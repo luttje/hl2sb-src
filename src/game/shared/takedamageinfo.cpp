@@ -61,6 +61,7 @@ DEFINE_FIELD( m_vecDamageForce, FIELD_VECTOR ),
   m_iPlayerPenetrationCount = 0;
   m_flDamageBonus = 0.f;
   m_bForceFriendlyFire = false;
+  m_flDamageForForce = 0.f;
 }
 
 CTakeDamageInfo::CTakeDamageInfo()

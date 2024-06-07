@@ -1,10 +1,8 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose:
 //
 //===========================================================================//
-
-#define leiface_cpp
 
 #include "cbase.h"
 #include "luamanager.h"
@@ -103,7 +101,7 @@ void RemoveGlobalChangeCallbacks( void )
 /*
 ** Open cvar library
 */
-LUALIB_API int luaopen_cvar( lua_State *L )
+LUALIB_API int luaopen_cvars( lua_State *L )
 {
   luaL_register( L, LUA_CVARLIBNAME, cvarlib );
   InstallGlobalChangeCallbacks();

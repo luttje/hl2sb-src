@@ -166,9 +166,6 @@ class CHud
 
  public:
   int m_iKeyBits;
-#ifdef HL2SB
-  bool m_bSkipClear;
-#endif
 #ifndef _XBOX
   float m_flMouseSensitivity;
   float m_flMouseSensitivityFactor;

@@ -62,7 +62,8 @@ class CHudDeathNotice : public CHudElement, public vgui::Panel
   virtual void FireGameEvent( IGameEvent *event );
 
  private:
-  CPanelAnimationVarAliasType( float, m_flLineHeight, "LineHeight", "15", "proportional_float" );
+  CPanelAnimationVarAliasType( float, m_flLineHeight, "LineHeight", "15",
+                               "proportional_float" );
 
   CPanelAnimationVar( float, m_flMaxDeathNotices, "MaxDeathNotices", "4" );
 
@@ -171,8 +172,10 @@ void CHudDeathNotice::Paint()
       iVictimTeam = g_PR->GetTeam( m_DeathNotices[i].Victim.iEntIndex );
     }
 
-    g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName, victim, sizeof( victim ) );
-    g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Killer.szName, killer, sizeof( killer ) );
+    g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Victim.szName,
+                                           victim, sizeof( victim ) );
+    g_pVGuiLocalize->ConvertANSIToUnicode( m_DeathNotices[i].Killer.szName,
+                                           killer, sizeof( killer ) );
 
     // Get the local position for this notice
     int len = UTIL_ComputeStringWidth( m_hTextFont, victim );
@@ -183,12 +186,14 @@ void CHudDeathNotice::Paint()
 
     if ( icon->bRenderUsingFont )
     {
-      iconWide = surface()->GetCharacterWidth( icon->hFont, icon->cCharacterInFont );
+      iconWide = surface()->GetCharacterWidth( icon->hFont,
+                                               icon->cCharacterInFont );
       iconTall = surface()->GetFontTall( icon->hFont );
     }
     else
     {
-      float scale = ( ( float )ScreenHeight() / 480.0f );  // scale based on 640x480
+      float scale =
+          ( ( float )ScreenHeight() / 480.0f );  // scale based on 640x480
       iconWide = ( int )( scale * ( float )icon->Width() );
       iconTall = ( int )( scale * ( float )icon->Height() );
     }
@@ -231,7 +236,8 @@ void CHudDeathNotice::Paint()
 
     // Draw victims name
     surface()->DrawSetTextPos( x, y );
-    surface()->DrawSetTextFont( m_hTextFont );  // reset the font, draw icon can change it
+    surface()->DrawSetTextFont(
+        m_hTextFont );  // reset the font, draw icon can change it
     surface()->DrawUnicodeString( victim );
   }
 
@@ -280,7 +286,8 @@ void CHudDeathNotice::FireGameEvent( IGameEvent *event )
   char fullkilledwith[128];
   if ( killedwith && *killedwith )
   {
-    Q_snprintf( fullkilledwith, sizeof( fullkilledwith ), "death_%s", killedwith );
+    Q_snprintf( fullkilledwith, sizeof( fullkilledwith ), "death_%s",
+                killedwith );
   }
   else
   {
@@ -320,8 +327,8 @@ void CHudDeathNotice::FireGameEvent( IGameEvent *event )
     Q_strncpy( deathMsg.Killer.szName, killername, MAX_PLAYER_NAME_LENGTH );
   }
 #endif
-  Q_strncpy( deathMsg.Victim.szName, victim_name, MAX_PLAYER_NAME_LENGTH );
-  deathMsg.flDisplayTime = gpGlobals->curtime + hud_deathnotice_time.GetFloat();
+  deathMsg.flDisplayTime =
+      gpGlobals->curtime + hud_deathnotice_time.GetFloat();
 #ifndef LUA_SDK
   deathMsg.iSuicide = ( !killer || killer == victim );
 #else
@@ -347,24 +354,29 @@ void CHudDeathNotice::FireGameEvent( IGameEvent *event )
   {
     if ( !strcmp( fullkilledwith, "d_worldspawn" ) )
     {
-      Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s died.\n", deathMsg.Victim.szName );
+      Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s died.\n",
+                  deathMsg.Victim.szName );
     }
     else  // d_world
     {
-      Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s suicided.\n", deathMsg.Victim.szName );
+      Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s suicided.\n",
+                  deathMsg.Victim.szName );
     }
   }
   else
   {
-    Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s killed %s", deathMsg.Killer.szName, deathMsg.Victim.szName );
+    Q_snprintf( sDeathMsg, sizeof( sDeathMsg ), "%s killed %s",
+                deathMsg.Killer.szName, deathMsg.Victim.szName );
 
 #ifndef LUA_SDK
     if ( fullkilledwith && *fullkilledwith && ( *fullkilledwith > 13 ) )
 #else
-    if ( fullkilledwith && *fullkilledwith && ( *fullkilledwith > 13 ) && Q_strcmp( deathMsg.Killer.szName, killedwithname ) )
+    if ( fullkilledwith && *fullkilledwith && ( *fullkilledwith > 13 ) &&
+         Q_strcmp( deathMsg.Killer.szName, killedwithname ) )
 #endif
     {
-      Q_strncat( sDeathMsg, VarArgs( " with %s.\n", fullkilledwith + 6 ), sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
+      Q_strncat( sDeathMsg, VarArgs( " with %s.\n", fullkilledwith + 6 ),
+                 sizeof( sDeathMsg ), COPY_ALL_CHARACTERS );
     }
 #ifdef LUA_SDK
     else

@@ -364,8 +364,10 @@ struct lump_t
 {
   DECLARE_BYTESWAP_DATADESC();
   int fileofs, filelen;
-  int version;     // default to zero
-  char fourCC[4];  // default to ( char )0, ( char )0, ( char )0, ( char )0
+  int version;  // default to zero
+  // this field was char fourCC[4] previously, but was unused, favoring the LUMP IDs above instead. It has been
+  // repurposed for compression.  0 implies the lump is not compressed.
+  int uncompressedSize;  // default to zero
 };
 
 struct dheader_t
@@ -407,7 +409,7 @@ struct dgamelumpheader_t
 // This is expected to be a four-CC code ('lump')
 typedef int GameLumpId_t;
 
-// 360 only: game lump is compressed, filelen reflects original size
+// game lump is compressed, filelen reflects original size
 // use next entry fileofs to determine actual disk lump compressed size
 // compression stage ensures a terminal null dictionary entry
 #define GAMELUMPFLAG_COMPRESSED 0x0001

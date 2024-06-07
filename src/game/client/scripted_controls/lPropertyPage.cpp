@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -42,7 +43,8 @@ LPropertyPage::~LPropertyPage()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called when page is loaded.  Data should be reloaded from document into controls.
+// Purpose: Called when page is loaded.  Data should be reloaded from document
+// into controls.
 //-----------------------------------------------------------------------------
 void LPropertyPage::OnResetData()
 {
@@ -53,7 +55,8 @@ void LPropertyPage::OnResetData()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called when the OK / Apply button is pressed.  Changed data should be written into document.
+// Purpose: Called when the OK / Apply button is pressed.  Changed data should
+// be written into document.
 //-----------------------------------------------------------------------------
 void LPropertyPage::OnApplyChanges()
 {
@@ -122,7 +125,8 @@ void LPropertyPage::OnKeyCodeTyped( KeyCode code )
 
 LUA_API lua_PropertyPage *lua_topropertypage( lua_State *L, int idx )
 {
-  PHandle *phPanel = dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
+  PHandle *phPanel =
+      dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
   if ( phPanel == NULL )
     return NULL;
   return dynamic_cast< lua_PropertyPage * >( phPanel->Get() );
@@ -177,10 +181,11 @@ static int PropertyPage_GetPanelClassName( lua_State *L )
 
 static int PropertyPage_GetRefTable( lua_State *L )
 {
-  LPropertyPage *plPage = dynamic_cast< LPropertyPage * >( luaL_checkpropertypage( L, 1 ) );
+  LPropertyPage *plPage =
+      dynamic_cast< LPropertyPage * >( luaL_checkpropertypage( L, 1 ) );
   if ( plPage )
   {
-    if ( plPage->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plPage->m_nTableReference ) )
     {
       lua_newtable( L );
       plPage->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -200,7 +205,8 @@ static int PropertyPage_HasUserConfigSettings( lua_State *L )
 
 static int PropertyPage_KB_AddBoundKey( lua_State *L )
 {
-  luaL_checkpropertypage( L, 1 )->KB_AddBoundKey( luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkpropertypage( L, 1 )->KB_AddBoundKey(
+      luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -256,11 +262,12 @@ static int PropertyPage___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LPropertyPage *plPage = dynamic_cast< LPropertyPage * >( pPage );
-  if ( plPage && plPage->m_nTableReference != LUA_NOREF )
+  if ( plPage && luasrc_isrefvalid( L, plPage->m_nTableReference ) )
   {
     lua_getref( L, plPage->m_nTableReference );
     lua_pushvalue( L, 2 );
@@ -320,13 +327,14 @@ static int PropertyPage___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LPropertyPage *plPage = dynamic_cast< LPropertyPage * >( pPage );
   if ( plPage )
   {
-    if ( plPage->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plPage->m_nTableReference ) )
     {
       lua_newtable( L );
       plPage->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -344,14 +352,16 @@ static int PropertyPage___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
 }
 
 static int PropertyPage___gc( lua_State *L )
 {
-  LPropertyPage *plPage = dynamic_cast< LPropertyPage * >( lua_topropertypage( L, 1 ) );
+  LPropertyPage *plPage =
+      dynamic_cast< LPropertyPage * >( lua_topropertypage( L, 1 ) );
   if ( plPage )
   {
     --plPage->m_nRefCount;
@@ -408,14 +418,15 @@ static const luaL_Reg PropertyPagemeta[] = {
 
 static int luasrc_PropertyPage( lua_State *L )
 {
-  PropertyPage *pPage = new LPropertyPage( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ), luaL_checkstring( L, 2 ), L );
+  PropertyPage *pPage =
+      new LPropertyPage( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ),
+                         luaL_checkstring( L, 2 ), L );
   lua_pushpropertypage( L, pPage );
   return 1;
 }
 
 static const luaL_Reg PropertyPage_funcs[] = {
-    { "PropertyPage", luasrc_PropertyPage },
-    { NULL, NULL } };
+    { "PropertyPage", luasrc_PropertyPage }, { NULL, NULL } };
 
 /*
 ** Open PropertyPage object

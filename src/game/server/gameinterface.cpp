@@ -1,9 +1,10 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: encapsulates and implements all the accessing of the game dll from external
+// Purpose: encapsulates and implements all the accessing of the game dll from
+// external
 //			sources (only the engine at the time of writing)
-//			This files ONLY contains functions and data necessary to build an interface
-//			to external modules
+//			This files ONLY contains functions and data necessary to
+// build an interface 			to external modules
 //===========================================================================//
 
 #include "cbase.h"
@@ -98,6 +99,7 @@
 #include "tf_gamerules.h"
 #include "tf_lobby.h"
 #include "player_vs_environment/tf_population_manager.h"
+#include "workshop/maps_workshop.h"
 
 extern ConVar tf_mm_trusted;
 extern ConVar tf_mm_servermode;
@@ -115,17 +117,6 @@ extern ConVar tf_mm_servermode;
 #include "econ_item_system.h"
 #endif  // USES_ECON_ITEMS
 
-#ifdef LUA_SDK
-#include "luamanager.h"
-#include "luacachefile.h"
-#include "mountaddons.h"
-#endif
-
-#ifdef HL2SB
-#include "mountsteamcontent.h"
-#include "ticketfix.h"
-#endif
-
 #ifdef CSTRIKE_DLL  // BOTPORT: TODO: move these ifdefs out
 #include "bot/bot.h"
 #endif
@@ -133,6 +124,12 @@ extern ConVar tf_mm_servermode;
 #ifdef PORTAL
 #include "prop_portal_shared.h"
 #include "portal_player.h"
+#endif
+
+#ifdef LUA_SDK
+#include "luacachefile.h"
+#include "luamanager.h"
+// #include "mountaddons.h" // TODO
 #endif
 
 #if defined( REPLAY_ENABLED )
@@ -153,7 +150,8 @@ CSteamAPIContext *steamapicontext = &s_SteamAPIContext;
 // this context is not available on a pure client connected to a remote server.
 // WARNING! always check if interfaces are available before using
 static CSteamGameServerAPIContext s_SteamGameServerAPIContext;
-CSteamGameServerAPIContext *steamgameserverapicontext = &s_SteamGameServerAPIContext;
+CSteamGameServerAPIContext *steamgameserverapicontext =
+    &s_SteamGameServerAPIContext;
 #endif
 
 IUploadGameStats *gamestatsuploader = NULL;
@@ -208,14 +206,20 @@ class IMaterialSystem;
 class IStudioRender;
 
 #ifdef _DEBUG
-static ConVar s_UseNetworkVars( "UseNetworkVars", "1", FCVAR_CHEAT, "For profiling, toggle network vars." );
+static ConVar s_UseNetworkVars( "UseNetworkVars", "1", FCVAR_CHEAT,
+                                "For profiling, toggle network vars." );
 #endif
 
 extern ConVar sv_noclipduringpause;
 ConVar sv_massreport( "sv_massreport", "0" );
-ConVar sv_force_transmit_ents( "sv_force_transmit_ents", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY, "Will transmit all entities to client, regardless of PVS conditions (will still skip based on transmit flags, however)." );
+ConVar sv_force_transmit_ents(
+    "sv_force_transmit_ents", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY,
+    "Will transmit all entities to client, regardless of PVS conditions (will "
+    "still skip based on transmit flags, however)." );
 
-ConVar sv_autosave( "sv_autosave", "1", 0, "Set to 1 to autosave game on level transition. Does not affect autosave triggers." );
+ConVar sv_autosave( "sv_autosave", "1", 0,
+                    "Set to 1 to autosave game on level transition. Does not "
+                    "affect autosave triggers." );
 ConVar *sv_maxreplay = NULL;
 static ConVar *g_pcv_commentary = NULL;
 static ConVar *g_pcv_ThreadMode = NULL;
@@ -246,7 +250,10 @@ static int g_nCommandClientIndex = 0;
 static int g_nCurrentChapterIndex = -1;
 
 #ifdef _DEBUG
-static ConVar sv_showhitboxes( "sv_showhitboxes", "-1", FCVAR_CHEAT, "Send server-side hitboxes for specified entity to client (NOTE:  this uses lots of bandwidth, use on listen server only)." );
+static ConVar sv_showhitboxes(
+    "sv_showhitboxes", "-1", FCVAR_CHEAT,
+    "Send server-side hitboxes for specified entity to client (NOTE:  this "
+    "uses lots of bandwidth, use on listen server only)." );
 #endif
 
 void PrecachePointTemplates();
@@ -324,14 +331,17 @@ bool UTIL_GetModDir( char *lpszTextOut, unsigned int nSize )
     return false;
 
   Q_strncpy( lpszTextOut, pGameDir, nSize );
-  if ( Q_strnchr( lpszTextOut, '/', nSize ) || Q_strnchr( lpszTextOut, '\\', nSize ) )
+  if ( Q_strnchr( lpszTextOut, '/', nSize ) ||
+       Q_strnchr( lpszTextOut, '\\', nSize ) )
   {
     // Strip the last directory off (which will be our game dir)
     Q_StripLastDir( lpszTextOut, nSize );
 
-    // Find the difference in string lengths and take that difference from the original string as the mod dir
+    // Find the difference in string lengths and take that difference from
+    // the original string as the mod dir
     int dirlen = Q_strlen( lpszTextOut );
-    Q_strncpy( lpszTextOut, pGameDir + dirlen, Q_strlen( pGameDir ) - dirlen + 1 );
+    Q_strncpy( lpszTextOut, pGameDir + dirlen,
+               Q_strlen( pGameDir ) - dirlen + 1 );
   }
 
   return true;
@@ -354,7 +364,7 @@ extern ConVar think_limit;
 #if 0
 //-----------------------------------------------------------------------------
 // Purpose: Draw output overlays for any measure sections
-// Input  : 
+// Input  :
 //-----------------------------------------------------------------------------
 void DrawMeasuredSections(void)
 {
@@ -367,7 +377,7 @@ void DrawMeasuredSections(void)
 		char str[256];
 		Q_snprintf(str,sizeof(str),"%s",p->GetName());
 		NDebugOverlay::ScreenText( 0.01,0.51+(row*rowheight),str, 255,255,255,255, 0.0 );
-		
+
 		Q_snprintf(str,sizeof(str),"%5.2f\n",p->GetTime().GetMillisecondsF());
 		//Q_snprintf(str,sizeof(str),"%3.3f\n",p->GetTime().GetSeconds() * 100.0 / engine->Time());
 		NDebugOverlay::ScreenText( 0.28,0.51+(row*rowheight),str, 255,255,255,255, 0.0 );
@@ -400,7 +410,7 @@ void DrawMeasuredSections(void)
 	p = CMeasureSection::GetList();
 	while ( p )
 	{
-		// Update max 
+		// Update max
 		p->UpdateMax();
 
 		// Reset regular accum.
@@ -459,19 +469,29 @@ void DrawAllDebugOverlays( void )
         if ( pAILink )
         {
           // For now just using one big AI network
-          Vector startPos = g_pBigAINet->GetNode( pAILink->m_iSrcID )->GetPosition( g_pAINetworkManager->GetEditOps()->m_iHullDrawNum );
-          Vector endPos = g_pBigAINet->GetNode( pAILink->m_iDestID )->GetPosition( g_pAINetworkManager->GetEditOps()->m_iHullDrawNum );
+          Vector startPos =
+              g_pBigAINet->GetNode( pAILink->m_iSrcID )
+                  ->GetPosition( g_pAINetworkManager->GetEditOps()
+                                     ->m_iHullDrawNum );
+          Vector endPos =
+              g_pBigAINet->GetNode( pAILink->m_iDestID )
+                  ->GetPosition( g_pAINetworkManager->GetEditOps()
+                                     ->m_iHullDrawNum );
           Vector linkDir = startPos - endPos;
           float linkLen = VectorNormalize( linkDir );
 
           // Draw in green if link that's been turned off
           if ( pAILink->m_LinkInfo & bits_LINK_OFF )
           {
-            NDebugOverlay::BoxDirection( startPos, Vector( -4, -4, -4 ), Vector( -linkLen, 4, 4 ), linkDir, 0, 255, 0, 40, 0 );
+            NDebugOverlay::BoxDirection(
+                startPos, Vector( -4, -4, -4 ),
+                Vector( -linkLen, 4, 4 ), linkDir, 0, 255, 0, 40, 0 );
           }
           else
           {
-            NDebugOverlay::BoxDirection( startPos, Vector( -4, -4, -4 ), Vector( -linkLen, 4, 4 ), linkDir, 255, 0, 0, 40, 0 );
+            NDebugOverlay::BoxDirection(
+                startPos, Vector( -4, -4, -4 ),
+                Vector( -linkLen, 4, 4 ), linkDir, 255, 0, 0, 40, 0 );
           }
         }
       }
@@ -489,17 +509,23 @@ void DrawAllDebugOverlays( void )
 
         if ( pAINode )
         {
-          Vector vecPos = pAINode->GetPosition( g_pAINetworkManager->GetEditOps()->m_iHullDrawNum );
-          NDebugOverlay::Box( vecPos, Vector( -8, -8, -8 ), Vector( 8, 8, 8 ), 255, 0, 0, 40, 0 );
+          Vector vecPos = pAINode->GetPosition(
+              g_pAINetworkManager->GetEditOps()->m_iHullDrawNum );
+          NDebugOverlay::Box( vecPos, Vector( -8, -8, -8 ),
+                              Vector( 8, 8, 8 ), 255, 0, 0, 40, 0 );
 
           if ( pAINode->GetHint() )
           {
             CBaseEntity *pEnt = ( CBaseEntity * )pAINode->GetHint();
             if ( pEnt->GetEntityName() != NULL_STRING )
             {
-              NDebugOverlay::Text( vecPos + Vector( 0, 0, 6 ), STRING( pEnt->GetEntityName() ), false, 0 );
+              NDebugOverlay::Text( vecPos + Vector( 0, 0, 6 ),
+                                   STRING( pEnt->GetEntityName() ),
+                                   false, 0 );
             }
-            NDebugOverlay::Text( vecPos, GetHintTypeDescription( pAINode->GetHint() ), false, 0 );
+            NDebugOverlay::Text(
+                vecPos, GetHintTypeDescription( pAINode->GetHint() ),
+                false, 0 );
           }
         }
       }
@@ -508,7 +534,8 @@ void DrawAllDebugOverlays( void )
       // ------------------------------------
       if ( g_pAINetworkManager->GetEditOps()->m_bAirEditMode )
       {
-        UTIL_DrawPositioningOverlay( g_pAINetworkManager->GetEditOps()->m_flAirEditDistance );
+        UTIL_DrawPositioningOverlay(
+            g_pAINetworkManager->GetEditOps()->m_flAirEditDistance );
       }
       else
       {
@@ -553,8 +580,10 @@ void DrawAllDebugOverlays( void )
         continue;
 
       char tempstr[512];
-      Q_snprintf( tempstr, sizeof( tempstr ), "%s: Mass: %.2f kg / %.2f lb (%s)",
-                  STRING( ent->GetModelName() ), ent->VPhysicsGetObject()->GetMass(),
+      Q_snprintf( tempstr, sizeof( tempstr ),
+                  "%s: Mass: %.2f kg / %.2f lb (%s)",
+                  STRING( ent->GetModelName() ),
+                  ent->VPhysicsGetObject()->GetMass(),
                   kg2lbs( ent->VPhysicsGetObject()->GetMass() ),
                   GetMassEquivalent( ent->VPhysicsGetObject()->GetMass() ) );
       ent->EntityText( 0, tempstr, 0 );
@@ -566,15 +595,21 @@ void DrawAllDebugOverlays( void )
 }
 
 CServerGameDLL g_ServerGameDLL;
-// INTERFACEVERSION_SERVERGAMEDLL_VERSION_8 is compatible with the latest since we're only adding things to the end, so expose that as well.
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameDLL, IServerGameDLL008, INTERFACEVERSION_SERVERGAMEDLL_VERSION_8, g_ServerGameDLL );
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameDLL, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL, g_ServerGameDLL );
+// INTERFACEVERSION_SERVERGAMEDLL_VERSION_8 is compatible with the latest since
+// we're only adding things to the end, so expose that as well.
+// EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CServerGameDLL, IServerGameDLL008,
+// INTERFACEVERSION_SERVERGAMEDLL_VERSION_8, g_ServerGameDLL );
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameDLL, IServerGameDLL,
+                                   INTERFACEVERSION_SERVERGAMEDLL,
+                                   g_ServerGameDLL );
 
-// When bumping the version to this interface, check that our assumption is still valid and expose the older version in the same way
-COMPILE_TIME_ASSERT( INTERFACEVERSION_SERVERGAMEDLL_INT == 9 );
+// When bumping the version to this interface, check that our assumption is
+// still valid and expose the older version in the same way
+COMPILE_TIME_ASSERT( INTERFACEVERSION_SERVERGAMEDLL_INT == 10 );
 
 bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
-                              CreateInterfaceFn physicsFactory, CreateInterfaceFn fileSystemFactory,
+                              CreateInterfaceFn physicsFactory,
+                              CreateInterfaceFn fileSystemFactory,
                               CGlobalVars *pGlobals )
 {
   ConnectTier1Libraries( &appSystemFactory, 1 );
@@ -591,70 +626,80 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 #endif
 
   // init each (seperated for ease of debugging)
-  if ( ( engine = ( IVEngineServer * )appSystemFactory( INTERFACEVERSION_VENGINESERVER, NULL ) ) == NULL )
+  if ( ( engine = ( IVEngineServer * )appSystemFactory(
+             INTERFACEVERSION_VENGINESERVER, NULL ) ) == NULL )
     return false;
-  if ( ( g_pVoiceServer = ( IVoiceServer * )appSystemFactory( INTERFACEVERSION_VOICESERVER, NULL ) ) == NULL )
+  if ( ( g_pVoiceServer = ( IVoiceServer * )appSystemFactory(
+             INTERFACEVERSION_VOICESERVER, NULL ) ) == NULL )
     return false;
-  if ( ( networkstringtable = ( INetworkStringTableContainer * )appSystemFactory( INTERFACENAME_NETWORKSTRINGTABLESERVER, NULL ) ) == NULL )
+  if ( ( networkstringtable = ( INetworkStringTableContainer * )appSystemFactory(
+             INTERFACENAME_NETWORKSTRINGTABLESERVER, NULL ) ) == NULL )
     return false;
-  if ( ( staticpropmgr = ( IStaticPropMgrServer * )appSystemFactory( INTERFACEVERSION_STATICPROPMGR_SERVER, NULL ) ) == NULL )
+  if ( ( staticpropmgr = ( IStaticPropMgrServer * )appSystemFactory(
+             INTERFACEVERSION_STATICPROPMGR_SERVER, NULL ) ) == NULL )
     return false;
-  if ( ( random = ( IUniformRandomStream * )appSystemFactory( VENGINE_SERVER_RANDOM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( random = ( IUniformRandomStream * )appSystemFactory(
+             VENGINE_SERVER_RANDOM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( enginesound = ( IEngineSound * )appSystemFactory( IENGINESOUND_SERVER_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( enginesound = ( IEngineSound * )appSystemFactory(
+             IENGINESOUND_SERVER_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( partition = ( ISpatialPartition * )appSystemFactory( INTERFACEVERSION_SPATIALPARTITION, NULL ) ) == NULL )
+  if ( ( partition = ( ISpatialPartition * )appSystemFactory(
+             INTERFACEVERSION_SPATIALPARTITION, NULL ) ) == NULL )
     return false;
-  if ( ( modelinfo = ( IVModelInfo * )appSystemFactory( VMODELINFO_SERVER_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( modelinfo = ( IVModelInfo * )appSystemFactory(
+             VMODELINFO_SERVER_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( enginetrace = ( IEngineTrace * )appSystemFactory( INTERFACEVERSION_ENGINETRACE_SERVER, NULL ) ) == NULL )
+  if ( ( enginetrace = ( IEngineTrace * )appSystemFactory(
+             INTERFACEVERSION_ENGINETRACE_SERVER, NULL ) ) == NULL )
     return false;
-  if ( ( filesystem = ( IFileSystem * )fileSystemFactory( FILESYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( filesystem = ( IFileSystem * )fileSystemFactory(
+             FILESYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( gameeventmanager = ( IGameEventManager2 * )appSystemFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL ) ) == NULL )
+  if ( ( gameeventmanager = ( IGameEventManager2 * )appSystemFactory(
+             INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL ) ) == NULL )
     return false;
-  if ( ( datacache = ( IDataCache * )appSystemFactory( DATACACHE_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( datacache = ( IDataCache * )appSystemFactory( DATACACHE_INTERFACE_VERSION,
+                                                       NULL ) ) == NULL )
     return false;
-  if ( ( soundemitterbase = ( ISoundEmitterSystemBase * )appSystemFactory( SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( soundemitterbase = ( ISoundEmitterSystemBase * )appSystemFactory(
+             SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
 #ifndef _XBOX
-  if ( ( gamestatsuploader = ( IUploadGameStats * )appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL ) ) == NULL )
+  if ( ( gamestatsuploader = ( IUploadGameStats * )appSystemFactory(
+             INTERFACEVERSION_UPLOADGAMESTATS, NULL ) ) == NULL )
     return false;
 #endif
   if ( !mdlcache )
     return false;
-  if ( ( serverpluginhelpers = ( IServerPluginHelpers * )appSystemFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL ) ) == NULL )
+  if ( ( serverpluginhelpers = ( IServerPluginHelpers * )appSystemFactory(
+             INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL ) ) == NULL )
     return false;
-  if ( ( scenefilecache = ( ISceneFileCache * )appSystemFactory( SCENE_FILE_CACHE_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( scenefilecache = ( ISceneFileCache * )appSystemFactory(
+             SCENE_FILE_CACHE_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( IsX360() && ( xboxsystem = ( IXboxSystem * )appSystemFactory( XBOXSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( IsX360() && ( xboxsystem = ( IXboxSystem * )appSystemFactory(
+                         XBOXSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( IsX360() && ( matchmaking = ( IMatchmaking * )appSystemFactory( VENGINE_MATCHMAKING_VERSION, NULL ) ) == NULL )
+  if ( IsX360() && ( matchmaking = ( IMatchmaking * )appSystemFactory(
+                         VENGINE_MATCHMAKING_VERSION, NULL ) ) == NULL )
     return false;
 
   // If not running dedicated, grab the engine vgui interface
   if ( !engine->IsDedicatedServer() )
   {
 #ifdef _WIN32
-    // This interface is optional, and is only valid when running with -tools
-    serverenginetools = ( IServerEngineTools * )appSystemFactory( VSERVERENGINETOOLS_INTERFACE_VERSION, NULL );
+    // This interface is optional, and is only valid when running with
+    // -tools
+    serverenginetools = ( IServerEngineTools * )appSystemFactory(
+        VSERVERENGINETOOLS_INTERFACE_VERSION, NULL );
 #endif
   }
 
-  // Yes, both the client and game .dlls will try to Connect, the soundemittersystem.dll will handle this gracefully
+  // Yes, both the client and game .dlls will try to Connect, the
+  // soundemittersystem.dll will handle this gracefully
   if ( !soundemitterbase->Connect( appSystemFactory ) )
     return false;
-
-#if defined( HL2SB )
-  // Andrew; then mount everything the user wants to use.
-  MountUserContent();
-
-  // Finally, load all of the player's addons.
-  MountAddons();
-
-  // Fixes the issue where the external ip is not matching the local ip.
-  PatchTicketValidation();
-#endif
 
   // cache the globals
   gpGlobals = pGlobals;
@@ -692,14 +737,21 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
 
   sv_maxreplay = g_pCVar->FindVar( "sv_maxreplay" );
 
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetEntitySaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetPhysSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetEntitySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetPhysSaveRestoreBlockHandler() );
   g_pGameSaveRestoreBlockSet->AddBlockHandler( GetAISaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetTemplateSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetDefaultResponseSystemSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetCommentarySaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetEventQueueSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetAchievementSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetTemplateSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetDefaultResponseSystemSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetCommentarySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetEventQueueSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetAchievementSaveRestoreBlockHandler() );
 
   // The string system must init first + shutdown last
   IGameSystem::Add( GameStringSystem() );
@@ -719,7 +771,8 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
   // Add sound emitter
   IGameSystem::Add( SoundEmitterSystem() );
 
-  // load Mod specific game events ( MUST be before InitAllSystems() so it can pickup the mod specific events)
+  // load Mod specific game events ( MUST be before InitAllSystems() so it can
+  // pickup the mod specific events)
   gameeventmanager->LoadEventsFromFile( "resource/ModEvents.res" );
 
 #ifdef CSTRIKE_DLL  // BOTPORT: TODO: move these ifdefs out
@@ -730,7 +783,8 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
     return false;
 
 #if defined( REPLAY_ENABLED )
-  if ( gameeventmanager->LoadEventsFromFile( "resource/replayevents.res" ) <= 0 )
+  if ( gameeventmanager->LoadEventsFromFile( "resource/replayevents.res" ) <=
+       0 )
   {
     Warning( "\n*\n* replayevents.res MISSING.\n*\n\n" );
     return false;
@@ -749,7 +803,8 @@ bool CServerGameDLL::DLLInit( CreateInterfaceFn appSystemFactory,
   ParseParticleEffects( false, false );
 
   // try to get debug overlay, may be NULL if on HLDS
-  debugoverlay = ( IVDebugOverlay * )appSystemFactory( VDEBUG_OVERLAY_INTERFACE_VERSION, NULL );
+  debugoverlay = ( IVDebugOverlay * )appSystemFactory(
+      VDEBUG_OVERLAY_INTERFACE_VERSION, NULL );
 
 #ifndef _XBOX
 #ifdef USE_NAV_MESH
@@ -774,14 +829,22 @@ void CServerGameDLL::DLLShutdown( void )
   // Due to dependencies, these are not autogamesystems
   ModelSoundsCacheShutdown();
 
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetAchievementSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetCommentarySaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetEventQueueSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetDefaultResponseSystemSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetTemplateSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetAISaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetPhysSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetEntitySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetAchievementSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetCommentarySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetEventQueueSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetDefaultResponseSystemSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetTemplateSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetAISaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetPhysSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetEntitySaveRestoreBlockHandler() );
 
   char *pFilename = g_TextStatsMgr.GetStatsFilename();
   if ( !pFilename || !pFilename[0] )
@@ -816,11 +879,6 @@ void CServerGameDLL::DLLShutdown( void )
 
   gameeventmanager = NULL;
 
-#ifdef HL2SB
-  // Andrew; fixes the "CNet Encrypt:0" issue in 2007-based mods.
-  SteamAPI_Shutdown();
-#endif
-
   DisconnectTier3Libraries();
   DisconnectTier2Libraries();
   ConVar_Unregister();
@@ -832,7 +890,8 @@ bool CServerGameDLL::ReplayInit( CreateInterfaceFn fnReplayFactory )
 #if defined( REPLAY_ENABLED )
   if ( !IsPC() )
     return false;
-  if ( ( g_pReplay = ( IReplaySystem * )fnReplayFactory( REPLAY_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( g_pReplay = ( IReplaySystem * )fnReplayFactory( REPLAY_INTERFACE_VERSION,
+                                                         NULL ) ) == NULL )
     return false;
   if ( ( g_pReplayServerContext = g_pReplay->SV_GetContext() ) == NULL )
     return false;
@@ -843,8 +902,8 @@ bool CServerGameDLL::ReplayInit( CreateInterfaceFn fnReplayFactory )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: See shareddefs.h for redefining this.  Don't even think about it, though, for HL2.  Or you will pay.  ywb 9/22/03
-// Output : float
+// Purpose: See shareddefs.h for redefining this.  Don't even think about it,
+// though, for HL2.  Or you will pay.  ywb 9/22/03 Output : float
 //-----------------------------------------------------------------------------
 float CServerGameDLL::GetTickInterval( void ) const
 {
@@ -852,7 +911,8 @@ float CServerGameDLL::GetTickInterval( void ) const
 
 //=============================================================================
 // HPE_BEGIN:
-// [Forrest] For Counter-Strike, set default tick rate of 66 and removed -tickrate command line parameter.
+// [Forrest] For Counter-Strike, set default tick rate of 66 and removed
+// -tickrate command line parameter.
 //=============================================================================
 // Ignoring this for now, server ops are abusing it
 #if !defined( TF_DLL ) && !defined( CSTRIKE_DLL ) && !defined( DOD_DLL )
@@ -940,7 +1000,8 @@ void EndRestoreEntities()
   g_InRestore = false;
   gEntList.CleanupDeleteList();
 
-  // HACKHACK: UNDONE: We need to redesign the main loop with respect to save/load/server activate
+  // HACKHACK: UNDONE: We need to redesign the main loop with respect to
+  // save/load/server activate
   g_ServerGameDLL.ServerActivate( NULL, 0, 0 );
   CBaseEntity::SetAllowPrecache( false );
 }
@@ -962,17 +1023,22 @@ void BeginRestoreEntities()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: This prevents sv.tickcount/gpGlobals->tickcount from advancing during restore which
+// Purpose: This prevents sv.tickcount/gpGlobals->tickcount from advancing
+// during restore which
 //  would cause a lot of the NPCs to fast forward their think times to the same
-//  tick due to some ticks being elapsed during restore where there was no simulation going on
+//  tick due to some ticks being elapsed during restore where there was no
+//  simulation going on
 //-----------------------------------------------------------------------------
 bool CServerGameDLL::IsRestoring()
 {
   return g_InRestore;
 }
 
-// Called any time a new level is started (after GameInit() also on level transitions within a game)
-bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, char const *pOldLevel, char const *pLandmarkName, bool loadGame, bool background )
+// Called any time a new level is started (after GameInit() also on level
+// transitions within a game)
+bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities,
+                                char const *pOldLevel, char const *pLandmarkName,
+                                bool loadGame, bool background )
 {
   VPROF( "CServerGameDLL::LevelInit" );
 
@@ -1011,20 +1077,24 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
     lcf_preparecachefile();
   }
 #endif
+
   ResetWindspeed();
   UpdateChapterRestrictions( pMapName );
 
-  if ( IsX360() && !background && ( gpGlobals->maxClients == 1 ) && ( g_nCurrentChapterIndex >= 0 ) )
+  if ( IsX360() && !background && ( gpGlobals->maxClients == 1 ) &&
+       ( g_nCurrentChapterIndex >= 0 ) )
   {
-    // Single player games tell xbox live what game & chapter the user is playing
+    // Single player games tell xbox live what game & chapter the user is
+    // playing
     UpdateRichPresence();
   }
 
   // Tony; parse custom manifest if exists!
   ParseParticleEffectsMap( pMapName, false );
 
-  // IGameSystem::LevelInitPreEntityAllSystems() is called when the world is precached
-  // That happens either in LoadGameState() or in MapEntity_ParseAllEntities()
+  // IGameSystem::LevelInitPreEntityAllSystems() is called when the world is
+  // precached That happens either in LoadGameState() or in
+  // MapEntity_ParseAllEntities()
   if ( loadGame )
   {
     if ( pOldLevel )
@@ -1064,7 +1134,8 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
     {
       // This is a single-player style level transition.
       // Queue up an autosave one second into the level
-      CBaseEntity *pAutosave = CBaseEntity::Create( "logic_autosave", vec3_origin, vec3_angle, NULL );
+      CBaseEntity *pAutosave = CBaseEntity::Create(
+          "logic_autosave", vec3_origin, vec3_angle, NULL );
       if ( pAutosave )
       {
         g_EventQueue.AddEvent( pAutosave, "Save", 1.0, NULL, NULL );
@@ -1097,15 +1168,16 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
   // Check low violence settings for this map
   g_RagdollLVManager.SetLowViolence( pMapName );
 
-  // Now that all of the active entities have been loaded in, precache any entities who need point_template parameters
+  // Now that all of the active entities have been loaded in, precache any
+  // entities who need point_template parameters
   //  to be parsed (the above code has loaded all point_template entities)
   PrecachePointTemplates();
 
   // load MOTD from file into stringtable
   LoadMessageOfTheDay();
 
-  // Sometimes an ent will Remove() itself during its precache, so RemoveImmediate won't happen.
-  // This makes sure those ents get cleaned up.
+  // Sometimes an ent will Remove() itself during its precache, so
+  // RemoveImmediate won't happen. This makes sure those ents get cleaned up.
   gEntList.CleanupDeleteList();
 
   g_AIFriendliesTalkSemaphore.Release();
@@ -1126,12 +1198,15 @@ bool CServerGameDLL::LevelInit( const char *pMapName, char const *pMapEntities, 
   lua_pushboolean( L, background );
   END_LUA_CALL_HOOK( 6, 0 );
 #endif
+
   return true;
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: called after every level change and load game, iterates through all the
-//			active entities and gives them a chance to fix up their state
+// Purpose: called after every level change and load game, iterates through all
+// the
+//			active entities and gives them a chance to fix up their
+// state
 //-----------------------------------------------------------------------------
 #ifdef DEBUG
 bool g_bReceivedChainedActivate;
@@ -1144,36 +1219,41 @@ bool g_bCheckForChainedActivate;
     g_bCheckForChainedActivate = true;  \
     g_bReceivedChainedActivate = false; \
   }
-#define EndCheckChainedActivate( bCheck )                                                                                                                                          \
-  if ( 0 )                                                                                                                                                                         \
-    ;                                                                                                                                                                              \
-  else                                                                                                                                                                             \
-  {                                                                                                                                                                                \
-    if ( bCheck )                                                                                                                                                                  \
-    {                                                                                                                                                                              \
-      char msg[1024];                                                                                                                                                              \
-      Q_snprintf( msg, sizeof( msg ), "Entity (%i/%s/%s) failed to call base class Activate()\n", pClass->entindex(), pClass->GetClassname(), STRING( pClass->GetEntityName() ) ); \
-      AssertMsg( g_bReceivedChainedActivate == true, msg );                                                                                                                        \
-    }                                                                                                                                                                              \
-    g_bCheckForChainedActivate = false;                                                                                                                                            \
+#define EndCheckChainedActivate( bCheck )                             \
+  if ( 0 )                                                            \
+    ;                                                                 \
+  else                                                                \
+  {                                                                   \
+    if ( bCheck )                                                     \
+    {                                                                 \
+      AssertMsg(                                                      \
+          g_bReceivedChainedActivate,                                 \
+          "Entity (%i/%s/%s) failed to call base class Activate()\n", \
+          pClass->entindex(), pClass->GetClassname(),                 \
+          STRING( pClass->GetEntityName() ) );                        \
+    }                                                                 \
+    g_bCheckForChainedActivate = false;                               \
   }
 #else
 #define BeginCheckChainedActivate() ( ( void )0 )
 #define EndCheckChainedActivate( bCheck ) ( ( void )0 )
 #endif
 
-void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
+void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount,
+                                     int clientMax )
 {
-  // HACKHACK: UNDONE: We need to redesign the main loop with respect to save/load/server activate
+  // HACKHACK: UNDONE: We need to redesign the main loop with respect to
+  // save/load/server activate
   if ( g_InRestore )
     return;
 
   if ( gEntList.ResetDeleteList() != 0 )
   {
-    Msg( "ERROR: Entity delete queue not empty on level start!\n" );
+    Msg( "%s", "ERROR: Entity delete queue not empty on level start!\n" );
   }
 
-  for ( CBaseEntity *pClass = gEntList.FirstEnt(); pClass != NULL; pClass = gEntList.NextEnt( pClass ) )
+  for ( CBaseEntity *pClass = gEntList.FirstEnt(); pClass != NULL;
+        pClass = gEntList.NextEnt( pClass ) )
   {
     if ( pClass && !pClass->IsDormant() )
     {
@@ -1182,7 +1262,8 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
       BeginCheckChainedActivate();
       pClass->Activate();
 
-      // We don't care if it finished activating if it decided to remove itself.
+      // We don't care if it finished activating if it decided to remove
+      // itself.
       EndCheckChainedActivate( !( pClass->GetEFlags() & EFL_KILLME ) );
     }
   }
@@ -1191,7 +1272,8 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
   // No more precaching after PostEntityAllSystems!!!
   CBaseEntity::SetAllowPrecache( false );
 
-  // only display the think limit when the game is run with "developer" mode set
+  // only display the think limit when the game is run with "developer" mode
+  // set
   if ( !g_pDeveloper->GetInt() )
   {
     think_limit.SetValue( 0 );
@@ -1212,6 +1294,14 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
 #ifdef NEXT_BOT
   TheNextBots().OnMapLoaded();
 #endif
+
+#if defined( LUA_SDK )
+  // Andrew; call activate on the gamemode
+  BEGIN_LUA_CALL_HOOK( "ServerActivate" );
+  lua_pushinteger( L, edictCount );
+  lua_pushinteger( L, clientMax );
+  END_LUA_CALL_HOOK( 2, 0 );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1220,8 +1310,10 @@ void CServerGameDLL::ServerActivate( edict_t *pEdictList, int edictCount, int cl
 void CServerGameDLL::GameServerSteamAPIActivated( void )
 {
 #ifndef NO_STEAM
+  steamgameserverapicontext->Clear();
   steamgameserverapicontext->Init();
-  if ( steamgameserverapicontext->SteamGameServer() && engine->IsDedicatedServer() )
+  if ( steamgameserverapicontext->SteamGameServer() &&
+       engine->IsDedicatedServer() )
   {
     steamgameserverapicontext->SteamGameServer()->GetGameplayStats();
   }
@@ -1230,14 +1322,7 @@ void CServerGameDLL::GameServerSteamAPIActivated( void )
 #ifdef TF_DLL
   GCClientSystem()->GameServerActivate();
   InventoryManager()->GameServerSteamAPIActivated();
-#endif
-
-// Andrew; call activate on the gamemode
-#if defined( LUA_SDK )
-  BEGIN_LUA_CALL_HOOK( "ServerActivate" );
-  lua_pushinteger( L, edictCount );
-  lua_pushinteger( L, clientMax );
-  END_LUA_CALL_HOOK( 2, 0 );
+  TFMapsWorkshop()->GameServerSteamAPIActivated();
 #endif
 }
 
@@ -1319,8 +1404,9 @@ void CServerGameDLL::GameFrame( bool simulating )
 
   IGameSystem::FrameUpdatePostEntityThinkAllSystems();
 
-  // UNDONE: Make these systems IGameSystems and move these calls into FrameUpdatePostEntityThink()
-  // service event queue, firing off any actions whos time has come
+  // UNDONE: Make these systems IGameSystems and move these calls into
+  // FrameUpdatePostEntityThink() service event queue, firing off any actions
+  // whos time has come
   ServiceEventQueue();
 
   // free all ents marked in think functions
@@ -1348,7 +1434,8 @@ void CServerGameDLL::GameFrame( bool simulating )
 
     if ( total )
     {
-      Msg( "Trace: %d, contents %d, enumerate %d\n", totals[0], totals[1], totals[2] );
+      Msg( "Trace: %d, contents %d, enumerate %d\n", totals[0], totals[1],
+           totals[2] );
     }
   }
 
@@ -1370,7 +1457,7 @@ void CServerGameDLL::PreClientUpdate( bool simulating )
   /*
   if (game_speeds.GetInt())
   {
-    DrawMeasuredSections();
+          DrawMeasuredSections();
   }
   */
 
@@ -1391,7 +1478,8 @@ void CServerGameDLL::PreClientUpdate( bool simulating )
 
     while ( 1 )
     {
-      pEntity = gEntList.FindEntityByName( pEntity, sv_showhitboxes.GetString() );
+      pEntity =
+          gEntList.FindEntityByName( pEntity, sv_showhitboxes.GetString() );
       if ( !pEntity )
         break;
 
@@ -1405,7 +1493,8 @@ void CServerGameDLL::PreClientUpdate( bool simulating )
     return;
   }
 
-  CBaseAnimating *anim = dynamic_cast< CBaseAnimating * >( CBaseEntity::Instance( engine->PEntityOfEntIndex( sv_showhitboxes.GetInt() ) ) );
+  CBaseAnimating *anim = dynamic_cast< CBaseAnimating * >( CBaseEntity::Instance(
+      engine->PEntityOfEntIndex( sv_showhitboxes.GetInt() ) ) );
   if ( !anim )
     return;
 
@@ -1415,16 +1504,16 @@ void CServerGameDLL::PreClientUpdate( bool simulating )
 
 void CServerGameDLL::Think( bool finalTick )
 {
-  if ( m_fAutoSaveDangerousTime != 0.0f && m_fAutoSaveDangerousTime < gpGlobals->curtime )
+  if ( m_fAutoSaveDangerousTime != 0.0f &&
+       m_fAutoSaveDangerousTime < gpGlobals->curtime )
   {
     // The safety timer for a dangerous auto save has expired
-#ifdef HL2SB
-    CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-#else
     CBasePlayer *pPlayer = UTIL_PlayerByIndex( 1 );
-#endif
 
-    if ( pPlayer && ( pPlayer->GetDeathTime() == 0.0f || pPlayer->GetDeathTime() > gpGlobals->curtime ) && !pPlayer->IsSinglePlayerGameEnding() )
+    if ( pPlayer &&
+         ( pPlayer->GetDeathTime() == 0.0f ||
+           pPlayer->GetDeathTime() > gpGlobals->curtime ) &&
+         !pPlayer->IsSinglePlayerGameEnding() )
     {
       if ( pPlayer->GetHealth() >= m_fAutoSaveDangerousMinHealthToCommit )
       {
@@ -1438,7 +1527,11 @@ void CServerGameDLL::Think( bool finalTick )
   }
 }
 
-void CServerGameDLL::OnQueryCvarValueFinished( QueryCvarCookie_t iCookie, edict_t *pPlayerEntity, EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
+void CServerGameDLL::OnQueryCvarValueFinished( QueryCvarCookie_t iCookie,
+                                               edict_t *pPlayerEntity,
+                                               EQueryCvarValueStatus eStatus,
+                                               const char *pCvarName,
+                                               const char *pCvarValue )
 {
 }
 
@@ -1465,7 +1558,8 @@ void CServerGameDLL::LevelShutdown( void )
   IGameSystem::LevelShutdownPreEntityAllSystems();
 
   // YWB:
-  // This entity pointer is going away now and is corrupting memory on level transitions/restarts
+  // This entity pointer is going away now and is corrupting memory on level
+  // transitions/restarts
   CSoundEnt::ShutdownSoundEnt();
 
   gEntList.Clear();
@@ -1512,18 +1606,29 @@ const char *CServerGameDLL::GetGameDescription( void )
 void CServerGameDLL::CreateNetworkStringTables( void )
 {
   // Create any shared string tables here (and only here!)
-  // E.g.:  xxx = networkstringtable->CreateStringTable( "SceneStrings", 512 );
-  g_pStringTableParticleEffectNames = networkstringtable->CreateStringTable( "ParticleEffectNames", MAX_PARTICLESYSTEMS_STRINGS );
-  g_pStringTableEffectDispatch = networkstringtable->CreateStringTable( "EffectDispatch", MAX_EFFECT_DISPATCH_STRINGS );
-  g_pStringTableVguiScreen = networkstringtable->CreateStringTable( "VguiScreen", MAX_VGUI_SCREEN_STRINGS );
-  g_pStringTableMaterials = networkstringtable->CreateStringTable( "Materials", MAX_MATERIAL_STRINGS );
-  g_pStringTableInfoPanel = networkstringtable->CreateStringTable( "InfoPanel", MAX_INFOPANEL_STRINGS );
-  g_pStringTableClientSideChoreoScenes = networkstringtable->CreateStringTable( "Scenes", MAX_CHOREO_SCENES_STRINGS );
-  g_pStringTableServerMapCycle = networkstringtable->CreateStringTable( "ServerMapCycle", 128 );
+  // E.g.:  xxx = networkstringtable->CreateStringTable( "SceneStrings", 512
+  // );
+  g_pStringTableParticleEffectNames = networkstringtable->CreateStringTable(
+      "ParticleEffectNames", MAX_PARTICLESYSTEMS_STRINGS );
+  g_pStringTableEffectDispatch = networkstringtable->CreateStringTable(
+      "EffectDispatch", MAX_EFFECT_DISPATCH_STRINGS );
+  g_pStringTableVguiScreen = networkstringtable->CreateStringTable(
+      "VguiScreen", MAX_VGUI_SCREEN_STRINGS );
+  g_pStringTableMaterials = networkstringtable->CreateStringTable(
+      "Materials", MAX_MATERIAL_STRINGS );
+  g_pStringTableInfoPanel = networkstringtable->CreateStringTable(
+      "InfoPanel", MAX_INFOPANEL_STRINGS );
+  g_pStringTableClientSideChoreoScenes =
+      networkstringtable->CreateStringTable( "Scenes",
+                                             MAX_CHOREO_SCENES_STRINGS );
+  g_pStringTableServerMapCycle =
+      networkstringtable->CreateStringTable( "ServerMapCycle", 128 );
 
 #ifdef TF_DLL
-  g_pStringTableServerPopFiles = networkstringtable->CreateStringTable( "ServerPopFiles", 128 );
-  g_pStringTableServerMapCycleMvM = networkstringtable->CreateStringTable( "ServerMapCycleMvM", 128 );
+  g_pStringTableServerPopFiles =
+      networkstringtable->CreateStringTable( "ServerPopFiles", 128 );
+  g_pStringTableServerMapCycleMvM =
+      networkstringtable->CreateStringTable( "ServerMapCycleMvM", 128 );
 #endif
 
   bool bPopFilesValid = true;
@@ -1533,14 +1638,10 @@ void CServerGameDLL::CreateNetworkStringTables( void )
   bPopFilesValid = ( g_pStringTableServerPopFiles != NULL );
 #endif
 
-  Assert( g_pStringTableParticleEffectNames &&
-          g_pStringTableEffectDispatch &&
-          g_pStringTableVguiScreen &&
-          g_pStringTableMaterials &&
-          g_pStringTableInfoPanel &&
-          g_pStringTableClientSideChoreoScenes &&
-          g_pStringTableServerMapCycle &&
-          bPopFilesValid );
+  Assert( g_pStringTableParticleEffectNames && g_pStringTableEffectDispatch &&
+          g_pStringTableVguiScreen && g_pStringTableMaterials &&
+          g_pStringTableInfoPanel && g_pStringTableClientSideChoreoScenes &&
+          g_pStringTableServerMapCycle && bPopFilesValid );
 
   // Need this so we have the error material always handy
   PrecacheMaterial( "debug/debugempty" );
@@ -1561,14 +1662,19 @@ CSaveRestoreData *CServerGameDLL::SaveInit( int size )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Saves data from a struct into a saverestore object, to be saved to disk
-// Input  : *pSaveData - the saverestore object
+// Purpose: Saves data from a struct into a saverestore object, to be saved to
+// disk Input  : *pSaveData - the saverestore object
 //			char *pname - the name of the data to write
-//			*pBaseData - the struct into which the data is to be read
-//			*pFields - pointer to an array of data field descriptions
-//			fieldCount - the size of the array (number of field descriptions)
+//			*pBaseData - the struct into which the data is to be
+// read 			*pFields - pointer to an array of data field
+// descriptions 			fieldCount - the size of the array
+// (number of field descriptions)
 //-----------------------------------------------------------------------------
-void CServerGameDLL::SaveWriteFields( CSaveRestoreData *pSaveData, const char *pname, void *pBaseData, datamap_t *pMap, typedescription_t *pFields, int fieldCount )
+void CServerGameDLL::SaveWriteFields( CSaveRestoreData *pSaveData,
+                                      const char *pname, void *pBaseData,
+                                      datamap_t *pMap,
+                                      typedescription_t *pFields,
+                                      int fieldCount )
 {
   CSave saveHelper( pSaveData );
   saveHelper.WriteFields( pname, pBaseData, pMap, pFields, fieldCount );
@@ -1578,14 +1684,18 @@ void CServerGameDLL::SaveWriteFields( CSaveRestoreData *pSaveData, const char *p
 // Purpose: Reads data from a save/restore block into a structure
 // Input  : *pSaveData - the saverestore object
 //			char *pname - the name of the data to extract from
-//			*pBaseData - the struct into which the data is to be restored
-//			*pFields - pointer to an array of data field descriptions
-//			fieldCount - the size of the array (number of field descriptions)
+//			*pBaseData - the struct into which the data is to be
+// restored 			*pFields - pointer to an array of data field
+// descriptions 			fieldCount
+//- the size of the array (number of field descriptions)
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 
-void CServerGameDLL::SaveReadFields( CSaveRestoreData *pSaveData, const char *pname, void *pBaseData, datamap_t *pMap, typedescription_t *pFields, int fieldCount )
+void CServerGameDLL::SaveReadFields( CSaveRestoreData *pSaveData,
+                                     const char *pname, void *pBaseData,
+                                     datamap_t *pMap, typedescription_t *pFields,
+                                     int fieldCount )
 {
   CRestore restoreHelper( pSaveData );
   restoreHelper.ReadFields( pname, pBaseData, pMap, pFields, fieldCount );
@@ -1624,7 +1734,8 @@ void CServerGameDLL::Restore( CSaveRestoreData *s, bool b )
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 
-bool CServerGameDLL::GetUserMessageInfo( int msg_type, char *name, int maxnamelength, int &size )
+bool CServerGameDLL::GetUserMessageInfo( int msg_type, char *name,
+                                         int maxnamelength, int &size )
 {
   if ( !usermessages->IsValidIndex( msg_type ) )
     return false;
@@ -1648,8 +1759,10 @@ int CServerGameDLL::CreateEntityTransitionList( CSaveRestoreData *s, int a )
   int movedCount = ::CreateEntityTransitionList( s, a );
   if ( movedCount )
   {
-    g_pGameSaveRestoreBlockSet->CallBlockHandlerRestore( GetPhysSaveRestoreBlockHandler(), base, &restoreHelper, false );
-    g_pGameSaveRestoreBlockSet->CallBlockHandlerRestore( GetAISaveRestoreBlockHandler(), base, &restoreHelper, false );
+    g_pGameSaveRestoreBlockSet->CallBlockHandlerRestore(
+        GetPhysSaveRestoreBlockHandler(), base, &restoreHelper, false );
+    g_pGameSaveRestoreBlockSet->CallBlockHandlerRestore(
+        GetAISaveRestoreBlockHandler(), base, &restoreHelper, false );
   }
 
   GetPhysSaveRestoreBlockHandler()->PostRestore();
@@ -1673,149 +1786,152 @@ typedef struct
 } TITLECOMMENT;
 
 // this list gets searched for the first partial match, so some are out of order
-static TITLECOMMENT gTitleComments[] =
-    {
+static TITLECOMMENT gTitleComments[] = {
 #ifdef HL1_DLL
-        { "t0a0", "#T0A0TITLE" },
-        { "c0a0", "#HL1_Chapter1_Title" },
-        { "c1a0", "#HL1_Chapter2_Title" },
-        { "c1a1", "#HL1_Chapter3_Title" },
-        { "c1a2", "#HL1_Chapter4_Title" },
-        { "c1a3", "#HL1_Chapter5_Title" },
-        { "c1a4", "#HL1_Chapter6_Title" },
-        { "c2a1", "#HL1_Chapter7_Title" },
-        { "c2a2", "#HL1_Chapter8_Title" },
-        { "c2a3", "#HL1_Chapter9_Title" },
-        { "c2a4d", "#HL1_Chapter11_Title" },  // These must appear before "C2A4" so all other map names starting with C2A4 get that title
-        { "c2a4e", "#HL1_Chapter11_Title" },
-        { "c2a4f", "#HL1_Chapter11_Title" },
-        { "c2a4g", "#HL1_Chapter11_Title" },
-        { "c2a4", "#HL1_Chapter10_Title" },
-        { "c2a5", "#HL1_Chapter12_Title" },
-        { "c3a1", "#HL1_Chapter13_Title" },
-        { "c3a2", "#HL1_Chapter14_Title" },
-        { "c4a1a", "#HL1_Chapter17_Title" },  // Order is important, see above
-        { "c4a1b", "#HL1_Chapter17_Title" },
-        { "c4a1c", "#HL1_Chapter17_Title" },
-        { "c4a1d", "#HL1_Chapter17_Title" },
-        { "c4a1e", "#HL1_Chapter17_Title" },
-        { "c4a1", "#HL1_Chapter15_Title" },
-        { "c4a2", "#HL1_Chapter16_Title" },
-        { "c4a3", "#HL1_Chapter18_Title" },
-        { "c5a1", "#HL1_Chapter19_Title" },
+    { "t0a0", "#T0A0TITLE" },
+    { "c0a0", "#HL1_Chapter1_Title" },
+    { "c1a0", "#HL1_Chapter2_Title" },
+    { "c1a1", "#HL1_Chapter3_Title" },
+    { "c1a2", "#HL1_Chapter4_Title" },
+    { "c1a3", "#HL1_Chapter5_Title" },
+    { "c1a4", "#HL1_Chapter6_Title" },
+    { "c2a1", "#HL1_Chapter7_Title" },
+    { "c2a2", "#HL1_Chapter8_Title" },
+    { "c2a3", "#HL1_Chapter9_Title" },
+    { "c2a4d",
+      "#HL1_Chapter11_Title" },  // These must appear before "C2A4" so all other
+                                 // map names starting with C2A4 get that title
+    { "c2a4e", "#HL1_Chapter11_Title" },
+    { "c2a4f", "#HL1_Chapter11_Title" },
+    { "c2a4g", "#HL1_Chapter11_Title" },
+    { "c2a4", "#HL1_Chapter10_Title" },
+    { "c2a5", "#HL1_Chapter12_Title" },
+    { "c3a1", "#HL1_Chapter13_Title" },
+    { "c3a2", "#HL1_Chapter14_Title" },
+    { "c4a1a", "#HL1_Chapter17_Title" },  // Order is important, see above
+    { "c4a1b", "#HL1_Chapter17_Title" },
+    { "c4a1c", "#HL1_Chapter17_Title" },
+    { "c4a1d", "#HL1_Chapter17_Title" },
+    { "c4a1e", "#HL1_Chapter17_Title" },
+    { "c4a1", "#HL1_Chapter15_Title" },
+    { "c4a2", "#HL1_Chapter16_Title" },
+    { "c4a3", "#HL1_Chapter18_Title" },
+    { "c5a1", "#HL1_Chapter19_Title" },
 #elif defined PORTAL
-        { "testchmb_a_00", "#Portal_Chapter1_Title" },
-        { "testchmb_a_01", "#Portal_Chapter1_Title" },
-        { "testchmb_a_02", "#Portal_Chapter2_Title" },
-        { "testchmb_a_03", "#Portal_Chapter2_Title" },
-        { "testchmb_a_04", "#Portal_Chapter3_Title" },
-        { "testchmb_a_05", "#Portal_Chapter3_Title" },
-        { "testchmb_a_06", "#Portal_Chapter4_Title" },
-        { "testchmb_a_07", "#Portal_Chapter4_Title" },
-        { "testchmb_a_08_advanced", "#Portal_Chapter5_Title" },
-        { "testchmb_a_08", "#Portal_Chapter5_Title" },
-        { "testchmb_a_09_advanced", "#Portal_Chapter6_Title" },
-        { "testchmb_a_09", "#Portal_Chapter6_Title" },
-        { "testchmb_a_10_advanced", "#Portal_Chapter7_Title" },
-        { "testchmb_a_10", "#Portal_Chapter7_Title" },
-        { "testchmb_a_11_advanced", "#Portal_Chapter8_Title" },
-        { "testchmb_a_11", "#Portal_Chapter8_Title" },
-        { "testchmb_a_13_advanced", "#Portal_Chapter9_Title" },
-        { "testchmb_a_13", "#Portal_Chapter9_Title" },
-        { "testchmb_a_14_advanced", "#Portal_Chapter10_Title" },
-        { "testchmb_a_14", "#Portal_Chapter10_Title" },
-        { "testchmb_a_15", "#Portal_Chapter11_Title" },
-        { "escape_", "#Portal_Chapter11_Title" },
-        { "background2", "#Portal_Chapter12_Title" },
+    { "testchmb_a_00", "#Portal_Chapter1_Title" },
+    { "testchmb_a_01", "#Portal_Chapter1_Title" },
+    { "testchmb_a_02", "#Portal_Chapter2_Title" },
+    { "testchmb_a_03", "#Portal_Chapter2_Title" },
+    { "testchmb_a_04", "#Portal_Chapter3_Title" },
+    { "testchmb_a_05", "#Portal_Chapter3_Title" },
+    { "testchmb_a_06", "#Portal_Chapter4_Title" },
+    { "testchmb_a_07", "#Portal_Chapter4_Title" },
+    { "testchmb_a_08_advanced", "#Portal_Chapter5_Title" },
+    { "testchmb_a_08", "#Portal_Chapter5_Title" },
+    { "testchmb_a_09_advanced", "#Portal_Chapter6_Title" },
+    { "testchmb_a_09", "#Portal_Chapter6_Title" },
+    { "testchmb_a_10_advanced", "#Portal_Chapter7_Title" },
+    { "testchmb_a_10", "#Portal_Chapter7_Title" },
+    { "testchmb_a_11_advanced", "#Portal_Chapter8_Title" },
+    { "testchmb_a_11", "#Portal_Chapter8_Title" },
+    { "testchmb_a_13_advanced", "#Portal_Chapter9_Title" },
+    { "testchmb_a_13", "#Portal_Chapter9_Title" },
+    { "testchmb_a_14_advanced", "#Portal_Chapter10_Title" },
+    { "testchmb_a_14", "#Portal_Chapter10_Title" },
+    { "testchmb_a_15", "#Portal_Chapter11_Title" },
+    { "escape_", "#Portal_Chapter11_Title" },
+    { "background2", "#Portal_Chapter12_Title" },
 #else
-        { "intro", "#HL2_Chapter1_Title" },
+    { "intro", "#HL2_Chapter1_Title" },
 
-        { "d1_trainstation_05", "#HL2_Chapter2_Title" },
-        { "d1_trainstation_06", "#HL2_Chapter2_Title" },
+    { "d1_trainstation_05", "#HL2_Chapter2_Title" },
+    { "d1_trainstation_06", "#HL2_Chapter2_Title" },
 
-        { "d1_trainstation_", "#HL2_Chapter1_Title" },
+    { "d1_trainstation_", "#HL2_Chapter1_Title" },
 
-        { "d1_canals_06", "#HL2_Chapter4_Title" },
-        { "d1_canals_07", "#HL2_Chapter4_Title" },
-        { "d1_canals_08", "#HL2_Chapter4_Title" },
-        { "d1_canals_09", "#HL2_Chapter4_Title" },
-        { "d1_canals_1", "#HL2_Chapter4_Title" },
+    { "d1_canals_06", "#HL2_Chapter4_Title" },
+    { "d1_canals_07", "#HL2_Chapter4_Title" },
+    { "d1_canals_08", "#HL2_Chapter4_Title" },
+    { "d1_canals_09", "#HL2_Chapter4_Title" },
+    { "d1_canals_1", "#HL2_Chapter4_Title" },
 
-        { "d1_canals_0", "#HL2_Chapter3_Title" },
+    { "d1_canals_0", "#HL2_Chapter3_Title" },
 
-        { "d1_eli_", "#HL2_Chapter5_Title" },
+    { "d1_eli_", "#HL2_Chapter5_Title" },
 
-        { "d1_town_", "#HL2_Chapter6_Title" },
+    { "d1_town_", "#HL2_Chapter6_Title" },
 
-        { "d2_coast_09", "#HL2_Chapter8_Title" },
-        { "d2_coast_1", "#HL2_Chapter8_Title" },
-        { "d2_prison_01", "#HL2_Chapter8_Title" },
+    { "d2_coast_09", "#HL2_Chapter8_Title" },
+    { "d2_coast_1", "#HL2_Chapter8_Title" },
+    { "d2_prison_01", "#HL2_Chapter8_Title" },
 
-        { "d2_coast_", "#HL2_Chapter7_Title" },
+    { "d2_coast_", "#HL2_Chapter7_Title" },
 
-        { "d2_prison_06", "#HL2_Chapter9a_Title" },
-        { "d2_prison_07", "#HL2_Chapter9a_Title" },
-        { "d2_prison_08", "#HL2_Chapter9a_Title" },
+    { "d2_prison_06", "#HL2_Chapter9a_Title" },
+    { "d2_prison_07", "#HL2_Chapter9a_Title" },
+    { "d2_prison_08", "#HL2_Chapter9a_Title" },
 
-        { "d2_prison_", "#HL2_Chapter9_Title" },
+    { "d2_prison_", "#HL2_Chapter9_Title" },
 
-        { "d3_c17_01", "#HL2_Chapter9a_Title" },
-        { "d3_c17_09", "#HL2_Chapter11_Title" },
-        { "d3_c17_1", "#HL2_Chapter11_Title" },
+    { "d3_c17_01", "#HL2_Chapter9a_Title" },
+    { "d3_c17_09", "#HL2_Chapter11_Title" },
+    { "d3_c17_1", "#HL2_Chapter11_Title" },
 
-        { "d3_c17_", "#HL2_Chapter10_Title" },
+    { "d3_c17_", "#HL2_Chapter10_Title" },
 
-        { "d3_citadel_", "#HL2_Chapter12_Title" },
+    { "d3_citadel_", "#HL2_Chapter12_Title" },
 
-        { "d3_breen_", "#HL2_Chapter13_Title" },
-        { "credits", "#HL2_Chapter14_Title" },
+    { "d3_breen_", "#HL2_Chapter13_Title" },
+    { "credits", "#HL2_Chapter14_Title" },
 
-        { "ep1_citadel_00", "#episodic_Chapter1_Title" },
-        { "ep1_citadel_01", "#episodic_Chapter1_Title" },
-        { "ep1_citadel_02b", "#episodic_Chapter1_Title" },
-        { "ep1_citadel_02", "#episodic_Chapter1_Title" },
-        { "ep1_citadel_03", "#episodic_Chapter2_Title" },
-        { "ep1_citadel_04", "#episodic_Chapter2_Title" },
-        { "ep1_c17_00a", "#episodic_Chapter3_Title" },
-        { "ep1_c17_00", "#episodic_Chapter3_Title" },
-        { "ep1_c17_01", "#episodic_Chapter4_Title" },
-        { "ep1_c17_02b", "#episodic_Chapter4_Title" },
-        { "ep1_c17_02", "#episodic_Chapter4_Title" },
-        { "ep1_c17_05", "#episodic_Chapter5_Title" },
-        { "ep1_c17_06", "#episodic_Chapter5_Title" },
+    { "ep1_citadel_00", "#episodic_Chapter1_Title" },
+    { "ep1_citadel_01", "#episodic_Chapter1_Title" },
+    { "ep1_citadel_02b", "#episodic_Chapter1_Title" },
+    { "ep1_citadel_02", "#episodic_Chapter1_Title" },
+    { "ep1_citadel_03", "#episodic_Chapter2_Title" },
+    { "ep1_citadel_04", "#episodic_Chapter2_Title" },
+    { "ep1_c17_00a", "#episodic_Chapter3_Title" },
+    { "ep1_c17_00", "#episodic_Chapter3_Title" },
+    { "ep1_c17_01", "#episodic_Chapter4_Title" },
+    { "ep1_c17_02b", "#episodic_Chapter4_Title" },
+    { "ep1_c17_02", "#episodic_Chapter4_Title" },
+    { "ep1_c17_05", "#episodic_Chapter5_Title" },
+    { "ep1_c17_06", "#episodic_Chapter5_Title" },
 
-        { "ep2_outland_01a", "#ep2_Chapter1_Title" },
-        { "ep2_outland_01", "#ep2_Chapter1_Title" },
-        { "ep2_outland_02", "#ep2_Chapter2_Title" },
-        { "ep2_outland_03", "#ep2_Chapter2_Title" },
-        { "ep2_outland_04", "#ep2_Chapter2_Title" },
-        { "ep2_outland_05", "#ep2_Chapter3_Title" },
+    { "ep2_outland_01a", "#ep2_Chapter1_Title" },
+    { "ep2_outland_01", "#ep2_Chapter1_Title" },
+    { "ep2_outland_02", "#ep2_Chapter2_Title" },
+    { "ep2_outland_03", "#ep2_Chapter2_Title" },
+    { "ep2_outland_04", "#ep2_Chapter2_Title" },
+    { "ep2_outland_05", "#ep2_Chapter3_Title" },
 
-        { "ep2_outland_06a", "#ep2_Chapter4_Title" },
-        { "ep2_outland_06", "#ep2_Chapter3_Title" },
+    { "ep2_outland_06a", "#ep2_Chapter4_Title" },
+    { "ep2_outland_06", "#ep2_Chapter3_Title" },
 
-        { "ep2_outland_07", "#ep2_Chapter4_Title" },
-        { "ep2_outland_08", "#ep2_Chapter4_Title" },
-        { "ep2_outland_09", "#ep2_Chapter5_Title" },
+    { "ep2_outland_07", "#ep2_Chapter4_Title" },
+    { "ep2_outland_08", "#ep2_Chapter4_Title" },
+    { "ep2_outland_09", "#ep2_Chapter5_Title" },
 
-        { "ep2_outland_10a", "#ep2_Chapter5_Title" },
-        { "ep2_outland_10", "#ep2_Chapter5_Title" },
+    { "ep2_outland_10a", "#ep2_Chapter5_Title" },
+    { "ep2_outland_10", "#ep2_Chapter5_Title" },
 
-        { "ep2_outland_11a", "#ep2_Chapter6_Title" },
-        { "ep2_outland_11", "#ep2_Chapter6_Title" },
+    { "ep2_outland_11a", "#ep2_Chapter6_Title" },
+    { "ep2_outland_11", "#ep2_Chapter6_Title" },
 
-        { "ep2_outland_12a", "#ep2_Chapter7_Title" },
-        { "ep2_outland_12", "#ep2_Chapter6_Title" },
+    { "ep2_outland_12a", "#ep2_Chapter7_Title" },
+    { "ep2_outland_12", "#ep2_Chapter6_Title" },
 #endif
 };
 
 #ifdef _XBOX
-void CServerGameDLL::GetTitleName( const char *pMapName, char *pTitleBuff, int titleBuffSize )
+void CServerGameDLL::GetTitleName( const char *pMapName, char *pTitleBuff,
+                                   int titleBuffSize )
 {
   // Try to find a matching title comment for this mapname
   for ( int i = 0; i < ARRAYSIZE( gTitleComments ); i++ )
   {
-    if ( !Q_strnicmp( pMapName, gTitleComments[i].pBSPName, strlen( gTitleComments[i].pBSPName ) ) )
+    if ( !Q_strnicmp( pMapName, gTitleComments[i].pBSPName,
+                      strlen( gTitleComments[i].pBSPName ) ) )
     {
       Q_strncpy( pTitleBuff, gTitleComments[i].pTitleName, titleBuffSize );
       return;
@@ -1825,7 +1941,8 @@ void CServerGameDLL::GetTitleName( const char *pMapName, char *pTitleBuff, int t
 }
 #endif
 
-void CServerGameDLL::GetSaveComment( char *text, int maxlength, float flMinutes, float flSeconds, bool bNoTime )
+void CServerGameDLL::GetSaveComment( char *text, int maxlength, float flMinutes,
+                                     float flSeconds, bool bNoTime )
 {
   char comment[64];
   const char *pName;
@@ -1838,7 +1955,8 @@ void CServerGameDLL::GetSaveComment( char *text, int maxlength, float flMinutes,
   // Try to find a matching title comment for this mapname
   for ( i = 0; i < ARRAYSIZE( gTitleComments ) && !pName; i++ )
   {
-    if ( !Q_strnicmp( mapname, gTitleComments[i].pBSPName, strlen( gTitleComments[i].pBSPName ) ) )
+    if ( !Q_strnicmp( mapname, gTitleComments[i].pBSPName,
+                      strlen( gTitleComments[i].pBSPName ) ) )
     {
       // found one
       int j;
@@ -1884,8 +2002,10 @@ void CServerGameDLL::GetSaveComment( char *text, int maxlength, float flMinutes,
     int minutesAdd = ( seconds / 60 );
     seconds %= 60;
 
-    // add the elapsed time at the end of the comment, for the ui to parse out
-    Q_snprintf( text, maxlength, "%-64.64s %03d:%02d", pName, ( minutes + minutesAdd ), seconds );
+    // add the elapsed time at the end of the comment, for the ui to parse
+    // out
+    Q_snprintf( text, maxlength, "%-64.64s %03d:%02d", pName,
+                ( minutes + minutesAdd ), seconds );
   }
 }
 
@@ -1910,7 +2030,8 @@ void CServerGameDLL::PreSaveGameLoaded( char const *pSaveName, bool bInGame )
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns true if the game DLL wants the server not to be made public.
-//			Used by commentary system to hide multiplayer commentary servers from the master.
+//			Used by commentary system to hide multiplayer commentary
+// servers from the master.
 //-----------------------------------------------------------------------------
 bool CServerGameDLL::ShouldHideServer( void )
 {
@@ -1946,7 +2067,8 @@ bool CServerGameDLL::ShouldHideServer( void )
 void CServerGameDLL::InvalidateMdlCache()
 {
   CBaseAnimating *pAnimating;
-  for ( CBaseEntity *pEntity = gEntList.FirstEnt(); pEntity != NULL; pEntity = gEntList.NextEnt( pEntity ) )
+  for ( CBaseEntity *pEntity = gEntList.FirstEnt(); pEntity != NULL;
+        pEntity = gEntList.NextEnt( pEntity ) )
   {
     pAnimating = dynamic_cast< CBaseAnimating * >( pEntity );
     if ( pAnimating )
@@ -1971,7 +2093,8 @@ void CServerGameDLL::SetServerHibernation( bool bHibernating )
   m_bIsHibernating = bHibernating;
 
 #ifdef INFESTED_DLL
-  if ( engine && engine->IsDedicatedServer() && m_bIsHibernating && ASWGameRules() )
+  if ( engine && engine->IsDedicatedServer() && m_bIsHibernating &&
+       ASWGameRules() )
   {
     ASWGameRules()->OnServerHibernating();
   }
@@ -1987,7 +2110,10 @@ const char *CServerGameDLL::GetServerBrowserMapOverride()
 #ifdef TF_DLL
   if ( TFGameRules() && TFGameRules()->IsMannVsMachineMode() )
   {
-    const char *pszFilenameShort = g_pPopulationManager ? g_pPopulationManager->GetPopulationFilenameShort() : NULL;
+    const char *pszFilenameShort =
+        g_pPopulationManager
+            ? g_pPopulationManager->GetPopulationFilenameShort()
+            : NULL;
     if ( pszFilenameShort && pszFilenameShort[0] )
     {
       return pszFilenameShort;
@@ -2002,7 +2128,8 @@ const char *CServerGameDLL::GetServerBrowserGameData()
   CUtlString sResult;
 
 #ifdef TF_DLL
-  sResult.Format( "tf_mm_trusted:%d,tf_mm_servermode:%d", tf_mm_trusted.GetInt(), tf_mm_servermode.GetInt() );
+  sResult.Format( "tf_mm_trusted:%d,tf_mm_servermode:%d",
+                  tf_mm_trusted.GetInt(), tf_mm_servermode.GetInt() );
 
   CTFLobby *pLobby = GTFGCClientSystem()->GetLobby();
   if ( pLobby == NULL )
@@ -2015,7 +2142,9 @@ const char *CServerGameDLL::GetServerBrowserGameData()
   }
   if ( TFGameRules() && TFGameRules()->IsMannVsMachineMode() )
   {
-    sResult.Append( CFmtStr( ",mannup:%d", ( pLobby && pLobby->GetPlayingForBraggingRights() ) ? 1 : 0 ) );
+    sResult.Append(
+        CFmtStr( ",mannup:%d",
+                 ( pLobby && pLobby->GetPlayingForBraggingRights() ) ? 1 : 0 ) );
   }
 #endif
 
@@ -2034,6 +2163,59 @@ void CServerGameDLL::Status( void ( *print )( const char *fmt, ... ) )
 }
 
 //-----------------------------------------------------------------------------
+void CServerGameDLL::PrepareLevelResources( /* in/out */ char *pszMapName,
+                                            size_t nMapNameSize,
+                                            /* in/out */ char *pszMapFile,
+                                            size_t nMapFileSize )
+{
+#ifdef TF_DLL
+  TFMapsWorkshop()->PrepareLevelResources( pszMapName, nMapNameSize,
+                                           pszMapFile, nMapFileSize );
+#endif  // TF_DLL
+}
+
+//-----------------------------------------------------------------------------
+IServerGameDLL::ePrepareLevelResourcesResult
+CServerGameDLL::AsyncPrepareLevelResources( /* in/out */ char *pszMapName,
+                                            size_t nMapNameSize,
+                                            /* in/out */ char *pszMapFile,
+                                            size_t nMapFileSize,
+                                            float *flProgress /* = NULL */ )
+{
+#ifdef TF_DLL
+  return TFMapsWorkshop()->AsyncPrepareLevelResources(
+      pszMapName, nMapNameSize, pszMapFile, nMapFileSize, flProgress );
+#endif  // TF_DLL
+
+  if ( flProgress )
+  {
+    *flProgress = 1.f;
+  }
+  return IServerGameDLL::ePrepareLevelResources_Prepared;
+}
+
+//-----------------------------------------------------------------------------
+IServerGameDLL::eCanProvideLevelResult CServerGameDLL::CanProvideLevel(
+    /* in/out */ char *pMapName, int nMapNameMax )
+{
+#ifdef TF_DLL
+  return TFMapsWorkshop()->OnCanProvideLevel( pMapName, nMapNameMax );
+#endif  // TF_DLL
+  return IServerGameDLL::eCanProvideLevel_CannotProvide;
+}
+
+//-----------------------------------------------------------------------------
+bool CServerGameDLL::IsManualMapChangeOkay( const char **pszReason )
+{
+  if ( GameRules() )
+  {
+    return GameRules()->IsManualMapChangeOkay( pszReason );
+  }
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Called during a transition, to build a map adjacency list
 //-----------------------------------------------------------------------------
 void CServerGameDLL::BuildAdjacentMapList( void )
@@ -2042,12 +2224,13 @@ void CServerGameDLL::BuildAdjacentMapList( void )
   CSaveRestoreData *pSaveData = gpGlobals->pSaveData;
 
   if ( pSaveData )
-    pSaveData->levelInfo.connectionCount = BuildChangeList( pSaveData->levelInfo.levelList, MAX_LEVEL_CONNECTIONS );
+    pSaveData->levelInfo.connectionCount = BuildChangeList(
+        pSaveData->levelInfo.levelList, MAX_LEVEL_CONNECTIONS );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Sanity-check to verify that a path is a relative path inside the game dir
-// Taken From: engine/cmd.cpp
+// Purpose: Sanity-check to verify that a path is a relative path inside the
+// game dir Taken From: engine/cmd.cpp
 //-----------------------------------------------------------------------------
 static bool IsValidPath( const char *pszFilename )
 {
@@ -2066,7 +2249,8 @@ static bool IsValidPath( const char *pszFilename )
   return true;
 }
 
-static void ValidateMOTDFilename( IConVar *pConVar, const char *oldValue, float flOldValue )
+static void ValidateMOTDFilename( IConVar *pConVar, const char *oldValue,
+                                  float flOldValue )
 {
   ConVarRef var( pConVar );
   if ( !IsValidPath( var.GetString() ) )
@@ -2075,15 +2259,20 @@ static void ValidateMOTDFilename( IConVar *pConVar, const char *oldValue, float 
   }
 }
 
-static ConVar motdfile( "motdfile", "motd.txt", 0, "The MOTD file to load.", ValidateMOTDFilename );
-static ConVar motdfile_text( "motdfile_text", "motd_text.txt", 0, "The text-only MOTD file to use for clients that have disabled HTML MOTDs.", ValidateMOTDFilename );
+static ConVar motdfile( "motdfile", "motd.txt", 0, "The MOTD file to load.",
+                        ValidateMOTDFilename );
+static ConVar motdfile_text(
+    "motdfile_text", "motd_text.txt", 0,
+    "The text-only MOTD file to use for clients that have disabled HTML MOTDs.",
+    ValidateMOTDFilename );
 void CServerGameDLL::LoadMessageOfTheDay()
 {
   LoadSpecificMOTDMsg( motdfile, "motd" );
   LoadSpecificMOTDMsg( motdfile_text, "motd_text" );
 }
 
-void CServerGameDLL::LoadSpecificMOTDMsg( const ConVar &convar, const char *pszStringName )
+void CServerGameDLL::LoadSpecificMOTDMsg( const ConVar &convar,
+                                          const char *pszStringName )
 {
 #ifndef _XBOX
   CUtlBuffer buf;
@@ -2110,7 +2299,8 @@ void CServerGameDLL::LoadSpecificMOTDMsg( const ConVar &convar, const char *pszS
     V_strcpy_safe( szResolvedFilename, szPreferredFilename );
     char *dotTxt = V_stristr( szResolvedFilename, ".txt" );
     Assert( dotTxt != NULL );
-    if ( dotTxt ) V_strcpy( dotTxt, "_default.txt" );
+    if ( dotTxt )
+      V_strcpy( dotTxt, "_default.txt" );
     bFound = filesystem->ReadFile( szResolvedFilename, "GAME", buf );
   }
 
@@ -2133,15 +2323,18 @@ void CServerGameDLL::LoadSpecificMOTDMsg( const ConVar &convar, const char *pszS
   }
   else
   {
-    Msg( "Set %s from file '%s'.  ('%s' was not found.)\n", pszStringName, szResolvedFilename, szPreferredFilename );
+    Msg( "Set %s from file '%s'.  ('%s' was not found.)\n", pszStringName,
+         szResolvedFilename, szPreferredFilename );
   }
 
-  g_pStringTableInfoPanel->AddString( CBaseEntity::IsServer(), pszStringName, buf.TellPut(), buf.Base() );
+  g_pStringTableInfoPanel->AddString( CBaseEntity::IsServer(), pszStringName,
+                                      buf.TellPut(), buf.Base() );
 #endif
 }
 
 // keeps track of which chapters the user has unlocked
-ConVar sv_unlockedchapters( "sv_unlockedchapters", "1", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX );
+ConVar sv_unlockedchapters( "sv_unlockedchapters", "1",
+                            FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX );
 
 //-----------------------------------------------------------------------------
 // Purpose: Updates which chapters are unlocked
@@ -2153,10 +2346,12 @@ void UpdateChapterRestrictions( const char *mapname )
   chapterTitle[0] = 0;
   for ( int i = 0; i < ARRAYSIZE( gTitleComments ); i++ )
   {
-    if ( !Q_strnicmp( mapname, gTitleComments[i].pBSPName, strlen( gTitleComments[i].pBSPName ) ) )
+    if ( !Q_strnicmp( mapname, gTitleComments[i].pBSPName,
+                      strlen( gTitleComments[i].pBSPName ) ) )
     {
       // found
-      Q_strncpy( chapterTitle, gTitleComments[i].pTitleName, sizeof( chapterTitle ) );
+      Q_strncpy( chapterTitle, gTitleComments[i].pTitleName,
+                 sizeof( chapterTitle ) );
       int j = 0;
       while ( j < 64 && chapterTitle[j] )
       {
@@ -2182,7 +2377,8 @@ void UpdateChapterRestrictions( const char *mapname )
     return;
 
   char chapterNumberPrefix[64];
-  Q_snprintf( chapterNumberPrefix, sizeof( chapterNumberPrefix ), "#%s_chapter", modDir );
+  Q_snprintf( chapterNumberPrefix, sizeof( chapterNumberPrefix ), "#%s_chapter",
+              modDir );
 
   const char *newChapterNumber = strstr( chapterTitle, chapterNumberPrefix );
   if ( newChapterNumber )
@@ -2243,7 +2439,8 @@ void UpdateRichPresence( void )
   // This assumes we're playing a single player game
   Assert( gpGlobals->maxClients == 1 );
 
-  // Shouldn't get here unless we're playing a map and we've updated sv_unlockedchapters
+  // Shouldn't get here unless we're playing a map and we've updated
+  // sv_unlockedchapters
   Assert( g_nCurrentChapterIndex >= 0 );
 
   // Get our active mod directory name
@@ -2284,13 +2481,16 @@ void UpdateRichPresence( void )
   }
   else
   {
-    Warning( "UpdateRichPresence failed in GameInterface. Didn't recognize -game parameter." );
+    Warning(
+        "UpdateRichPresence failed in GameInterface. Didn't recognize "
+        "-game parameter." );
   }
 
 #if defined( _X360 )
 
   // Set chapter context based on mapname
-  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), iChapterID, iChapterIndex, true ) )
+  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), iChapterID,
+                                    iChapterIndex, true ) )
   {
     Warning( "GameInterface: UserSetContext failed.\n" );
   }
@@ -2298,7 +2498,9 @@ void UpdateRichPresence( void )
   if ( commentary.GetBool() )
   {
     // Set presence to show the user is playing developer commentary
-    if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_PRESENCE, CONTEXT_PRESENCE_COMMENTARY, true ) )
+    if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(),
+                                      X_CONTEXT_PRESENCE,
+                                      CONTEXT_PRESENCE_COMMENTARY, true ) )
     {
       Warning( "GameInterface: UserSetContext failed.\n" );
     }
@@ -2306,24 +2508,29 @@ void UpdateRichPresence( void )
   else
   {
     // Set presence to show the user is in-game
-    if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_PRESENCE, iGamePresenceID, true ) )
+    if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(),
+                                      X_CONTEXT_PRESENCE, iGamePresenceID,
+                                      true ) )
     {
       Warning( "GameInterface: UserSetContext failed.\n" );
     }
   }
 
   // Set which game the user is playing
-  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), CONTEXT_GAME, iGameID, true ) )
+  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), CONTEXT_GAME,
+                                    iGameID, true ) )
   {
     Warning( "GameInterface: UserSetContext failed.\n" );
   }
 
-  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_GAME_TYPE, X_CONTEXT_GAME_TYPE_STANDARD, true ) )
+  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_GAME_TYPE,
+                                    X_CONTEXT_GAME_TYPE_STANDARD, true ) )
   {
     Warning( "GameInterface: UserSetContext failed.\n" );
   }
 
-  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_GAME_MODE, CONTEXT_GAME_MODE_SINGLEPLAYER, true ) )
+  if ( !xboxsystem->UserSetContext( XBX_GetPrimaryUserId(), X_CONTEXT_GAME_MODE,
+                                    CONTEXT_GAME_MODE_SINGLEPLAYER, true ) )
   {
     Warning( "GameInterface: UserSetContext failed.\n" );
   }
@@ -2354,7 +2561,8 @@ int GetMaterialIndex( const char *pMaterialName )
     }
     else
     {
-      DevMsg( "Warning! GetMaterialIndex: couldn't find material %s\n ", pMaterialName );
+      DevMsg( "Warning! GetMaterialIndex: couldn't find material %s\n ",
+              pMaterialName );
       return 0;
     }
   }
@@ -2377,7 +2585,8 @@ const char *GetMaterialNameFromIndex( int nMaterialIndex )
 void PrecacheParticleSystem( const char *pParticleSystemName )
 {
   Assert( pParticleSystemName && pParticleSystemName[0] );
-  g_pStringTableParticleEffectNames->AddString( CBaseEntity::IsServer(), pParticleSystemName );
+  g_pStringTableParticleEffectNames->AddString( CBaseEntity::IsServer(),
+                                                pParticleSystemName );
 }
 
 //-----------------------------------------------------------------------------
@@ -2387,11 +2596,13 @@ int GetParticleSystemIndex( const char *pParticleSystemName )
 {
   if ( pParticleSystemName )
   {
-    int nIndex = g_pStringTableParticleEffectNames->FindStringIndex( pParticleSystemName );
+    int nIndex = g_pStringTableParticleEffectNames->FindStringIndex(
+        pParticleSystemName );
     if ( nIndex != INVALID_STRING_INDEX )
       return nIndex;
 
-    DevWarning( "Server: Missing precache for particle system \"%s\"!\n", pParticleSystemName );
+    DevWarning( "Server: Missing precache for particle system \"%s\"!\n",
+                pParticleSystemName );
   }
 
   // This is the invalid string index
@@ -2409,7 +2620,8 @@ const char *GetParticleSystemNameFromIndex( int nMaterialIndex )
 }
 
 //-----------------------------------------------------------------------------
-// Returns true if host_thread_mode is set to non-zero (and engine is running in threaded mode)
+// Returns true if host_thread_mode is set to non-zero (and engine is running in
+// threaded mode)
 //-----------------------------------------------------------------------------
 bool IsEngineThreaded()
 {
@@ -2428,9 +2640,12 @@ class CServerGameEnts : public IServerGameEnts
   virtual void FreeContainingEntity( edict_t * );
   virtual edict_t *BaseEntityToEdict( CBaseEntity *pEnt );
   virtual CBaseEntity *EdictToBaseEntity( edict_t *pEdict );
-  virtual void CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned short *pEdictIndices, int nEdicts );
+  virtual void CheckTransmit( CCheckTransmitInfo *pInfo,
+                              const unsigned short *pEdictIndices,
+                              int nEdicts );
 };
-EXPOSE_SINGLE_INTERFACE( CServerGameEnts, IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS );
+EXPOSE_SINGLE_INTERFACE( CServerGameEnts, IServerGameEnts,
+                         INTERFACEVERSION_SERVERGAMEENTS );
 
 void CServerGameEnts::SetDebugEdictBase( edict_t *base )
 {
@@ -2451,7 +2666,8 @@ void CServerGameEnts::MarkEntitiesAsTouching( edict_t *e1, edict_t *e2 )
     // HACKHACK: UNDONE: Pass in the trace here??!?!?
     trace_t tr;
     UTIL_ClearTrace( tr );
-    tr.endpos = ( entity->GetAbsOrigin() + entityTouched->GetAbsOrigin() ) * 0.5;
+    tr.endpos =
+        ( entity->GetAbsOrigin() + entityTouched->GetAbsOrigin() ) * 0.5;
     entity->PhysicsMarkEntitiesAsTouching( entityTouched, tr );
   }
 }
@@ -2477,28 +2693,33 @@ CBaseEntity *CServerGameEnts::EdictToBaseEntity( edict_t *pEdict )
     return NULL;
 }
 
-/* Yuck.. ideally this would be in CServerNetworkProperty's header, but it requires CBaseEntity and
+/* Yuck.. ideally this would be in CServerNetworkProperty's header, but it
+requires CBaseEntity and
 // inlining it gives a nice speedup.
 inline void CServerNetworkProperty::CheckTransmit( CCheckTransmitInfo *pInfo )
 {
-  // If we have a transmit proxy, let it hook our ShouldTransmit return value.
-  if ( m_pTransmitProxy )
-  {
-    nShouldTransmit = m_pTransmitProxy->ShouldTransmit( pInfo, nShouldTransmit );
-  }
+        // If we have a transmit proxy, let it hook our ShouldTransmit return
+value. if ( m_pTransmitProxy )
+        {
+                nShouldTransmit = m_pTransmitProxy->ShouldTransmit( pInfo,
+nShouldTransmit );
+        }
 
-  if ( m_pOuter->ShouldTransmit( pInfo ) )
-  {
-    m_pOuter->SetTransmit( pInfo );
-  }
+        if ( m_pOuter->ShouldTransmit( pInfo ) )
+        {
+                m_pOuter->SetTransmit( pInfo );
+        }
 } */
 
-void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned short *pEdictIndices, int nEdicts )
+void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo,
+                                     const unsigned short *pEdictIndices,
+                                     int nEdicts )
 {
-  // NOTE: for speed's sake, this assumes that all networkables are CBaseEntities and that the edict list
-  // is consecutive in memory. If either of these things change, then this routine needs to change, but
-  // ideally we won't be calling any virtual from this routine. This speedy routine was added as an
-  // optimization which would be nice to keep.
+  // NOTE: for speed's sake, this assumes that all networkables are
+  // CBaseEntities and that the edict list is consecutive in memory. If either
+  // of these things change, then this routine needs to change, but ideally we
+  // won't be calling any virtual from this routine. This speedy routine was
+  // added as an optimization which would be nice to keep.
   edict_t *pBaseEdict = engine->PEntityOfEntIndex( 0 );
 
   // get recipient player's skybox:
@@ -2509,7 +2730,8 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
     return;
 
   MDLCACHE_CRITICAL_SECTION();
-  CBasePlayer *pRecipientPlayer = static_cast< CBasePlayer * >( pRecipientEntity );
+  CBasePlayer *pRecipientPlayer =
+      static_cast< CBasePlayer * >( pRecipientEntity );
   const int skyBoxArea = pRecipientPlayer->m_Local.m_skybox3d.area;
 
 #ifndef _X360
@@ -2527,7 +2749,9 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
 
     edict_t *pEdict = &pBaseEdict[iEdict];
     Assert( pEdict == engine->PEntityOfEntIndex( iEdict ) );
-    int nFlags = pEdict->m_fStateFlags & ( FL_EDICT_DONTSEND | FL_EDICT_ALWAYS | FL_EDICT_PVSCHECK | FL_EDICT_FULLCHECK );
+    int nFlags =
+        pEdict->m_fStateFlags & ( FL_EDICT_DONTSEND | FL_EDICT_ALWAYS |
+                                  FL_EDICT_PVSCHECK | FL_EDICT_FULLCHECK );
 
     // entity needs no transmit
     if ( nFlags & FL_EDICT_DONTSEND )
@@ -2552,7 +2776,9 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
           pInfo->m_pTransmitAlways->Set( iEdict );
         }
 #endif
-        CServerNetworkProperty *pEnt = static_cast< CServerNetworkProperty * >( pEdict->GetNetworkable() );
+        CServerNetworkProperty *pEnt =
+            static_cast< CServerNetworkProperty * >(
+                pEdict->GetNetworkable() );
         if ( !pEnt )
           break;
 
@@ -2588,7 +2814,8 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
     if ( !( nFlags & FL_EDICT_PVSCHECK ) )
       continue;
 
-    CServerNetworkProperty *netProp = static_cast< CServerNetworkProperty * >( pEdict->GetNetworkable() );
+    CServerNetworkProperty *netProp =
+        static_cast< CServerNetworkProperty * >( pEdict->GetNetworkable() );
 
 #ifndef _X360
     if ( bIsHLTV || bIsReplay )
@@ -2607,7 +2834,8 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
 #endif
 
     // Always send entities in the player's 3d skybox.
-    // Sidenote: call of AreaNum() ensures that PVS data is up to date for this entity
+    // Sidenote: call of AreaNum() ensures that PVS data is up to date for
+    // this entity
     bool bSameAreaAsSky = netProp->AreaNum() == skyBoxArea;
     if ( bSameAreaAsSky )
     {
@@ -2623,13 +2851,17 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
       continue;
     }
 
-    // If the entity is marked "check PVS" but it's in hierarchy, walk up the hierarchy looking for the
-    //  for any parent which is also in the PVS.  If none are found, then we don't need to worry about sending ourself
+    // If the entity is marked "check PVS" but it's in hierarchy, walk up
+    // the hierarchy looking for the
+    //  for any parent which is also in the PVS.  If none are found, then we
+    //  don't need to worry about sending ourself
     CBaseEntity *orig = pEnt;
     CServerNetworkProperty *check = netProp->GetNetworkParent();
 
-    // BUG BUG:  I think it might be better to build up a list of edict indices which "depend" on other answers and then
-    // resolve them in a second pass.  Not sure what happens if an entity has two parents who both request PVS check?
+    // BUG BUG:  I think it might be better to build up a list of edict
+    // indices which "depend" on other answers and then resolve them in a
+    // second pass. Not sure what happens if an entity has two parents who
+    // both request PVS check?
     while ( check )
     {
       int checkIndex = check->entindex();
@@ -2642,7 +2874,9 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
       }
 
       edict_t *checkEdict = check->edict();
-      int checkFlags = checkEdict->m_fStateFlags & ( FL_EDICT_DONTSEND | FL_EDICT_ALWAYS | FL_EDICT_PVSCHECK | FL_EDICT_FULLCHECK );
+      int checkFlags = checkEdict->m_fStateFlags &
+                       ( FL_EDICT_DONTSEND | FL_EDICT_ALWAYS |
+                         FL_EDICT_PVSCHECK | FL_EDICT_FULLCHECK );
       if ( checkFlags & FL_EDICT_DONTSEND )
         break;
 
@@ -2654,7 +2888,8 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
 
       if ( checkFlags == FL_EDICT_FULLCHECK )
       {
-        // do a full ShouldTransmit() check, may return FL_EDICT_CHECKPVS
+        // do a full ShouldTransmit() check, may return
+        // FL_EDICT_CHECKPVS
         CBaseEntity *pCheckEntity = check->GetBaseEntity();
         nFlags = pCheckEntity->ShouldTransmit( pInfo );
         Assert( !( nFlags & FL_EDICT_FULLCHECK ) );
@@ -2678,7 +2913,8 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
         }
       }
 
-      // Continue up chain just in case the parent itself has a parent that's in the PVS...
+      // Continue up chain just in case the parent itself has a parent
+      // that's in the PVS...
       check = check->GetNetworkParent();
     }
   }
@@ -2687,9 +2923,14 @@ void CServerGameEnts::CheckTransmit( CCheckTransmitInfo *pInfo, const unsigned s
 }
 
 CServerGameClients g_ServerGameClients;
-// INTERFACEVERSION_SERVERGAMECLIENTS_VERSION_3 is compatible with the latest since we're only adding things to the end, so expose that as well.
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameClients, IServerGameClients003, INTERFACEVERSION_SERVERGAMECLIENTS_VERSION_3, g_ServerGameClients );
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameClients, IServerGameClients, INTERFACEVERSION_SERVERGAMECLIENTS, g_ServerGameClients );
+// INTERFACEVERSION_SERVERGAMECLIENTS_VERSION_3 is compatible with the latest
+// since we're only adding things to the end, so expose that as well.
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameClients, IServerGameClients003,
+                                   INTERFACEVERSION_SERVERGAMECLIENTS_VERSION_3,
+                                   g_ServerGameClients );
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameClients, IServerGameClients,
+                                   INTERFACEVERSION_SERVERGAMECLIENTS,
+                                   g_ServerGameClients );
 
 //-----------------------------------------------------------------------------
 // Purpose: called when a player tries to connect to the server
@@ -2699,19 +2940,23 @@ EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CServerGameClients, IServerGameClients, INTER
 //			reject - output - fill in with the reason why
 //			maxrejectlen -- sizeof output buffer
 //			the player was not allowed to connect.
-// Output : Returns TRUE if player is allowed to join, FALSE if connection is denied.
+// Output : Returns TRUE if player is allowed to join, FALSE if connection is
+// denied.
 //-----------------------------------------------------------------------------
-bool CServerGameClients::ClientConnect( edict_t *pEdict, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
+bool CServerGameClients::ClientConnect( edict_t *pEdict, const char *pszName,
+                                        const char *pszAddress, char *reject,
+                                        int maxrejectlen )
 {
   if ( !g_pGameRules )
     return false;
 
-  return g_pGameRules->ClientConnected( pEdict, pszName, pszAddress, reject, maxrejectlen );
+  return g_pGameRules->ClientConnected( pEdict, pszName, pszAddress, reject,
+                                        maxrejectlen );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called when a player is fully active (i.e. ready to receive messages)
-// Input  : *pEntity - the player
+// Purpose: Called when a player is fully active (i.e. ready to receive
+// messages) Input  : *pEntity - the player
 //-----------------------------------------------------------------------------
 void CServerGameClients::ClientActive( edict_t *pEdict, bool bLoadGame )
 {
@@ -2725,7 +2970,8 @@ void CServerGameClients::ClientActive( edict_t *pEdict, bool bLoadGame )
   if ( gpGlobals->eLoadType != MapLoad_LoadGame )
   {
     // notify all entities that the player is now in the game
-    for ( CBaseEntity *pEntity = gEntList.FirstEnt(); pEntity != NULL; pEntity = gEntList.NextEnt( pEntity ) )
+    for ( CBaseEntity *pEntity = gEntList.FirstEnt(); pEntity != NULL;
+          pEntity = gEntList.NextEnt( pEntity ) )
     {
       pEntity->PostClientActive();
     }
@@ -2733,20 +2979,14 @@ void CServerGameClients::ClientActive( edict_t *pEdict, bool bLoadGame )
 
   // Tell the sound controller to check looping sounds
   CBasePlayer *pPlayer = ( CBasePlayer * )CBaseEntity::Instance( pEdict );
-#ifdef HL2SB
-  if ( pPlayer )
-  {
-    CSoundEnvelopeController::GetController().CheckLoopingSoundsForPlayer( pPlayer );
-    SceneManager_ClientActive( pPlayer );
-  }
-#else
-  CSoundEnvelopeController::GetController().CheckLoopingSoundsForPlayer( pPlayer );
+  CSoundEnvelopeController::GetController().CheckLoopingSoundsForPlayer(
+      pPlayer );
   SceneManager_ClientActive( pPlayer );
-#endif
 
 #if defined( TF_DLL )
   Assert( pPlayer );
-  if ( pPlayer && !pPlayer->IsFakeClient() )
+  if ( pPlayer && !pPlayer->IsFakeClient() && !pPlayer->IsHLTV() &&
+       !pPlayer->IsReplay() )
   {
     CSteamID steamID;
     if ( pPlayer->GetSteamID( &steamID ) )
@@ -2755,7 +2995,10 @@ void CServerGameClients::ClientActive( edict_t *pEdict, bool bLoadGame )
     }
     else
     {
-      Log( "WARNING: ClientActive, but we don't know his SteamID?\n" );
+      if ( !pPlayer->IsReplay() && !pPlayer->IsHLTV() )
+      {
+        Log( "WARNING: ClientActive, but we don't know his SteamID?\n" );
+      }
     }
   }
 #endif
@@ -2789,16 +3032,19 @@ void CServerGameClients::ClientDisconnect( edict_t *pEdict )
       player->SetMaxSpeed( 0.0f );
 
       CSound *pSound;
-      pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEdict ) );
+      pSound = CSoundEnt::SoundPointerForIndex(
+          CSoundEnt::ClientSoundIndex( pEdict ) );
       {
-        // since this client isn't around to think anymore, reset their sound.
+        // since this client isn't around to think anymore, reset their
+        // sound.
         if ( pSound )
         {
           pSound->Reset();
         }
       }
 
-      // since the edict doesn't get deleted, fix it so it doesn't interfere.
+      // since the edict doesn't get deleted, fix it so it doesn't
+      // interfere.
       player->RemoveFlag( FL_AIMTARGET );         // don't attract autoaim
       player->AddFlag( FL_DONTTOUCH );            // stop it touching anything
       player->AddFlag( FL_NOTARGET );             // stop NPCs noticing it
@@ -2829,14 +3075,19 @@ void CServerGameClients::ClientDisconnect( edict_t *pEdict )
       }
       else
       {
-        Log( "WARNING: ClientDisconnected, but we don't know his SteamID?\n" );
+        if ( !player->IsReplay() && !player->IsHLTV() )
+        {
+          Log( "WARNING: ClientDisconnected, but we don't know his "
+               "SteamID?\n" );
+        }
       }
     }
 #endif
   }
 }
 
-void CServerGameClients::ClientPutInServer( edict_t *pEntity, const char *playername )
+void CServerGameClients::ClientPutInServer( edict_t *pEntity,
+                                            const char *playername )
 {
   if ( g_pClientPutInServerOverride )
     g_pClientPutInServerOverride( pEntity, playername );
@@ -2851,7 +3102,8 @@ void CServerGameClients::ClientCommand( edict_t *pEntity, const CCommand &args )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: called after the player changes userinfo - gives dll a chance to modify
+// Purpose: called after the player changes userinfo - gives dll a chance to
+// modify
 //			it before it gets sent into the rest of the engine->
 // Input  : *pEdict - the player
 //			*infobuffer - their infobuffer
@@ -2867,25 +3119,34 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
   if ( !player )
     return;
 
-  bool bAllowNetworkingClientSettingsChange = g_pGameRules->IsConnectedUserInfoChangeAllowed( player );
+  bool bAllowNetworkingClientSettingsChange =
+      g_pGameRules->IsConnectedUserInfoChangeAllowed( player );
   if ( bAllowNetworkingClientSettingsChange )
   {
-#define QUICKGETCVARVALUE( v ) ( engine->GetClientConVarValue( player->entindex(), v ) )
+#define QUICKGETCVARVALUE( v ) \
+  ( engine->GetClientConVarValue( player->entindex(), v ) )
 
     // get network setting for prediction & lag compensation
 
-    // Unfortunately, we have to duplicate the code in cdll_bounded_cvars.cpp here because the client
-    // doesn't send the virtualized value up (because it has no way to know when the virtualized value
-    // changes). Possible todo: put the responsibility on the bounded cvar to notify the engine when
-    // its virtualized value has changed.
+    // Unfortunately, we have to duplicate the code in
+    // cdll_bounded_cvars.cpp here because the client doesn't send the
+    // virtualized value up (because it has no way to know when the
+    // virtualized value changes). Possible todo: put the responsibility on
+    // the bounded cvar to notify the engine when its virtualized value has
+    // changed.
 
     player->m_nUpdateRate = Q_atoi( QUICKGETCVARVALUE( "cl_updaterate" ) );
-    static const ConVar *pMinUpdateRate = g_pCVar->FindVar( "sv_minupdaterate" );
-    static const ConVar *pMaxUpdateRate = g_pCVar->FindVar( "sv_maxupdaterate" );
+    static const ConVar *pMinUpdateRate =
+        g_pCVar->FindVar( "sv_minupdaterate" );
+    static const ConVar *pMaxUpdateRate =
+        g_pCVar->FindVar( "sv_maxupdaterate" );
     if ( pMinUpdateRate && pMaxUpdateRate )
-      player->m_nUpdateRate = clamp( player->m_nUpdateRate, ( int )pMinUpdateRate->GetFloat(), ( int )pMaxUpdateRate->GetFloat() );
+      player->m_nUpdateRate =
+          clamp( player->m_nUpdateRate, ( int )pMinUpdateRate->GetFloat(),
+                 ( int )pMaxUpdateRate->GetFloat() );
 
-    bool useInterpolation = Q_atoi( QUICKGETCVARVALUE( "cl_interpolate" ) ) != 0;
+    bool useInterpolation =
+        Q_atoi( QUICKGETCVARVALUE( "cl_interpolate" ) ) != 0;
     if ( useInterpolation )
     {
       float flLerpRatio = Q_atof( QUICKGETCVARVALUE( "cl_interp_ratio" ) );
@@ -2893,11 +3154,14 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
         flLerpRatio = 1.0f;
       float flLerpAmount = Q_atof( QUICKGETCVARVALUE( "cl_interp" ) );
 
-      static const ConVar *pMin = g_pCVar->FindVar( "sv_client_min_interp_ratio" );
-      static const ConVar *pMax = g_pCVar->FindVar( "sv_client_max_interp_ratio" );
+      static const ConVar *pMin =
+          g_pCVar->FindVar( "sv_client_min_interp_ratio" );
+      static const ConVar *pMax =
+          g_pCVar->FindVar( "sv_client_max_interp_ratio" );
       if ( pMin && pMax && pMin->GetFloat() != -1 )
       {
-        flLerpRatio = clamp( flLerpRatio, pMin->GetFloat(), pMax->GetFloat() );
+        flLerpRatio =
+            clamp( flLerpRatio, pMin->GetFloat(), pMax->GetFloat() );
       }
       else
       {
@@ -2905,7 +3169,8 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
           flLerpRatio = 1.0f;
       }
       // #define FIXME_INTERP_RATIO
-      player->m_fLerpTime = MAX( flLerpAmount, flLerpRatio / player->m_nUpdateRate );
+      player->m_fLerpTime =
+          MAX( flLerpAmount, flLerpRatio / player->m_nUpdateRate );
     }
     else
     {
@@ -2917,8 +3182,10 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
 
     if ( usePrediction )
     {
-      player->m_bPredictWeapons = Q_atoi( QUICKGETCVARVALUE( "cl_predictweapons" ) ) != 0;
-      player->m_bLagCompensation = Q_atoi( QUICKGETCVARVALUE( "cl_lagcompensation" ) ) != 0;
+      player->m_bPredictWeapons =
+          Q_atoi( QUICKGETCVARVALUE( "cl_predictweapons" ) ) != 0;
+      player->m_bLagCompensation =
+          Q_atoi( QUICKGETCVARVALUE( "cl_lagcompensation" ) ) != 0;
     }
     else
 #endif
@@ -2939,7 +3206,9 @@ void CServerGameClients::ClientSettingsChanged( edict_t *pEdict )
 // Input  : pAreaPortal - The Area portal to test for visibility from portals
 // Output : int - 1 if any portal needs this area portal open, 0 otherwise.
 //-----------------------------------------------------------------------------
-int TestAreaPortalVisibilityThroughPortals( CFuncAreaPortalBase *pAreaPortal, edict_t *pViewEntity, unsigned char *pvs, int pvssize )
+int TestAreaPortalVisibilityThroughPortals( CFuncAreaPortalBase *pAreaPortal,
+                                            edict_t *pViewEntity,
+                                            unsigned char *pvs, int pvssize )
 {
   int iPortalCount = CProp_Portal_Shared::AllPortals.Count();
   if ( iPortalCount == 0 )
@@ -2954,14 +3223,18 @@ int TestAreaPortalVisibilityThroughPortals( CFuncAreaPortalBase *pAreaPortal, ed
     {
       CProp_Portal *pRemotePortal = pLocalPortal->m_hLinkedPortal.Get();
 
-      // Make sure this portal's linked portal is in the PVS before we add what it can see
-      if ( pRemotePortal && pRemotePortal->m_bActivated && pRemotePortal->NetworkProp() &&
-           pRemotePortal->NetworkProp()->IsInPVS( pViewEntity, pvs, pvssize ) )
+      // Make sure this portal's linked portal is in the PVS before we add
+      // what it can see
+      if ( pRemotePortal && pRemotePortal->m_bActivated &&
+           pRemotePortal->NetworkProp() &&
+           pRemotePortal->NetworkProp()->IsInPVS( pViewEntity, pvs,
+                                                  pvssize ) )
       {
         bool bIsOpenOnClient = true;
         float fovDistanceAdjustFactor = 1.0f;
         Vector portalOrg = pLocalPortal->GetAbsOrigin();
-        int iPortalNeedsThisPortalOpen = pAreaPortal->UpdateVisibility( portalOrg, fovDistanceAdjustFactor, bIsOpenOnClient );
+        int iPortalNeedsThisPortalOpen = pAreaPortal->UpdateVisibility(
+            portalOrg, fovDistanceAdjustFactor, bIsOpenOnClient );
 
         // Stop checking on success, this portal needs to be open
         if ( iPortalNeedsThisPortalOpen )
@@ -2977,18 +3250,25 @@ int TestAreaPortalVisibilityThroughPortals( CFuncAreaPortalBase *pAreaPortal, ed
 #endif
 
 //-----------------------------------------------------------------------------
-// Purpose: A client can have a separate "view entity" indicating that his/her view should depend on the origin of that
-//  view entity.  If that's the case, then pViewEntity will be non-NULL and will be used.  Otherwise, the current
-//  entity's origin is used.  Either is offset by the m_vecViewOffset to get the eye position.
-// From the eye position, we set up the PAS and PVS to use for filtering network messages to the client.  At this point, we could
+// Purpose: A client can have a separate "view entity" indicating that his/her
+// view should depend on the origin of that
+//  view entity.  If that's the case, then pViewEntity will be non-NULL and will
+//  be used.  Otherwise, the current entity's origin is used.  Either is offset
+//  by the m_vecViewOffset to get the eye position.
+// From the eye position, we set up the PAS and PVS to use for filtering network
+// messages to the client.  At this point, we could
 //  override the actual PAS or PVS values, or use a different origin.
-// NOTE:  Do not cache the values of pas and pvs, as they depend on reusable memory in the engine, they are only good for this one frame
-// Input  : *pViewEntity -
+// NOTE:  Do not cache the values of pas and pvs, as they depend on reusable
+// memory in the engine, they are only good for this one frame Input  :
+// *pViewEntity -
 //			*pClient -
 //			**pvs -
 //			**pas -
 //-----------------------------------------------------------------------------
-void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *pClient, unsigned char *pvs, int pvssize )
+void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity,
+                                                edict_t *pClient,
+                                                unsigned char *pvs,
+                                                int pvssize )
 {
   Vector org;
 
@@ -3018,7 +3298,8 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
     org = pPlayer->EyePosition();
     pPlayer->SetupVisibility( pVE, pvs, pvssize );
     UTIL_SetClientVisibilityPVS( pClient, pvs, pvssize );
-    fovDistanceAdjustFactor = pPlayer->GetFOVDistanceAdjustFactorForNetworking();
+    fovDistanceAdjustFactor =
+        pPlayer->GetFOVDistanceAdjustFactorForNetworking();
   }
 
   unsigned char portalBits[MAX_AREA_PORTAL_STATE_BYTES];
@@ -3028,7 +3309,8 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
   int isOpen[512];
   int iOutPortal = 0;
 
-  for ( unsigned short i = g_AreaPortals.Head(); i != g_AreaPortals.InvalidIndex(); i = g_AreaPortals.Next( i ) )
+  for ( unsigned short i = g_AreaPortals.Head();
+        i != g_AreaPortals.InvalidIndex(); i = g_AreaPortals.Next( i ) )
   {
     CFuncAreaPortalBase *pCur = g_AreaPortals[i];
 
@@ -3036,13 +3318,16 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
 
     // Update our array of which portals are open and flush it if necessary.
     portalNums[iOutPortal] = pCur->m_portalNumber;
-    isOpen[iOutPortal] = pCur->UpdateVisibility( org, fovDistanceAdjustFactor, bIsOpenOnClient );
+    isOpen[iOutPortal] = pCur->UpdateVisibility(
+        org, fovDistanceAdjustFactor, bIsOpenOnClient );
 
 #ifdef PORTAL
-    // If the client doesn't need this open, test if portals might need this area portal open
+    // If the client doesn't need this open, test if portals might need this
+    // area portal open
     if ( isOpen[iOutPortal] == 0 )
     {
-      isOpen[iOutPortal] = TestAreaPortalVisibilityThroughPortals( pCur, pViewEntity, pvs, pvssize );
+      isOpen[iOutPortal] = TestAreaPortalVisibilityThroughPortals(
+          pCur, pViewEntity, pvs, pvssize );
     }
 #endif
 
@@ -3053,8 +3338,8 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
       iOutPortal = 0;
     }
 
-    // Version 0 portals (ie: shipping Half-Life 2 era) are always treated as open
-    // for purposes of the m_chAreaPortalBits array on the client.
+    // Version 0 portals (ie: shipping Half-Life 2 era) are always treated
+    // as open for purposes of the m_chAreaPortalBits array on the client.
     if ( pCur->m_iPortalVersion == 0 )
       bIsOpenOnClient = true;
 
@@ -3063,9 +3348,11 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
       if ( pCur->m_portalNumber < 0 )
         continue;
       else if ( pCur->m_portalNumber >= sizeof( portalBits ) * 8 )
-        Error( "ClientSetupVisibility: portal number (%d) too large", pCur->m_portalNumber );
+        Error( "ClientSetupVisibility: portal number (%d) too large",
+               pCur->m_portalNumber );
       else
-        portalBits[pCur->m_portalNumber >> 3] |= ( 1 << ( pCur->m_portalNumber & 7 ) );
+        portalBits[pCur->m_portalNumber >> 3] |=
+            ( 1 << ( pCur->m_portalNumber & 7 ) );
     }
   }
 
@@ -3078,7 +3365,8 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
     pPlayer->m_Local.UpdateAreaBits( pPlayer, portalBits );
 
 #ifdef PORTAL
-    // *After* the player's view has updated its area bits, add on any other areas seen by portals
+    // *After* the player's view has updated its area bits, add on any other
+    // areas seen by portals
     CPortal_Player *pPortalPlayer = dynamic_cast< CPortal_Player * >( pPlayer );
     if ( pPortalPlayer )
     {
@@ -3101,8 +3389,10 @@ void CServerGameClients::ClientSetupVisibility( edict_t *pViewEntity, edict_t *p
 //-----------------------------------------------------------------------------
 #define CMD_MAXBACKUP 64
 
-float CServerGameClients::ProcessUsercmds( edict_t *player, bf_read *buf, int numcmds, int totalcmds,
-                                           int dropped_packets, bool ignore, bool paused )
+float CServerGameClients::ProcessUsercmds( edict_t *player, bf_read *buf,
+                                           int numcmds, int totalcmds,
+                                           int dropped_packets, bool ignore,
+                                           bool paused )
 {
   int i;
   CUserCmd *from, *to;
@@ -3131,7 +3421,9 @@ float CServerGameClients::ProcessUsercmds( edict_t *player, bf_read *buf, int nu
       name = pPlayer->GetPlayerName();
     }
 
-    Msg( "CBasePlayer::ProcessUsercmds: too many cmds %i sent for player %s\n", totalcmds, name );
+    Msg( "CBasePlayer::ProcessUsercmds: too many cmds %i sent for player "
+         "%s\n",
+         totalcmds, name );
     // FIXME:  Need a way to drop the client from here
     // SV_DropClient ( host_client, false, "CMD_MAXBACKUP hit" );
     buf->SetOverflowFlag();
@@ -3148,7 +3440,8 @@ float CServerGameClients::ProcessUsercmds( edict_t *player, bf_read *buf, int nu
     from = to;
   }
 
-  // Client not fully connected or server has gone inactive  or is paused, just ignore
+  // Client not fully connected or server has gone inactive  or is paused,
+  // just ignore
   if ( ignore || !pPlayer )
   {
     return 0.0f;
@@ -3164,7 +3457,8 @@ void CServerGameClients::PostClientMessagesSent_DEPRECIATED( void )
 {
 }
 
-// Sets the client index for the client who typed the command into his/her console
+// Sets the client index for the client who typed the command into his/her
+// console
 void CServerGameClients::SetCommandClient( int index )
 {
   g_nCommandClientIndex = index;
@@ -3185,7 +3479,8 @@ int CServerGameClients::GetReplayDelay( edict_t *pEdict, int &entity )
 //-----------------------------------------------------------------------------
 // The client's userinfo data lump has changed
 //-----------------------------------------------------------------------------
-void CServerGameClients::ClientEarPosition( edict_t *pEdict, Vector *pEarOrigin )
+void CServerGameClients::ClientEarPosition( edict_t *pEdict,
+                                            Vector *pEarOrigin )
 {
   CBasePlayer *pPlayer = ( CBasePlayer * )CBaseEntity::Instance( pEdict );
   if ( pPlayer )
@@ -3219,7 +3514,8 @@ CPlayerState *CServerGameClients::GetPlayerState( edict_t *player )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Anything this game .dll wants to add to the bug reporter text (e.g., the entity/model under the picker crosshair)
+// Purpose: Anything this game .dll wants to add to the bug reporter text (e.g.,
+// the entity/model under the picker crosshair)
 //  can be added here
 // Input  : *buf -
 //			buflen -
@@ -3238,8 +3534,7 @@ void CServerGameClients::GetBugReportInfo( char *buf, int buflen )
     if ( ent )
     {
       Q_snprintf( buf, buflen, "Picker %i/%s - ent %s model %s\n",
-                  ent->entindex(),
-                  ent->GetClassname(),
+                  ent->entindex(), ent->GetClassname(),
                   STRING( ent->GetEntityName() ),
                   STRING( ent->GetModelName() ) );
     }
@@ -3251,9 +3546,13 @@ void CServerGameClients::GetBugReportInfo( char *buf, int buflen )
       Q_snprintf( buf, buflen, "%sRecent NPC speech:\n", buf );
       for ( i = 0; i < num; i++ )
       {
-        Q_snprintf( buf, buflen, "%s   time: %6.3f   sound name: %s   scene: %s\n", buf, speech[i].time, speech[i].name, speech[i].sceneName );
+        Q_snprintf( buf, buflen,
+                    "%s   time: %6.3f   sound name: %s   scene: %s\n",
+                    buf, speech[i].time, speech[i].name,
+                    speech[i].sceneName );
       }
-      Q_snprintf( buf, buflen, "%sCurrent time: %6.3f\n", buf, gpGlobals->curtime );
+      Q_snprintf( buf, buflen, "%sCurrent time: %6.3f\n", buf,
+                  gpGlobals->curtime );
     }
   }
 }
@@ -3261,7 +3560,8 @@ void CServerGameClients::GetBugReportInfo( char *buf, int buflen )
 //-----------------------------------------------------------------------------
 // Purpose: A user has had their network id setup and validated
 //-----------------------------------------------------------------------------
-void CServerGameClients::NetworkIDValidated( const char *pszUserName, const char *pszNetworkID )
+void CServerGameClients::NetworkIDValidated( const char *pszUserName,
+                                             const char *pszNetworkID )
 {
 #if defined( LUA_SDK )
   BEGIN_LUA_CALL_HOOK( "NetworkIDValidated" );
@@ -3272,7 +3572,8 @@ void CServerGameClients::NetworkIDValidated( const char *pszUserName, const char
 }
 
 // The client has submitted a keyvalues command
-void CServerGameClients::ClientCommandKeyValues( edict_t *pEntity, KeyValues *pKeyValues )
+void CServerGameClients::ClientCommandKeyValues( edict_t *pEntity,
+                                                 KeyValues *pKeyValues )
 {
   if ( !pKeyValues )
     return;
@@ -3294,7 +3595,8 @@ void EntityMessageBegin( CBaseEntity *entity, bool reliable /*= false*/ )
 
   Assert( entity );
 
-  g_pMsgBuffer = engine->EntityMessageBegin( entity->entindex(), entity->GetServerClass(), reliable );
+  g_pMsgBuffer = engine->EntityMessageBegin(
+      entity->entindex(), entity->GetServerClass(), reliable );
 }
 
 void UserMessageBegin( IRecipientFilter &filter, const char *messagename )
@@ -3437,7 +3739,8 @@ void MessageWriteEHandle( CBaseEntity *pEntity )
   {
     EHANDLE hEnt = pEntity;
 
-    int iSerialNum = hEnt.GetSerialNumber() & ( ( 1 << NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS ) - 1 );
+    int iSerialNum = hEnt.GetSerialNumber() &
+                     ( ( 1 << NUM_NETWORKED_EHANDLE_SERIAL_NUMBER_BITS ) - 1 );
     iEncodedEHandle = hEnt.GetEntryIndex() | ( iSerialNum << MAX_EDICT_BITS );
   }
   else
@@ -3486,8 +3789,10 @@ class CServerDLLSharedAppSystems : public IServerDLLSharedAppSystems
  public:
   CServerDLLSharedAppSystems()
   {
-    AddAppSystem( "soundemittersystem" DLL_EXT_STRING, SOUNDEMITTERSYSTEM_INTERFACE_VERSION );
-    AddAppSystem( "scenefilecache" DLL_EXT_STRING, SCENE_FILE_CACHE_INTERFACE_VERSION );
+    AddAppSystem( "soundemittersystem" DLL_EXT_STRING,
+                  SOUNDEMITTERSYSTEM_INTERFACE_VERSION );
+    AddAppSystem( "scenefilecache" DLL_EXT_STRING,
+                  SCENE_FILE_CACHE_INTERFACE_VERSION );
   }
 
   virtual int Count()
@@ -3515,7 +3820,8 @@ class CServerDLLSharedAppSystems : public IServerDLLSharedAppSystems
   CUtlVector< AppSystemInfo_t > m_Systems;
 };
 
-EXPOSE_SINGLE_INTERFACE( CServerDLLSharedAppSystems, IServerDLLSharedAppSystems, SERVER_DLL_SHARED_APPSYSTEMS );
+EXPOSE_SINGLE_INTERFACE( CServerDLLSharedAppSystems, IServerDLLSharedAppSystems,
+                         SERVER_DLL_SHARED_APPSYSTEMS );
 
 //-----------------------------------------------------------------------------
 //
@@ -3532,7 +3838,8 @@ void CServerGameTags::GetTaggedConVarList( KeyValues *pCvarTagList )
 
 CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
 {
-  const CSteamID *pResult = engine->GetClientSteamIDByPlayerIndex( iPlayerIndex );
+  const CSteamID *pResult =
+      engine->GetClientSteamIDByPlayerIndex( iPlayerIndex );
   if ( pResult )
     return *pResult;
 

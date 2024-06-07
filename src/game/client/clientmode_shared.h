@@ -15,6 +15,7 @@
 #include "iclientmode.h"
 #include "GameEventListener.h"
 #include <baseviewport.h>
+
 #ifdef LUA_SDK
 #include <scriptedhudviewport.h>
 #include <scriptedclientluapanel.h>
@@ -44,7 +45,8 @@ class Panel;
 
 class CReplayReminderPanel;
 
-#define USERID2PLAYER( i ) ToBasePlayer( ClientEntityList().GetEnt( engine->GetPlayerForUserID( i ) ) )
+#define USERID2PLAYER( i ) \
+  ToBasePlayer( ClientEntityList().GetEnt( engine->GetPlayerForUserID( i ) ) )
 
 extern IClientMode *GetClientModeNormal();  // must be implemented
 
@@ -70,7 +72,7 @@ class ClientModeShared : public IClientMode, public CGameEventListener
   virtual void Disable();
   virtual void Layout();
 
-  virtual void ReloadScheme( void );
+  virtual void ReloadScheme( bool flushLowLevel );
   virtual void OverrideView( CViewSetup *pSetup );
   virtual bool ShouldDrawDetailObjects();
   virtual bool ShouldDrawEntity( C_BaseEntity *pEnt );
@@ -89,14 +91,14 @@ class ClientModeShared : public IClientMode, public CGameEventListener
   virtual void Update();
 
   // Input
-  virtual int KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
+  virtual int KeyInput( int down, ButtonCode_t keynum,
+                        const char *pszCurrentBinding );
 #ifdef ARGG
-  // adnan
-  // does this weapon need to override the view angles?
   virtual bool OverrideViewAngles( void );
-  // end adnan
 #endif
-  virtual int HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
+
+  virtual int HudElementKeyInput( int down, ButtonCode_t keynum,
+                                  const char *pszCurrentBinding );
   virtual void OverrideMouseInput( float *x, float *y );
   virtual void StartMessageMode( int iMessageModeType );
   virtual vgui::Panel *GetMessagePanel();
@@ -125,13 +127,15 @@ class ClientModeShared : public IClientMode, public CGameEventListener
     return true;
   }
 
-  virtual int HandleSpectatorKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding );
+  virtual int HandleSpectatorKeyInput( int down, ButtonCode_t keynum,
+                                       const char *pszCurrentBinding );
 
   virtual void ComputeVguiResConditions( KeyValues *pkvConditions ) OVERRIDE;
 
   //=============================================================================
   // HPE_BEGIN:
-  // [menglish] Save server information shown to the client in a persistent place
+  // [menglish] Save server information shown to the client in a persistent
+  // place
   //=============================================================================
 
   virtual wchar_t *GetServerName()
@@ -151,14 +155,17 @@ class ClientModeShared : public IClientMode, public CGameEventListener
 
   virtual bool DoPostScreenSpaceEffects( const CViewSetup *pSetup );
 
-  virtual void DisplayReplayMessage( const char *pLocalizeName, float flDuration, bool bUrgent,
+  virtual void DisplayReplayMessage( const char *pLocalizeName,
+                                     float flDuration, bool bUrgent,
                                      const char *pSound, bool bDlg );
 
   virtual bool IsInfoPanelAllowed() OVERRIDE
   {
     return true;
   }
-  virtual void InfoPanelDisplayed() OVERRIDE {}
+  virtual void InfoPanelDisplayed() OVERRIDE
+  {
+  }
   virtual bool IsHTMLInfoPanelAllowed() OVERRIDE
   {
     return true;

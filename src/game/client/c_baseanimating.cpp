@@ -78,6 +78,11 @@ const float RUN_SPEED_ESTIMATE_SQR = 150.0f * 150.0f;
 static ConVar dbganimmodel( "dbganimmodel", "" );
 #endif
 
+#if defined( STAGING_ONLY )
+static ConVar dbg_bonestack_perturb( "dbg_bonestack_perturb", "0", 0 );
+static CInterlockedInt dbg_bonestack_reentrant_count = 0;
+#endif  // STAGING_ONLY
+
 mstudioevent_t *GetEventIndexForSequence( mstudioseqdesc_t &seqdesc );
 
 C_EntityDissolve *DissolveEffect( C_BaseEntity *pTarget, float flTime );
@@ -627,7 +632,10 @@ void C_ClientRagdoll::Release( void )
   }
   ClientEntityList().RemoveEntity( GetClientHandle() );
 
-  partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
+  if ( CollisionProp()->GetPartitionHandle() != PARTITION_INVALID_HANDLE )
+  {
+    partition->Remove( PARTITION_CLIENT_SOLID_EDICTS | PARTITION_CLIENT_RESPONSIVE_EDICTS | PARTITION_CLIENT_NON_STATIC_EDICTS, CollisionProp()->GetPartitionHandle() );
+  }
   RemoveFromLeafSystem();
 
   BaseClass::Release();
@@ -738,15 +746,25 @@ C_BaseAnimating::~C_BaseAnimating()
   int i = g_PreviousBoneSetups.Find( this );
   if ( i != -1 )
     g_PreviousBoneSetups.FastRemove( i );
-  RemoveFromClientSideAnimationList();
 
   TermRopes();
-  delete m_pRagdollInfo;
+
   Assert( !m_pRagdoll );
+
+  delete m_pRagdollInfo;
+  m_pRagdollInfo = NULL;
+
   delete m_pIk;
+  m_pIk = NULL;
+
   delete m_pBoneMergeCache;
+  m_pBoneMergeCache = NULL;
+
   Studio_DestroyBoneCache( m_hitboxBoneCacheHandle );
+
   delete m_pJiggleBones;
+  m_pJiggleBones = NULL;
+
   InvalidateMdlCache();
 
   // Kill off anything bone attached to us.
@@ -845,7 +863,7 @@ void C_BaseAnimating::UpdateRelevantInterpolatedVars()
 {
   MDLCACHE_CRITICAL_SECTION();
   // Remove any interpolated vars that need to be removed.
-  if ( !GetPredictable() && !IsClientCreated() && GetModelPtr() && GetModelPtr()->SequencesAvailable() )
+  if ( !IsMarkedForDeletion() && !GetPredictable() && !IsClientCreated() && GetModelPtr() && GetModelPtr()->SequencesAvailable() )
   {
     AddBaseAnimatingInterpolatedVars();
   }
@@ -884,6 +902,17 @@ void C_BaseAnimating::RemoveBaseAnimatingInterpolatedVars()
   }
 }
 
+/*
+ From Ken: Lock() and Unlock() are render frame only, it’s just so the mdlcache
+ doesn’t toss the memory when it reshuffles the data, or at least used to. I
+ don't have any idea if mdlcache even does that anymore, but at one point it would
+ happily throw away the animation data if you ran out of memory on the
+ consoles. Jay adds: Ken is correct and the pointer should be valid until the end
+ of the frame lock (provided you are within a MDLCACHE_LOCK() block or whatever
+
+ Jay also recommends running with a forced small cache size (1MB) to put maximum
+ pressure on the cache when testing changes. Look for datacache ConVar in datacache.cpp.
+ */
 void C_BaseAnimating::LockStudioHdr()
 {
   Assert( m_hStudioHdr == MDLHANDLE_INVALID && m_pStudioHdr == NULL );
@@ -955,6 +984,9 @@ void C_BaseAnimating::UnlockStudioHdr()
       mdlcache->UnlockStudioHdr( m_hStudioHdr );
     }
     m_hStudioHdr = MDLHANDLE_INVALID;
+
+    delete m_pStudioHdr;
+    m_pStudioHdr = NULL;
   }
 }
 
@@ -1498,7 +1530,18 @@ void C_BaseAnimating::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quater
         }
         else
         {
-          ConcatTransforms( GetBone( pbones[i].parent ), bonematrix, goalMX );
+          // If the parent bone has been scaled (like with BuildBigHeadTransformations)
+          // scale it back down so the jiggly bones show up non-scaled in the correct location.
+          matrix3x4_t parentMX = GetBone( pbones[i].parent );
+
+          float fScale = Square( parentMX[0][0] ) + Square( parentMX[1][0] ) + Square( parentMX[2][0] );
+          if ( fScale > Square( 1.0001f ) )
+          {
+            fScale = 1.0f / FastSqrt( fScale );
+            MatrixScaleBy( fScale, parentMX );
+          }
+
+          ConcatTransforms( parentMX, bonematrix, goalMX );
         }
 
         // get jiggle properties from QC data
@@ -1968,10 +2011,10 @@ bool C_BaseAnimating::PutAttachment( int number, const matrix3x4_t &attachmentTo
   return true;
 }
 
-void C_BaseAnimating::SetupBones_AttachmentHelper( CStudioHdr *hdr )
+bool C_BaseAnimating::SetupBones_AttachmentHelper( CStudioHdr *hdr )
 {
-  if ( !hdr || !hdr->GetNumAttachments() )
-    return;
+  if ( !hdr )
+    return false;
 
   // calculate attachment points
   matrix3x4_t world;
@@ -1997,6 +2040,8 @@ void C_BaseAnimating::SetupBones_AttachmentHelper( CStudioHdr *hdr )
     FormatViewModelAttachment( i, world );
     PutAttachment( i + 1, world );
   }
+
+  return true;
 }
 
 bool C_BaseAnimating::CalcAttachments()
@@ -2181,17 +2226,36 @@ bool C_BaseAnimating::GetSoundSpatialization( SpatializationInfo_t &info )
   return true;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 bool C_BaseAnimating::IsViewModel() const
 {
   return false;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void C_BaseAnimating::UpdateOnRemove( void )
+{
+  RemoveFromClientSideAnimationList( true );
+
+  BaseClass::UpdateOnRemove();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 bool C_BaseAnimating::IsMenuModel() const
 {
   return false;
 }
 
 // UNDONE: Seems kind of silly to have this when we also have the cached bones in C_BaseAnimating
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
 CBoneCache *C_BaseAnimating::GetBoneCache( CStudioHdr *pStudioHdr )
 {
   int boneMask = BONE_USED_BY_HITBOX;
@@ -2870,7 +2934,11 @@ bool C_BaseAnimating::SetupBones( matrix3x4_t *pBoneToWorldOut, int nMaxBones, i
 
     if ( !( oldReadableBones & BONE_USED_BY_ATTACHMENT ) && ( boneMask & BONE_USED_BY_ATTACHMENT ) )
     {
-      SetupBones_AttachmentHelper( hdr );
+      if ( !SetupBones_AttachmentHelper( hdr ) )
+      {
+        DevWarning( 2, "SetupBones: SetupBones_AttachmentHelper failed.\n" );
+        return false;
+      }
     }
   }
 
@@ -2884,7 +2952,7 @@ bool C_BaseAnimating::SetupBones( matrix3x4_t *pBoneToWorldOut, int nMaxBones, i
     }
     else
     {
-      Warning( "SetupBones: invalid bone array size (%d - needs %d)\n", nMaxBones, m_CachedBoneData.Count() );
+      ExecuteNTimes( 25, Warning( "SetupBones: invalid bone array size (%d - needs %d)\n", nMaxBones, m_CachedBoneData.Count() ) );
       return false;
     }
   }
@@ -2946,6 +3014,9 @@ struct BoneAccess
   char const *tag;
 };
 
+// the modelcache critical section is insufficient for preventing us from getting into the bone cache at the same time.
+// The bonecache itself is protected by a mutex, but the actual bone access stack needs to be protected separately.
+static CThreadFastMutex g_BoneAccessMutex;
 static CUtlVector< BoneAccess > g_BoneAccessStack;
 static BoneAccess g_BoneAcessBase;
 
@@ -2960,6 +3031,9 @@ bool C_BaseAnimating::IsBoneAccessAllowed() const
 // (static function)
 void C_BaseAnimating::PushAllowBoneAccess( bool bAllowForNormalModels, bool bAllowForViewModels, char const *tagPush )
 {
+  AUTO_LOCK( g_BoneAccessMutex );
+  STAGING_ONLY_EXEC( ReentrancyVerifier rv( &dbg_bonestack_reentrant_count, dbg_bonestack_perturb.GetInt() ) );
+
   BoneAccess save = g_BoneAcessBase;
   g_BoneAccessStack.AddToTail( save );
 
@@ -2971,6 +3045,9 @@ void C_BaseAnimating::PushAllowBoneAccess( bool bAllowForNormalModels, bool bAll
 
 void C_BaseAnimating::PopBoneAccess( char const *tagPop )
 {
+  AUTO_LOCK( g_BoneAccessMutex );
+  STAGING_ONLY_EXEC( ReentrancyVerifier rv( &dbg_bonestack_reentrant_count, dbg_bonestack_perturb.GetInt() ) );
+
   // Validate that pop matches the push
   Assert( ( g_BoneAcessBase.tag == tagPop ) || ( g_BoneAcessBase.tag && g_BoneAcessBase.tag != ( char const * )1 && tagPop && tagPop != ( char const * )1 && !strcmp( g_BoneAcessBase.tag, tagPop ) ) );
   int lastIndex = g_BoneAccessStack.Count() - 1;
@@ -3436,7 +3513,7 @@ void C_BaseAnimating::DoAnimationEvents( CStudioHdr *pStudioHdr )
     }
 
     // Necessary to get the next loop working
-    m_flPrevEventCycle = -0.01;
+    m_flPrevEventCycle = flEventCycle - 0.001f;
   }
 
   for ( int i = 0; i < ( int )seqdesc.numevents; i++ )
@@ -3776,20 +3853,6 @@ void C_BaseAnimating::FireEvent( const Vector &origin, const QAngle &angles, int
 
     // Eject brass
     case CL_EVENT_EJECTBRASS1:
-#if defined( HL2SB )
-    {
-      // Check if we're a weapon, if we belong to the local player, and if the local player is in third person - if all are true, don't do a muzzleflash in this instance, because
-      // we're using the view models dispatch for smoothness.
-      if ( dynamic_cast< C_BaseCombatWeapon * >( this ) != NULL )
-      {
-        C_BaseCombatWeapon *pWeapon = dynamic_cast< C_BaseCombatWeapon * >( this );
-        if ( pWeapon && pWeapon->GetOwner() == C_BasePlayer::GetLocalPlayer() && ::input->CAM_IsThirdPerson() )
-          break;
-      }
-
-      if ( ( prediction->InPrediction() && !prediction->IsFirstTimePredicted() ) )
-        break;
-
       if ( m_Attachments.Count() > 0 )
       {
         if ( MainViewOrigin().DistToSqr( GetAbsOrigin() ) < ( 256 * 256 ) )
@@ -3804,23 +3867,6 @@ void C_BaseAnimating::FireEvent( const Vector &origin, const QAngle &angles, int
         }
       }
       break;
-    }
-#else
-      if ( m_Attachments.Count() > 0 )
-      {
-        if ( MainViewOrigin().DistToSqr( GetAbsOrigin() ) < ( 256 * 256 ) )
-        {
-          Vector attachOrigin;
-          QAngle attachAngles;
-
-          if ( GetAttachment( 2, attachOrigin, attachAngles ) )
-          {
-            tempents->EjectBrass( attachOrigin, attachAngles, GetAbsAngles(), atoi( options ) );
-          }
-        }
-      }
-      break;
-#endif
 
     case AE_MUZZLEFLASH:
     {
@@ -4474,7 +4520,7 @@ void C_BaseAnimating::OnPreDataChanged( DataUpdateType_t updateType )
   m_bLastClientSideFrameReset = m_bClientSideFrameReset;
 }
 
-void C_BaseAnimating::ForceSetupBonesAtTime( matrix3x4_t *pBonesOut, float flTime )
+bool C_BaseAnimating::ForceSetupBonesAtTime( matrix3x4_t *pBonesOut, float flTime )
 {
   // blow the cached prev bones
   InvalidateBoneCache();
@@ -4483,13 +4529,18 @@ void C_BaseAnimating::ForceSetupBonesAtTime( matrix3x4_t *pBonesOut, float flTim
   Interpolate( flTime );
 
   // Setup bone state at the given time
-  SetupBones( pBonesOut, MAXSTUDIOBONES, BONE_USED_BY_ANYTHING, flTime );
+  return SetupBones( pBonesOut, MAXSTUDIOBONES, BONE_USED_BY_ANYTHING, flTime );
 }
 
-void C_BaseAnimating::GetRagdollInitBoneArrays( matrix3x4_t *pDeltaBones0, matrix3x4_t *pDeltaBones1, matrix3x4_t *pCurrentBones, float boneDt )
+bool C_BaseAnimating::GetRagdollInitBoneArrays( matrix3x4_t *pDeltaBones0, matrix3x4_t *pDeltaBones1, matrix3x4_t *pCurrentBones, float boneDt )
 {
-  ForceSetupBonesAtTime( pDeltaBones0, gpGlobals->curtime - boneDt );
-  ForceSetupBonesAtTime( pDeltaBones1, gpGlobals->curtime );
+  bool bSuccess = true;
+
+  if ( !ForceSetupBonesAtTime( pDeltaBones0, gpGlobals->curtime - boneDt ) )
+    bSuccess = false;
+  if ( !ForceSetupBonesAtTime( pDeltaBones1, gpGlobals->curtime ) )
+    bSuccess = false;
+
   float ragdollCreateTime = PhysGetSyncCreateTime();
   if ( ragdollCreateTime != gpGlobals->curtime )
   {
@@ -4497,12 +4548,15 @@ void C_BaseAnimating::GetRagdollInitBoneArrays( matrix3x4_t *pDeltaBones0, matri
     // so initialize the ragdoll at that time so that it will reach the current
     // position at curtime.  Otherwise the ragdoll will simulate forward from curtime
     // and pop into the future a bit at this point of transition
-    ForceSetupBonesAtTime( pCurrentBones, ragdollCreateTime );
+    if ( !ForceSetupBonesAtTime( pCurrentBones, ragdollCreateTime ) )
+      bSuccess = false;
   }
   else
   {
     memcpy( pCurrentBones, m_CachedBoneData.Base(), sizeof( matrix3x4_t ) * m_CachedBoneData.Count() );
   }
+
+  return bSuccess;
 }
 
 C_BaseAnimating *C_BaseAnimating::CreateRagdollCopy()
@@ -4570,14 +4624,32 @@ C_BaseAnimating *C_BaseAnimating::BecomeRagdollOnClient()
 {
   MoveToLastReceivedPosition( true );
   GetAbsOrigin();
-  C_BaseAnimating *pRagdoll = CreateRagdollCopy();
 
-  matrix3x4_t boneDelta0[MAXSTUDIOBONES];
-  matrix3x4_t boneDelta1[MAXSTUDIOBONES];
-  matrix3x4_t currentBones[MAXSTUDIOBONES];
-  const float boneDt = 0.1f;
-  GetRagdollInitBoneArrays( boneDelta0, boneDelta1, currentBones, boneDt );
-  pRagdoll->InitAsClientRagdoll( boneDelta0, boneDelta1, currentBones, boneDt );
+  C_BaseAnimating *pRagdoll = CreateRagdollCopy();
+  if ( pRagdoll )
+  {
+    matrix3x4_t boneDelta0[MAXSTUDIOBONES];
+    matrix3x4_t boneDelta1[MAXSTUDIOBONES];
+    matrix3x4_t currentBones[MAXSTUDIOBONES];
+    const float boneDt = 0.1f;
+
+    bool bInitAsClient = false;
+    bool bInitBoneArrays = GetRagdollInitBoneArrays( boneDelta0, boneDelta1, currentBones, boneDt );
+
+    if ( bInitBoneArrays )
+    {
+      bInitAsClient = pRagdoll->InitAsClientRagdoll( boneDelta0, boneDelta1, currentBones, boneDt );
+    }
+
+    if ( !bInitAsClient || !bInitBoneArrays )
+    {
+      Warning( "C_BaseAnimating::BecomeRagdollOnClient failed. pRagdoll:%p bInitBoneArrays:%d bInitAsClient:%d\n",
+               pRagdoll, bInitBoneArrays, bInitAsClient );
+      pRagdoll->Release();
+      return NULL;
+    }
+  }
+
   return pRagdoll;
 }
 
@@ -5471,6 +5543,13 @@ int C_BaseAnimating::SelectWeightedSequence( int activity )
   return ::SelectWeightedSequence( GetModelPtr(), activity );
 }
 
+int C_BaseAnimating::SelectWeightedSequenceFromModifiers( Activity activity, CUtlSymbol *pActivityModifiers, int iModifierCount )
+{
+  Assert( activity != ACT_INVALID );
+  Assert( GetModelPtr() );
+  return GetModelPtr()->SelectWeightedSequenceFromModifiers( activity, pActivityModifiers, iModifierCount );
+}
+
 //=========================================================
 //=========================================================
 int C_BaseAnimating::LookupPoseParameter( CStudioHdr *pstudiohdr, const char *szName )
@@ -5969,7 +6048,7 @@ void C_BaseAnimating::AddToClientSideAnimationList()
   UpdateRelevantInterpolatedVars();
 }
 
-void C_BaseAnimating::RemoveFromClientSideAnimationList()
+void C_BaseAnimating::RemoveFromClientSideAnimationList( bool bBeingDestroyed /*= false*/ )
 {
   // Not in list yet
   if ( INVALID_CLIENTSIDEANIMATION_LIST_HANDLE == m_ClientSideAnimationListHandle )
@@ -6000,7 +6079,10 @@ void C_BaseAnimating::RemoveFromClientSideAnimationList()
   // Invalidate our handle no matter what.
   m_ClientSideAnimationListHandle = INVALID_CLIENTSIDEANIMATION_LIST_HANDLE;
 
-  UpdateRelevantInterpolatedVars();
+  if ( !bBeingDestroyed )
+  {
+    UpdateRelevantInterpolatedVars();
+  }
 }
 
 // static method

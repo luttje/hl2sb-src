@@ -99,9 +99,9 @@ class CItem : public CBaseAnimating, public CDefaultPlayerPickupVPhysics
 
  protected:
   virtual void ComeToRest( void );
+  bool m_bActivateWhenAtRest;
 
  private:
-  bool m_bActivateWhenAtRest;
   COutputEvent m_OnPlayerTouch;
   COutputEvent m_OnCacheInteraction;
 

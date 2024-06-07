@@ -1680,6 +1680,11 @@ int ByteswapMDLFile( void *pDestBase, void *pSrcBase, const int fileSize )
 
     SET_INDEX_POINTERS( pData, pSequence, keyvalueindex )
     WriteBuffer< char >( pDataDest, pDataSrc, SrcNative( &pSequence->keyvaluesize ) );
+
+    /** ACTIVITY MODIFIERS **/
+
+    SET_INDEX_POINTERS( pData, pSequence, activitymodifierindex )
+    WriteObjects< mstudioactivitymodifier_t >( pDataDest, pDataSrc, SrcNative( &pSequence->numactivitymodifiers ) );
   }
 
   /** TRANSITION GRAPH **/
@@ -2799,6 +2804,10 @@ DEFINE_FIELD( id, FIELD_INTEGER ),
     DEFINE_FIELD( position, FIELD_VECTOR ),
     END_BYTESWAP_DATADESC()
 
+        BEGIN_BYTESWAP_DATADESC( mstudioactivitymodifier_t )
+            DEFINE_INDEX( sznameindex, FIELD_INTEGER ),
+    END_BYTESWAP_DATADESC()
+
         BEGIN_BYTESWAP_DATADESC( mstudioseqdesc_t )
             DEFINE_INDEX( baseptr, FIELD_INTEGER ),
     DEFINE_INDEX( szlabelindex, FIELD_INTEGER ),
@@ -2838,7 +2847,9 @@ DEFINE_FIELD( id, FIELD_INTEGER ),
     DEFINE_INDEX( keyvalueindex, FIELD_INTEGER ),
     DEFINE_FIELD( keyvaluesize, FIELD_INTEGER ),
     DEFINE_INDEX( cycleposeindex, FIELD_INTEGER ),
-    DEFINE_ARRAY( unused, FIELD_INTEGER, 7 ),  // remove/add as appropriate (grow back to 8 ints on version change!)
+    DEFINE_INDEX( activitymodifierindex, FIELD_INTEGER ),
+    DEFINE_FIELD( numactivitymodifiers, FIELD_INTEGER ),
+    DEFINE_ARRAY( unused, FIELD_INTEGER, 5 ),  // remove/add as appropriate (grow back to 8 ints on version change!)
     END_BYTESWAP_DATADESC()
 
         BEGIN_BYTESWAP_DATADESC( mstudioevent_t )

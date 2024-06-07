@@ -167,7 +167,8 @@ class CDebugOverlayPanel : public IDebugOverlayPanel
     if ( debugOverlayPanel )
     {
       debugOverlayPanel->SetParent( ( vgui::Panel * )NULL );
-      delete debugOverlayPanel;
+      debugOverlayPanel->MarkForDeletion();
+      debugOverlayPanel = NULL;
     }
   }
 };

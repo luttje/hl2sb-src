@@ -1359,7 +1359,7 @@ class C_BaseEntity : public IClientEntity
 
  public:
   // Accessors for above
-  static int GetPredictionRandomSeed( void );
+  static int GetPredictionRandomSeed( bool bUseUnSyncedServerPlatTime = false );
   static void SetPredictionRandomSeed( const CUserCmd *cmd );
   static C_BasePlayer *GetPredictionPlayer( void );
   static void SetPredictionPlayer( C_BasePlayer *player );
@@ -1529,6 +1529,11 @@ class C_BaseEntity : public IClientEntity
     return false;
   }
 
+  bool IsCombatCharacter()
+  {
+    return MyCombatCharacterPointer() == NULL ? false : true;
+  }
+
  protected:
   int m_nFXComputeFrame;
 
@@ -1579,6 +1584,8 @@ class C_BaseEntity : public IClientEntity
   // This can be used to setup the entity as a client-only entity. It gets an entity handle,
   // a render handle, and is put into the spatial partition.
   bool InitializeAsClientEntityByIndex( int iIndex, RenderGroup_t renderGroup );
+
+  void TrackAngRotation( bool bTrack );
 
  private:
   friend void OnRenderStart();
@@ -1811,8 +1818,10 @@ class C_BaseEntity : public IClientEntity
   float *GetRenderClipPlane( void );  // Rendering clip plane, should be 4 floats, return value of NULL indicates a disabled render clip plane
 
 #if defined( LUA_SDK )
-  // Andrew; This is used to determine an entity's reference in Lua's LUA_REGISTRYINDEX.
-  // I'd rather do this than create a struct and pass that to each bounded function, plus it'll save some perf for massive executions, like Think funcs.
+                                      // Andrew; This is used to determine an entity's reference in Lua's
+  // LUA_REGISTRYINDEX. I'd rather do this than create a struct and pass
+  // that to each bounded function, plus it'll save some perf for massive
+  // executions, like Think funcs.
   int m_nTableReference;
   // Henry; There's an IsPlayer and IsWorld and such, why not an IsWeapon?
   virtual bool IsWeapon( void ) const

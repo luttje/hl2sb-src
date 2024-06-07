@@ -22,10 +22,6 @@
 #include "info_darknessmode_lightsource.h"
 #endif
 
-#ifdef HL2SB
-#include "hl2mp_gamerules.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -769,11 +765,7 @@ void CAI_FollowBehavior::GatherConditions( void )
 
 #ifdef HL2_EPISODIC
   // Let followers know if the player is lit in the darkness
-#ifndef HL2SB
   if ( GetFollowTarget()->IsPlayer() && HL2GameRules()->IsAlyxInDarknessMode() )
-#else
-  if ( GetFollowTarget()->IsPlayer() && HL2MPRules()->IsAlyxInDarknessMode() )
-#endif
   {
     if ( LookerCouldSeeTargetInDarkness( GetOuter(), GetFollowTarget() ) )
     {
@@ -857,11 +849,7 @@ bool CAI_FollowBehavior::ShouldMoveToFollowTarget()
     return false;
 
 #ifdef HL2_EPISODIC
-#ifndef HL2SB
   if ( HL2GameRules()->IsAlyxInDarknessMode() )
-#else
-  if ( HL2MPRules()->IsAlyxInDarknessMode() )
-#endif
   {
     // If we're in darkness mode, the player needs to be lit by
     // darkness, but we don't need line of sight to him.
@@ -1979,11 +1967,7 @@ void CAI_FollowBehavior::BuildScheduleTestBits()
 
 #ifdef HL2_EPISODIC
     // In Alyx darkness mode, break on the player turning their flashlight off
-#ifndef HL2SB
     if ( HL2GameRules()->IsAlyxInDarknessMode() )
-#else
-    if ( HL2MPRules()->IsAlyxInDarknessMode() )
-#endif
     {
       if ( IsCurSchedule( SCHED_FOLLOW, false ) || IsCurSchedule( SCHED_MOVE_TO_FACE_FOLLOW_TARGET, false ) ||
            IsCurSchedule( SCHED_FACE_FOLLOW_TARGET, false ) )
@@ -2144,16 +2128,6 @@ void CAI_FollowGoal::EnableGoal( CAI_BaseNPC *pAI )
     return;
 
   CBaseEntity *pGoalEntity = GetGoalEntity();
-#ifdef HL2SB
-  if ( !pGoalEntity )
-  {
-    if ( pAI->IRelationType( UTIL_GetNearestPlayer( pAI->GetAbsOrigin() ) ) == D_LI )
-    {
-      pGoalEntity = UTIL_GetNearestPlayer( pAI->GetAbsOrigin() );
-      SetGoalEntity( pGoalEntity );
-    }
-  }
-#else
   if ( !pGoalEntity && AI_IsSinglePlayer() )
   {
     if ( pAI->IRelationType( UTIL_GetLocalPlayer() ) == D_LI )
@@ -2162,7 +2136,6 @@ void CAI_FollowGoal::EnableGoal( CAI_BaseNPC *pAI )
       SetGoalEntity( pGoalEntity );
     }
   }
-#endif
 
   if ( pGoalEntity )
     pBehavior->SetFollowGoal( this );

@@ -70,7 +70,9 @@ class PropertyDialog : public Frame
   MESSAGE_FUNC( OnApplyButtonEnable, "ApplyButtonEnable" );
   void EnableApplyButton( bool bEnable );
 
+#ifndef LUA_SDK
  private:
+#endif
   PropertySheet *_propertySheet;
   Button *_okButton;
   Button *_cancelButton;

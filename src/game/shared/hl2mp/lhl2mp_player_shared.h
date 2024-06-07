@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:
 //
@@ -17,11 +17,15 @@
 
 /* type for CHL2MP_Player functions */
 typedef CHL2MP_Player lua_CHL2MP_Player;
+// #ifdef CLIENT_DLL
+// typedef C_HL2MP_Player lua_CHL2MP_Player;
+// #else
+// typedef CHL2MP_Player lua_CHL2MP_Player;
+// #endif
 
 /*
 ** access functions (stack -> C)
 */
-
 LUA_API lua_CHL2MP_Player *( lua_tohl2mpplayer )( lua_State *L, int idx );
 
 /*

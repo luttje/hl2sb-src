@@ -60,9 +60,9 @@ void CTeamplayRules::Precache( void )
     pTeam->Precache();
   }
 }
-
 #endif
-#ifdef LUA_SDK
+
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
@@ -102,49 +102,9 @@ void CTeamplayRules::Think( void )
   }
 #endif
 }
-#else
-#ifndef CLIENT_DLL
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void CTeamplayRules::Think( void )
-{
-  BaseClass::Think();
-
-  ///// Check game rules /////
-
-  if ( g_fGameOver )  // someone else quit the game already
-  {
-    BaseClass::Think();
-    return;
-  }
-
-  float flTimeLimit = mp_timelimit.GetFloat() * 60;
-
-  if ( flTimeLimit != 0 && gpGlobals->curtime >= flTimeLimit )
-  {
-    ChangeLevel();
-    return;
-  }
-
-  float flFragLimit = fraglimit.GetFloat();
-  if ( flFragLimit )
-  {
-    // check if any team is over the frag limit
-    for ( int i = 0; i < num_teams; i++ )
-    {
-      if ( team_scores[i] >= flFragLimit )
-      {
-        ChangeLevel();
-        return;
-      }
-    }
-  }
-}
 #endif
-#endif
-#ifndef CLIENT_DLL
 
+#ifndef CLIENT_DLL
 //=========================================================
 // ClientCommand
 // the user has typed a command which is unrecognized by everything else;
@@ -174,7 +134,9 @@ const char *CTeamplayRules::SetDefaultPlayerTeam( CBasePlayer *pPlayer )
 {
   // copy out the team name from the model
   int clientIndex = pPlayer->entindex();
-  const char *team = ( !pPlayer->IsNetClient() ) ? "default" : engine->GetClientConVarValue( clientIndex, "cl_team" );
+  const char *team = ( !pPlayer->IsNetClient() ) ? "default"
+                                                 : engine->GetClientConVarValue(
+                                                       clientIndex, "cl_team" );
 
   /* TODO
 
@@ -183,19 +145,20 @@ const char *CTeamplayRules::SetDefaultPlayerTeam( CBasePlayer *pPlayer )
   RecountTeams();
 
   // update the current player of the team he is joining
-  if ( (pPlayer->TeamName())[0] == '\0' || !IsValidTeam( pPlayer->TeamName() ) || defaultteam.GetFloat() )
+  if ( (pPlayer->TeamName())[0] == '\0' || !IsValidTeam( pPlayer->TeamName() )
+  || defaultteam.GetFloat() )
   {
-    const char *pTeamName = NULL;
+          const char *pTeamName = NULL;
 
-    if ( defaultteam.GetFloat() )
-    {
-      pTeamName = team_names[0];
-    }
-    else
-    {
-      pTeamName = TeamWithFewestPlayers();
-    }
-    pPlayer->SetTeamName( pTeamName );
+          if ( defaultteam.GetFloat() )
+          {
+                  pTeamName = team_names[0];
+          }
+          else
+          {
+                  pTeamName = TeamWithFewestPlayers();
+          }
+          pPlayer->SetTeamName( pTeamName );
   } */
 
   return team;  // pPlayer->TeamName();
@@ -212,28 +175,33 @@ void CTeamplayRules::InitHUD( CBasePlayer *pPlayer )
   RecountTeams();
 
   /* TODO this has to be rewritten, maybe add a new USERINFO cvar "team"
-  const char *team = engine->GetClientConVarValue( pPlayer->entindex(), "cl_team" );
+  const char *team = engine->GetClientConVarValue( pPlayer->entindex(),
+  "cl_team" );
 
   // update the current player of the team he is joining
   char text[1024];
   if ( !strcmp( mdls, pPlayer->TeamName() ) )
   {
-    Q_snprintf( text,sizeof(text), "You are on team \'%s\'\n", pPlayer->TeamName() );
+          Q_snprintf( text,sizeof(text), "You are on team \'%s\'\n",
+  pPlayer->TeamName() );
   }
   else
   {
-    Q_snprintf( text,sizeof(text), "You were assigned to team %s\n", pPlayer->TeamName() );
+          Q_snprintf( text,sizeof(text), "You were assigned to team %s\n",
+  pPlayer->TeamName() );
   }
 
   ChangePlayerTeam( pPlayer, pPlayer->TeamName(), false, false );
   if ( Q_strlen( pPlayer->TeamName() ) > 0 )
   {
-    UTIL_SayText( text, pPlayer );
+          UTIL_SayText( text, pPlayer );
   }
   RecountTeams(); */
 }
 
-void CTeamplayRules::ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTeamName, bool bKill, bool bGib )
+void CTeamplayRules::ChangePlayerTeam( CBasePlayer *pPlayer,
+                                       const char *pTeamName, bool bKill,
+                                       bool bGib )
 {
   int damageFlags = DMG_GENERIC;
   // int clientIndex = pPlayer->entindex();
@@ -280,44 +248,48 @@ void CTeamplayRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 {
   /* TODO: handle skin, model & team changes
 
-    char text[1024];
+  char text[1024];
 
   // skin/color/model changes
-  int iTeam = Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "cl_team" ) );
-  int iClass = Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(), "cl_class" ) );
+  int iTeam = Q_atoi( engine->GetClientConVarValue( pPlayer->entindex(),
+  "cl_team" ) ); int iClass = Q_atoi( engine->GetClientConVarValue(
+  pPlayer->entindex(), "cl_class" ) );
 
   if ( defaultteam.GetBool() )
   {
-    // int clientIndex = pPlayer->entindex();
+          // int clientIndex = pPlayer->entindex();
 
-    // engine->SetClientKeyValue( clientIndex, "model", pPlayer->TeamName() );
-    // engine->SetClientKeyValue( clientIndex, "team", pPlayer->TeamName() );
-    UTIL_SayText( "Not allowed to change teams in this game!\n", pPlayer );
-    return;
+          // engine->SetClientKeyValue( clientIndex, "model",
+  pPlayer->TeamName() );
+          // engine->SetClientKeyValue( clientIndex, "team",
+  pPlayer->TeamName() ); UTIL_SayText( "Not allowed to change teams in this
+  game!\n", pPlayer ); return;
   }
 
   if ( defaultteam.GetFloat() || !IsValidTeam( mdls ) )
   {
-    // int clientIndex = pPlayer->entindex();
+          // int clientIndex = pPlayer->entindex();
 
-    // engine->SetClientKeyValue( clientIndex, "model", pPlayer->TeamName() );
-    Q_snprintf( text,sizeof(text), "Can't change team to \'%s\'\n", mdls );
-    UTIL_SayText( text, pPlayer );
-    Q_snprintf( text,sizeof(text), "Server limits teams to \'%s\'\n", m_szTeamList );
-    UTIL_SayText( text, pPlayer );
-    return;
+          // engine->SetClientKeyValue( clientIndex, "model",
+  pPlayer->TeamName() ); Q_snprintf( text,sizeof(text), "Can't change team to
+  \'%s\'\n", mdls ); UTIL_SayText( text, pPlayer ); Q_snprintf(
+  text,sizeof(text), "Server limits teams to \'%s\'\n", m_szTeamList );
+          UTIL_SayText( text, pPlayer );
+          return;
   }
 
   ChangePlayerTeam( pPlayer, mdls, true, true );
   // recound stuff
   RecountTeams(); */
 
-  const char *pszName = engine->GetClientConVarValue( pPlayer->entindex(), "name" );
+  const char *pszName =
+      engine->GetClientConVarValue( pPlayer->entindex(), "name" );
 
   const char *pszOldName = pPlayer->GetPlayerName();
 
-  // msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
-  // Note, not using FStrEq so that this is case sensitive
+  // msg everyone if someone changes their name,  and it isn't the first time
+  // (changing no name to current name) Note, not using FStrEq so that this is
+  // case sensitive
   if ( pszOldName[0] != 0 && Q_strcmp( pszOldName, pszName ) )
   {
     IGameEvent *event = gameeventmanager->CreateEvent( "player_changename" );
@@ -333,7 +305,8 @@ void CTeamplayRules::ClientSettingsChanged( CBasePlayer *pPlayer )
   }
 
   // NVNT see if this user is still or has began using a haptic device
-  const char *pszHH = engine->GetClientConVarValue( pPlayer->entindex(), "hap_HasDevice" );
+  const char *pszHH =
+      engine->GetClientConVarValue( pPlayer->entindex(), "hap_HasDevice" );
   if ( pszHH )
   {
     int iHH = atoi( pszHH );
@@ -344,7 +317,8 @@ void CTeamplayRules::ClientSettingsChanged( CBasePlayer *pPlayer )
 //=========================================================
 // Deathnotice.
 //=========================================================
-void CTeamplayRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &info )
+void CTeamplayRules::DeathNotice( CBasePlayer *pVictim,
+                                  const CTakeDamageInfo &info )
 {
   if ( m_DisableDeathMessages )
     return;
@@ -356,14 +330,17 @@ void CTeamplayRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &i
 
     if ( pk )
     {
-      if ( ( pk != pVictim ) && ( PlayerRelationship( pVictim, pk ) == GR_TEAMMATE ) )
+      if ( ( pk != pVictim ) &&
+           ( PlayerRelationship( pVictim, pk ) == GR_TEAMMATE ) )
       {
-        IGameEvent *event = gameeventmanager->CreateEvent( "player_death" );
+        IGameEvent *event =
+            gameeventmanager->CreateEvent( "player_death" );
         if ( event )
         {
           event->SetInt( "killer", pk->GetUserID() );
           event->SetInt( "victim", pVictim->GetUserID() );
-          event->SetInt( "priority", 7 );  // HLTV event priority, not transmitted
+          event->SetInt( "priority",
+                         7 );  // HLTV event priority, not transmitted
 
           gameeventmanager->FireEvent( event );
         }
@@ -377,7 +354,8 @@ void CTeamplayRules::DeathNotice( CBasePlayer *pVictim, const CTakeDamageInfo &i
 
 //=========================================================
 //=========================================================
-void CTeamplayRules::PlayerKilled( CBasePlayer *pVictim, const CTakeDamageInfo &info )
+void CTeamplayRules::PlayerKilled( CBasePlayer *pVictim,
+                                   const CTakeDamageInfo &info )
 {
   if ( !m_DisableDeathPenalty )
   {
@@ -394,14 +372,18 @@ bool CTeamplayRules::IsTeamplay( void )
   return true;
 }
 
-bool CTeamplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker, const CTakeDamageInfo &info )
+bool CTeamplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer,
+                                           CBaseEntity *pAttacker,
+                                           const CTakeDamageInfo &info )
 {
-  if ( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE && !info.IsForceFriendlyFire() )
+  if ( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE &&
+       !info.IsForceFriendlyFire() )
   {
     // my teammate hit me.
     if ( ( friendlyfire.GetInt() == 0 ) && ( pAttacker != pPlayer ) )
     {
-      // friendly fire is off, and this hit came from someone other than myself,  then don't get hurt
+      // friendly fire is off, and this hit came from someone other than
+      // myself,  then don't get hurt
       return false;
     }
   }
@@ -411,14 +393,16 @@ bool CTeamplayRules::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pA
 
 //=========================================================
 //=========================================================
-int CTeamplayRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget )
+int CTeamplayRules::PlayerRelationship( CBaseEntity *pPlayer,
+                                        CBaseEntity *pTarget )
 {
   // half life multiplay has a simple concept of Player Relationships.
   // you are either on another player's team, or you are not.
   if ( !pPlayer || !pTarget || !pTarget->IsPlayer() )
     return GR_NOTTEAMMATE;
 
-  if ( ( *GetTeamID( pPlayer ) != '\0' ) && ( *GetTeamID( pTarget ) != '\0' ) && !stricmp( GetTeamID( pPlayer ), GetTeamID( pTarget ) ) )
+  if ( ( *GetTeamID( pPlayer ) != '\0' ) && ( *GetTeamID( pTarget ) != '\0' ) &&
+       !stricmp( GetTeamID( pPlayer ), GetTeamID( pTarget ) ) )
   {
     return GR_TEAMMATE;
   }
@@ -432,7 +416,8 @@ int CTeamplayRules::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarg
 //			*pSpeaker -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CTeamplayRules::PlayerCanHearChat( CBasePlayer *pListener, CBasePlayer *pSpeaker )
+bool CTeamplayRules::PlayerCanHearChat( CBasePlayer *pListener,
+                                        CBasePlayer *pSpeaker )
 {
   return ( PlayerRelationship( pListener, pSpeaker ) == GR_TEAMMATE );
 }
@@ -454,7 +439,8 @@ bool CTeamplayRules::ShouldAutoAim( CBasePlayer *pPlayer, edict_t *target )
 
 //=========================================================
 //=========================================================
-int CTeamplayRules::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled )
+int CTeamplayRules::IPointsForKill( CBasePlayer *pAttacker,
+                                    CBasePlayer *pKilled )
 {
   if ( !pKilled )
     return 0;
@@ -462,7 +448,8 @@ int CTeamplayRules::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled
   if ( !pAttacker )
     return 1;
 
-  if ( pAttacker != pKilled && PlayerRelationship( pAttacker, pKilled ) == GR_TEAMMATE )
+  if ( pAttacker != pKilled &&
+       PlayerRelationship( pAttacker, pKilled ) == GR_TEAMMATE )
     return -1;
 
   return 1;
@@ -564,7 +551,8 @@ void CTeamplayRules::RecountTeams( void )
   {
     if ( GetTeamIndex( pName ) < 0 )
     {
-      Q_strncpy( team_names[num_teams], pName, sizeof( team_names[num_teams] ) );
+      Q_strncpy( team_names[num_teams], pName,
+                 sizeof( team_names[num_teams] ) );
       num_teams++;
     }
     pName = strtok( NULL, ";" );

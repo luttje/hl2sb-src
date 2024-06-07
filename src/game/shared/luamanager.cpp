@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Contains the implementation of Lua for scripting.
 //
@@ -36,13 +36,13 @@ static void tag_error( lua_State *L, int narg, int tag )
 LUALIB_API int luaL_checkboolean( lua_State *L, int narg )
 {
   int d = lua_toboolean( L, narg );
-  if ( d == 0 && !lua_isboolean( L, narg ) ) /* avoid extra test when d is not 0 */
+  if ( d == 0 &&
+       !lua_isboolean( L, narg ) ) /* avoid extra test when d is not 0 */
     tag_error( L, narg, LUA_TBOOLEAN );
   return d;
 }
 
-LUALIB_API int luaL_optboolean( lua_State *L, int narg,
-                                int def )
+LUALIB_API int luaL_optboolean( lua_State *L, int narg, int def )
 {
   return luaL_opt( L, luaL_checkboolean, narg, def );
 }
@@ -69,8 +69,11 @@ static int luasrc_print( lua_State *L )
     lua_call( L, 1, 1 );
     s = lua_tostring( L, -1 ); /* get result */
     if ( s == NULL )
-      return luaL_error( L, LUA_QL( "tostring" ) " must return a string to " LUA_QL( "print" ) );
-    if ( i > 1 ) Msg( "\t" );
+      return luaL_error(
+          L,
+          LUA_QL( "tostring" ) " must return a string to " LUA_QL( "print" ) );
+    if ( i > 1 )
+      Msg( "\t" );
     Msg( s );
     lua_pop( L, 1 ); /* pop result */
   }
@@ -107,13 +110,65 @@ static int luasrc_include( lua_State *L )
   Q_StrRight( ar2.source, iLength - 1, source, sizeof( source ) );
   Q_StripFilename( source );
   char filename[MAX_PATH];
-  Q_snprintf( filename, sizeof( filename ), "%s\\%s", source, luaL_checkstring( L, 1 ) );
-  luasrc_dofile( L, filename );
+  Q_snprintf( filename, sizeof( filename ), "%s\\%s", source,
+              luaL_checkstring( L, 1 ) );
+
+  int returnedValueCount = luasrc_dofile_leave_stack( L, filename );
+
+  if ( returnedValueCount == -1 )
+  {
+    // An error occurred executing the script
+    return 0;
+  }
+
+  return returnedValueCount;
+}
+
+// Prints blue text on the server, yellow text on the client
+static int luasrc_InternalMsgClient( lua_State *L )
+{
+  const char *msg = luaL_checkstring( L, 1 );
+
+  ConColorMsg( Color( 255, 255, 0, 255 ), "%s", msg );
+
+  return 0;
+}
+static int luasrc_InternalMsgServer( lua_State *L )
+{
+  const char *msg = luaL_checkstring( L, 1 );
+
+  ConDColorMsg( Color( 0, 0, 255, 255 ), "%s", msg );
+
+  return 0;
+}
+static int luasrc_Msg( lua_State *L )
+{
+#ifdef CLIENT_DLL
+  luasrc_InternalMsgClient( L );
+#else
+  luasrc_InternalMsgServer( L );
+#endif
+
+  return 0;
+}
+
+static int luasrc_MsgN( lua_State *L )
+{
+#ifdef CLIENT_DLL
+  luasrc_InternalMsgClient( L );
+#else
+  luasrc_InternalMsgServer( L );
+#endif
+
+  Msg( "\n" );
+
   return 0;
 }
 
 static const luaL_Reg base_funcs[] = {
     { "print", luasrc_print },
+    { "Msg", luasrc_Msg },
+    { "MsgN", luasrc_MsgN },
     { "type", luasrc_type },
     { "include", luasrc_include },
     { NULL, NULL } };
@@ -131,10 +186,10 @@ static void base_open( lua_State *L )
   lua_setglobal( L, "_E" );
 #ifdef CLIENT_DLL
   lua_pushboolean( L, 1 );
-  lua_setglobal( L, "_CLIENT" ); /* set global _CLIENT */
+  lua_setglobal( L, "_CLIENT" );
 #else
   lua_pushboolean( L, 1 );
-  lua_setglobal( L, "_GAME" ); /* set global _GAME */
+  lua_setglobal( L, "_GAME" );
 #endif
 }
 
@@ -169,7 +224,8 @@ void luasrc_setmodulepaths( lua_State *L )
   lua_getfield( L, -1, "path" );
   // MAX_PATH + package.path:len();
   char lookupPath[MAX_PATH + 197];
-  Q_snprintf( lookupPath, sizeof( lookupPath ), "%s\\%s;%s", gamePath, LUA_PATH_MODULES "\\?.lua", luaL_checkstring( L, -1 ) );
+  Q_snprintf( lookupPath, sizeof( lookupPath ), "%s\\%s;%s", gamePath,
+              LUA_PATH_MODULES "\\?.lua", luaL_checkstring( L, -1 ) );
   Q_strlower( lookupPath );
   Q_FixSlashes( lookupPath );
   lua_pop( L, 1 ); /* pop result */
@@ -186,20 +242,25 @@ void luasrc_init_gameui( void )
 
   luaL_openlibs( LGameUI );
   base_open( LGameUI );
+
   lua_pushboolean( LGameUI, 1 );
   lua_setglobal( LGameUI, "_GAMEUI" ); /* set global _GAMEUI */
 
   luasrc_setmodulepaths( LGameUI );
 
-  luaopen_ConCommand( LGameUI );
-  luaopen_dbg( LGameUI );
-  luaopen_engine( LGameUI );
-  luaopen_enginevgui( LGameUI );
-  luaopen_FCVAR( LGameUI );
-  luaopen_KeyValues( LGameUI );
-  luaopen_Panel( LGameUI );
-  luaopen_surface( LGameUI );
-  luaopen_vgui( LGameUI );
+  int leftOnStack = 0;
+  leftOnStack += luaopen_ConCommand( LGameUI );
+  leftOnStack += luaopen_dbg( LGameUI );
+  leftOnStack += luaopen_engine( LGameUI );
+  leftOnStack += luaopen_enginevgui( LGameUI );
+  leftOnStack += luaopen_FCVAR( LGameUI );
+  leftOnStack += luaopen_KeyValues( LGameUI );
+  leftOnStack += luaopen_Panel( LGameUI );
+  leftOnStack += luaopen_surface( LGameUI );
+  leftOnStack += luaopen_vgui( LGameUI );
+  lua_pop( LGameUI, leftOnStack );
+
+  Msg( "Lua Menu initialized (" LUA_VERSION ")\n" );
 }
 
 void luasrc_shutdown_gameui( void )
@@ -257,33 +318,82 @@ void luasrc_shutdown( void )
 LUA_API int luasrc_dostring( lua_State *L, const char *string )
 {
   int iError = luaL_dostring( L, string );
+
   if ( iError != 0 )
   {
     Warning( "%s\n", lua_tostring( L, -1 ) );
     lua_pop( L, 1 );
   }
+
   return iError;
 }
 
+/// <summary>
+/// Executes the given file, clearing the stack of values that
+/// were returned by the file afterwards.
+/// </summary>
+/// <param name="L"></param>
+/// <param name="string"></param>
+/// <returns></returns>
 LUA_API int luasrc_dofile( lua_State *L, const char *filename )
 {
+  int stackBefore = lua_gettop( L );
   int iError = luaL_dofile( L, filename );
+
   if ( iError != 0 )
   {
     Warning( "%s\n", lua_tostring( L, -1 ) );
     lua_pop( L, 1 );
   }
+
+  lua_settop( L, stackBefore );
+
   return iError;
+}
+
+/// <summary>
+/// Executes the given file, not resetting the stack afterwards.
+/// It returns the amount of new values on the stack (which the file
+/// may have returned).
+/// </summary>
+/// <param name="L"></param>
+/// <param name="string"></param>
+/// <returns>The amount of new values on the stack or -1 on error</returns>
+LUA_API int luasrc_dofile_leave_stack( lua_State *L, const char *filename )
+{
+  int stackBefore = lua_gettop( L );
+  int iError = luaL_dofile( L, filename );
+
+  if ( iError != 0 )
+  {
+    Warning( "%s\n", lua_tostring( L, -1 ) );
+    lua_pop( L, 1 );
+    return -1;
+  }
+
+  return lua_gettop( L ) - stackBefore;
+}
+
+bool luasrc_checkfolder( const char *path )
+{
+  return g_pFullFileSystem->IsDirectory( path, "MOD" );
 }
 
 LUA_API void luasrc_dofolder( lua_State *L, const char *path )
 {
+  if ( !luasrc_checkfolder( path ) )
+  {
+    Warning( "[Lua] (dofolder) Folder does not exist: %s\n", path );
+    return;
+  }
+
   FileFindHandle_t fh;
 
   char searchPath[512];
   Q_snprintf( searchPath, sizeof( searchPath ), "%s\\*.lua", path );
 
   char const *fn = g_pFullFileSystem->FindFirstEx( searchPath, "MOD", &fh );
+
   while ( fn )
   {
     if ( fn[0] != '.' )
@@ -296,7 +406,8 @@ LUA_API void luasrc_dofolder( lua_State *L, const char *path )
         char relative[512];
         char loadname[512];
         Q_snprintf( relative, sizeof( relative ), "%s\\%s", path, fn );
-        filesystem->RelativePathToFullPath( relative, "MOD", loadname, sizeof( loadname ) );
+        filesystem->RelativePathToFullPath( relative, "MOD", loadname,
+                                            sizeof( loadname ) );
         luasrc_dofile( L, loadname );
       }
     }
@@ -375,16 +486,22 @@ void luasrc_LoadEntities( const char *path )
       if ( g_pFullFileSystem->FindIsDirectory( fh ) )
       {
 #ifdef CLIENT_DLL
-        Q_snprintf( filename, sizeof( filename ), "%s" LUA_PATH_ENTITIES "\\%s\\cl_init.lua", path, className );
+        Q_snprintf( filename, sizeof( filename ),
+                    "%s" LUA_PATH_ENTITIES "\\%s\\cl_init.lua", path,
+                    className );
 #else
-        Q_snprintf( filename, sizeof( filename ), "%s" LUA_PATH_ENTITIES "\\%s\\init.lua", path, className );
+        Q_snprintf( filename, sizeof( filename ),
+                    "%s" LUA_PATH_ENTITIES "\\%s\\init.lua", path,
+                    className );
 #endif
         if ( filesystem->FileExists( filename, "MOD" ) )
         {
-          filesystem->RelativePathToFullPath( filename, "MOD", fullpath, sizeof( fullpath ) );
+          filesystem->RelativePathToFullPath(
+              filename, "MOD", fullpath, sizeof( fullpath ) );
           lua_newtable( L );
           char entDir[MAX_PATH];
-          Q_snprintf( entDir, sizeof( entDir ), "entities\\%s", className );
+          Q_snprintf( entDir, sizeof( entDir ), "entities\\%s",
+                      className );
           lua_pushstring( L, entDir );
           lua_setfield( L, -2, "__folder" );
           lua_pushstring( L, LUA_BASE_ENTITY_CLASS );
@@ -410,11 +527,14 @@ void luasrc_LoadEntities( const char *path )
                   lua_getfield( L, -1, "__factory" );
                   if ( lua_isstring( L, -1 ) )
                   {
-                    const char *pszClassname = lua_tostring( L, -1 );
-                    if ( Q_strcmp( pszClassname, "CBaseAnimating" ) == 0 )
+                    const char *pszClassname =
+                        lua_tostring( L, -1 );
+                    if ( Q_strcmp( pszClassname,
+                                   "CBaseAnimating" ) == 0 )
                       RegisterScriptedEntity( className );
 #ifndef CLIENT_DLL
-                    else if ( Q_strcmp( pszClassname, "CBaseTrigger" ) == 0 )
+                    else if ( Q_strcmp( pszClassname,
+                                        "CBaseTrigger" ) == 0 )
                       RegisterScriptedTrigger( className );
 #endif
                   }
@@ -468,58 +588,80 @@ void luasrc_LoadWeapons( const char *path )
   {
     Q_strcpy( className, fn );
     Q_strlower( className );
-    if ( fn[0] != '.' )
+
+    if ( fn[0] == '.' )
     {
-      if ( g_pFullFileSystem->FindIsDirectory( fh ) )
-      {
+      fn = g_pFullFileSystem->FindNext( fh );
+      continue;
+    }
+
+    if ( !g_pFullFileSystem->FindIsDirectory( fh ) )
+    {
+      fn = g_pFullFileSystem->FindNext( fh );
+      continue;
+    }
+
 #ifdef CLIENT_DLL
-        Q_snprintf( filename, sizeof( filename ), "%s" LUA_PATH_WEAPONS "\\%s\\cl_init.lua", path, className );
+    Q_snprintf( filename, sizeof( filename ),
+                "%s" LUA_PATH_WEAPONS "\\%s\\cl_init.lua", path,
+                className );
 #else
-        Q_snprintf( filename, sizeof( filename ), "%s" LUA_PATH_WEAPONS "\\%s\\init.lua", path, className );
+    Q_snprintf( filename, sizeof( filename ),
+                "%s" LUA_PATH_WEAPONS "\\%s\\init.lua", path,
+                className );
 #endif
-        if ( filesystem->FileExists( filename, "MOD" ) )
+    if ( !filesystem->FileExists( filename, "MOD" ) )
+    {
+      fn = g_pFullFileSystem->FindNext( fh );
+      continue;
+    }
+
+    filesystem->RelativePathToFullPath(
+        filename, "MOD", fullpath, sizeof( fullpath ) );
+
+    lua_newtable( L );
+    char entDir[MAX_PATH];
+    Q_snprintf( entDir, sizeof( entDir ), "weapons\\%s",
+                className );
+
+    lua_pushstring( L, entDir );
+    lua_setfield( L, -2, "__folder" );
+    lua_pushstring( L, LUA_BASE_WEAPON );
+    lua_setfield( L, -2, "__base" );
+    lua_setglobal( L, "SWEP" );
+    if ( luasrc_dofile( L, fullpath ) == 0 )
+    {
+      lua_getglobal( L, "weapon" );
+
+      if ( lua_istable( L, -1 ) )
+      {
+        lua_getfield( L, -1, "register" );
+
+        if ( lua_isfunction( L, -1 ) )
         {
-          filesystem->RelativePathToFullPath( filename, "MOD", fullpath, sizeof( fullpath ) );
-          lua_newtable( L );
-          char entDir[MAX_PATH];
-          Q_snprintf( entDir, sizeof( entDir ), "weapons\\%s", className );
-          lua_pushstring( L, entDir );
-          lua_setfield( L, -2, "__folder" );
-          lua_pushstring( L, LUA_BASE_WEAPON );
-          lua_setfield( L, -2, "__base" );
-          lua_setglobal( L, "SWEP" );
-          if ( luasrc_dofile( L, fullpath ) == 0 )
-          {
-            lua_getglobal( L, "weapon" );
-            if ( lua_istable( L, -1 ) )
-            {
-              lua_getfield( L, -1, "register" );
-              if ( lua_isfunction( L, -1 ) )
-              {
-                lua_remove( L, -2 );
-                lua_getglobal( L, "SWEP" );
-                lua_pushstring( L, className );
-                luasrc_pcall( L, 2, 0, 0 );
-                RegisterScriptedWeapon( className );
-              }
-              else
-              {
-                lua_pop( L, 2 );
-              }
-            }
-            else
-            {
-              lua_pop( L, 1 );
-            }
-          }
-          lua_pushnil( L );
-          lua_setglobal( L, "SWEP" );
+          lua_remove( L, -2 );
+          lua_getglobal( L, "SWEP" );
+          lua_pushstring( L, className );
+          luasrc_pcall( L, 2, 0, 0 );
+          RegisterScriptedWeapon( className );
         }
+        else
+        {
+          lua_pop( L, 2 );
+        }
+      }
+      else
+      {
+        lua_pop( L, 1 );
       }
     }
 
+    lua_pushnil( L );
+    lua_setglobal( L, "SWEP" );
+
     fn = g_pFullFileSystem->FindNext( fh );
   }
+
   g_pFullFileSystem->FindClose( fh );
 }
 
@@ -535,13 +677,16 @@ bool luasrc_LoadGamemode( const char *gamemode )
   char filename[MAX_PATH];
   char fullpath[MAX_PATH];
 #ifdef CLIENT_DLL
-  Q_snprintf( filename, sizeof( filename ), "%s\\gamemode\\cl_init.lua", gamemodepath );
+  Q_snprintf( filename, sizeof( filename ), "%s\\gamemode\\cl_init.lua",
+              gamemodepath );
 #else
-  Q_snprintf( filename, sizeof( filename ), "%s\\gamemode\\init.lua", gamemodepath );
+  Q_snprintf( filename, sizeof( filename ), "%s\\gamemode\\init.lua",
+              gamemodepath );
 #endif
   if ( filesystem->FileExists( filename, "MOD" ) )
   {
-    filesystem->RelativePathToFullPath( filename, "MOD", fullpath, sizeof( fullpath ) );
+    filesystem->RelativePathToFullPath( filename, "MOD", fullpath,
+                                        sizeof( fullpath ) );
     if ( luasrc_dofile( L, fullpath ) == 0 )
     {
       lua_getglobal( L, "gamemode" );
@@ -550,7 +695,8 @@ bool luasrc_LoadGamemode( const char *gamemode )
       lua_getglobal( L, "GM" );
       lua_pushstring( L, gamemode );
       lua_getfield( L, -2, "__base" );
-      if ( lua_isnoneornil( L, -1 ) && Q_strcmp( gamemode, LUA_BASE_GAMEMODE ) != 0 )
+      if ( lua_isnoneornil( L, -1 ) &&
+           Q_strcmp( gamemode, LUA_BASE_GAMEMODE ) != 0 )
       {
         lua_pop( L, 1 );
         lua_pushstring( L, LUA_BASE_GAMEMODE );
@@ -580,39 +726,53 @@ bool luasrc_LoadGamemode( const char *gamemode )
 bool luasrc_SetGamemode( const char *gamemode )
 {
   lua_getglobal( L, "gamemode" );
-  if ( lua_istable( L, -1 ) )
+
+  if ( !lua_istable( L, -1 ) )
   {
-    lua_getfield( L, -1, "get" );
-    if ( lua_isfunction( L, -1 ) )
-    {
-      lua_remove( L, -2 );
-      lua_pushstring( L, gamemode );
-      luasrc_pcall( L, 1, 1, 0 );
-      lua_setglobal( L, "_GAMEMODE" );
-      Q_snprintf( contentSearchPath, sizeof( contentSearchPath ), "gamemodes\\%s\\content", gamemode );
-      filesystem->AddSearchPath( contentSearchPath, "MOD" );
-      char loadPath[MAX_PATH];
-      Q_snprintf( loadPath, sizeof( loadPath ), "%s\\", contentSearchPath );
-      luasrc_LoadWeapons( loadPath );
-      luasrc_LoadEntities( loadPath );
-      // luasrc_LoadEffects( loadPath );
-      BEGIN_LUA_CALL_HOOK( "Initialize" );
-      END_LUA_CALL_HOOK( 0, 0 );
-      return true;
-    }
-    else
-    {
-      lua_pop( L, 2 );
-      Warning( "ERROR: Failed to set gamemode!\n" );
-      return false;
-    }
-  }
-  else
-  {
-    lua_pop( L, 1 );
+    lua_pop( L, 1 );  // Remove gamemode table
     Warning( "ERROR: Failed to load gamemode module!\n" );
     return false;
   }
+
+  lua_getfield( L, -1, "get" );
+
+  if ( !lua_isfunction( L, -1 ) )
+  {
+    lua_pop( L, 2 );  // Remove gamemode table and Get function
+    Warning( "ERROR: Failed to set gamemode!\n" );
+    return false;
+  }
+
+  lua_remove( L, -2 );              // Remove gamemode table
+  lua_pushstring( L, gamemode );    // Push gamemode name
+  luasrc_pcall( L, 1, 1, 0 );       // Call gamemodes.Get(gamemode)
+  lua_setglobal( L, "_GAMEMODE" );  // Set GAMEMODE to the active gamemode table
+
+  Q_snprintf( contentSearchPath, sizeof( contentSearchPath ),
+              "gamemodes\\%s\\content", gamemode );
+
+  filesystem->AddSearchPath( contentSearchPath, "MOD" );
+
+  char loadPath[MAX_PATH];
+  Q_snprintf( loadPath, sizeof( loadPath ), "%s\\", contentSearchPath );
+
+  luasrc_LoadWeapons( loadPath );
+  luasrc_LoadEntities( loadPath );
+  // luasrc_LoadEffects( loadPath );
+
+  BEGIN_LUA_CALL_HOOK( "Initialize" );
+  END_LUA_CALL_HOOK( 0, 0 );
+
+  return true;
+}
+
+bool luasrc_isrefvalid( lua_State *L, int ref )
+{
+  // ref being 0 indicates we forgot to set `m_nTableReference = LUA_NOREF`
+  // in a constructor somewhere.
+  Assert( ref != 0 );
+
+  return ref != LUA_REFNIL && ref != LUA_NOREF;
 }
 
 #ifdef LUA_SDK
@@ -634,9 +794,9 @@ CON_COMMAND( lua_dostring_cl, "Run a Lua string" )
     lua_getglobal( L, "print" );
     lua_insert( L, 1 );
     if ( lua_pcall( L, lua_gettop( L ) - 1, 0, 0 ) != 0 )
-      Warning( "%s", lua_pushfstring( L,
-                                      "error calling " LUA_QL( "print" ) " (%s)",
-                                      lua_tostring( L, -1 ) ) );
+      Warning( "%s",
+               lua_pushfstring( L, "error calling " LUA_QL( "print" ) " (%s)",
+                                lua_tostring( L, -1 ) ) );
   }
   lua_settop( L, 0 ); /* clear stack */
 }
@@ -661,15 +821,17 @@ CON_COMMAND( lua_dostring, "Run a Lua string" )
     lua_getglobal( L, "print" );
     lua_insert( L, 1 );
     if ( lua_pcall( L, lua_gettop( L ) - 1, 0, 0 ) != 0 )
-      Warning( "%s", lua_pushfstring( L,
-                                      "error calling " LUA_QL( "print" ) " (%s)",
-                                      lua_tostring( L, -1 ) ) );
+      Warning( "%s",
+               lua_pushfstring( L, "error calling " LUA_QL( "print" ) " (%s)",
+                                lua_tostring( L, -1 ) ) );
   }
   lua_settop( L, 0 ); /* clear stack */
 }
 #endif
 
-static int DoFileCompletion( const char *partial, char commands[COMMAND_COMPLETION_MAXITEMS][COMMAND_COMPLETION_ITEM_LENGTH] )
+static int DoFileCompletion( const char *partial,
+                             char commands[COMMAND_COMPLETION_MAXITEMS]
+                                          [COMMAND_COMPLETION_ITEM_LENGTH] )
 {
   int current = 0;
 
@@ -699,11 +861,13 @@ static int DoFileCompletion( const char *partial, char commands[COMMAND_COMPLETI
     if ( fn[0] != '.' )
     {
       char filename[MAX_PATH] = { 0 };
-      Q_snprintf( filename, sizeof( filename ), LUA_ROOT "\\%s\\%s", substring, fn );
+      Q_snprintf( filename, sizeof( filename ), LUA_ROOT "\\%s\\%s",
+                  substring, fn );
       Q_FixSlashes( filename );
       if ( filesystem->FileExists( filename, "MOD" ) )
       {
-        Q_snprintf( commands[current], sizeof( commands[current] ), "%s %s%s", cmdname, substring, fn );
+        Q_snprintf( commands[current], sizeof( commands[current] ),
+                    "%s %s%s", cmdname, substring, fn );
         current++;
       }
     }
@@ -716,7 +880,8 @@ static int DoFileCompletion( const char *partial, char commands[COMMAND_COMPLETI
 }
 
 #ifdef CLIENT_DLL
-CON_COMMAND_F_COMPLETION( lua_dofile_cl, "Load and run a Lua file", 0, DoFileCompletion )
+CON_COMMAND_F_COMPLETION( lua_dofile_cl, "Load and run a Lua file", 0,
+                          DoFileCompletion )
 {
   if ( !g_bLuaInitialized )
     return;
@@ -734,11 +899,13 @@ CON_COMMAND_F_COMPLETION( lua_dofile_cl, "Load and run a Lua file", 0, DoFileCom
   Q_FixSlashes( filename );
   if ( filesystem->FileExists( filename, "MOD" ) )
   {
-    filesystem->RelativePathToFullPath( filename, "MOD", fullpath, sizeof( fullpath ) );
+    filesystem->RelativePathToFullPath( filename, "MOD", fullpath,
+                                        sizeof( fullpath ) );
   }
   else
   {
-    Q_snprintf( fullpath, sizeof( fullpath ), "%s\\" LUA_ROOT "\\%s", engine->GetGameDirectory(), args.ArgS() );
+    Q_snprintf( fullpath, sizeof( fullpath ), "%s\\" LUA_ROOT "\\%s",
+                engine->GetGameDirectory(), args.ArgS() );
     Q_strlower( fullpath );
     Q_FixSlashes( fullpath );
   }
@@ -751,7 +918,8 @@ CON_COMMAND_F_COMPLETION( lua_dofile_cl, "Load and run a Lua file", 0, DoFileCom
   luasrc_dofile( L, fullpath );
 }
 #else
-CON_COMMAND_F_COMPLETION( lua_dofile, "Load and run a Lua file", 0, DoFileCompletion )
+CON_COMMAND_F_COMPLETION( lua_dofile, "Load and run a Lua file", 0,
+                          DoFileCompletion )
 {
   if ( !g_bLuaInitialized )
     return;
@@ -772,15 +940,18 @@ CON_COMMAND_F_COMPLETION( lua_dofile, "Load and run a Lua file", 0, DoFileComple
   Q_FixSlashes( filename );
   if ( filesystem->FileExists( filename, "MOD" ) )
   {
-    filesystem->RelativePathToFullPath( filename, "MOD", fullpath, sizeof( fullpath ) );
+    filesystem->RelativePathToFullPath( filename, "MOD", fullpath,
+                                        sizeof( fullpath ) );
   }
   else
   {
-    // filename is local to game dir for Steam, so we need to prepend game dir for regular file load
+    // filename is local to game dir for Steam, so we need to prepend game
+    // dir for regular file load
     char gamePath[256];
     engine->GetGameDir( gamePath, 256 );
     Q_StripTrailingSlash( gamePath );
-    Q_snprintf( fullpath, sizeof( fullpath ), "%s\\" LUA_ROOT "\\%s", gamePath, args.ArgS() );
+    Q_snprintf( fullpath, sizeof( fullpath ), "%s\\" LUA_ROOT "\\%s", gamePath,
+                args.ArgS() );
     Q_strlower( fullpath );
     Q_FixSlashes( fullpath );
   }
@@ -795,49 +966,59 @@ CON_COMMAND_F_COMPLETION( lua_dofile, "Load and run a Lua file", 0, DoFileComple
 #endif
 
 #if DEBUG
+static void DumpLuaStack( lua_State *L )
+{
+  int n = lua_gettop( L ); /* number of objects */
+  int i;
+
+  for ( i = 1; i <= n; i++ )
+  {
+    if ( lua_istable( L, -1 ) )
+    {
+      lua_getglobal( L, "table" );
+      lua_getfield( L, -1, "print" );
+      lua_remove( L, -2 );
+      lua_pushvalue( L, i );
+      lua_call( L, 1, 0 );
+    }
+    else
+    {
+      const char *s;
+      lua_getglobal( L, "tostring" );
+      lua_pushvalue( L, -1 ); /* function to be called */
+      lua_pushvalue( L, i );  /* value to print */
+      lua_call( L, 1, 1 );
+
+      s = lua_tostring( L, -1 ); /* get result */
+      Warning( " %d:\t%s\n", i, s );
+      lua_pop( L, 1 ); /* pop result */
+    }
+  }
+
+  if ( n > 0 )
+    Warning( "Warning: %d object(s) left on the stack!\n", n );
+}
+
 #ifdef CLIENT_DLL
 CON_COMMAND( lua_dumpstack_cl, "Prints the Lua stack" )
 {
   if ( !g_bLuaInitialized )
     return;
-  int n = lua_gettop( L ); /* number of objects */
-  int i;
-  lua_getglobal( L, "tostring" );
-  for ( i = 1; i <= n; i++ )
-  {
-    const char *s;
-    lua_pushvalue( L, -1 ); /* function to be called */
-    lua_pushvalue( L, i );  /* value to print */
-    lua_call( L, 1, 1 );
-    s = lua_tostring( L, -1 ); /* get result */
-    Warning( " %d:\t%s\n", i, s );
-    lua_pop( L, 1 ); /* pop result */
-  }
-  lua_pop( L, 1 ); /* pop function */
-  if ( n > 0 )
-    Warning( "Warning: %d object(s) left on the stack!\n", n );
+
+  DumpLuaStack( L );
+}
+
+CON_COMMAND( lua_dumpstack_menu, "Prints the Lua stack" )
+{
+  DumpLuaStack( LGameUI );
 }
 #else
 CON_COMMAND( lua_dumpstack, "Prints the Lua stack" )
 {
   if ( !g_bLuaInitialized )
     return;
-  int n = lua_gettop( L ); /* number of objects */
-  int i;
-  lua_getglobal( L, "tostring" );
-  for ( i = 1; i <= n; i++ )
-  {
-    const char *s;
-    lua_pushvalue( L, -1 ); /* function to be called */
-    lua_pushvalue( L, i );  /* value to print */
-    lua_call( L, 1, 1 );
-    s = lua_tostring( L, -1 ); /* get result */
-    Warning( " %d:\t%s\n", i, s );
-    lua_pop( L, 1 ); /* pop result */
-  }
-  lua_pop( L, 1 ); /* pop function */
-  if ( n > 0 )
-    Warning( "Warning: %d object(s) left on the stack!\n", n );
+
+  DumpLuaStack( L );
 }
 #endif
 #endif

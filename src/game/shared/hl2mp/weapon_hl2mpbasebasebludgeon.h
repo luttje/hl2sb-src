@@ -66,12 +66,6 @@ class CBaseHL2MPBludgeonWeapon : public CBaseHL2MPCombatWeapon
     return 1.0f;
   }
 
-#ifdef HL2SB
-#ifndef CLIENT_DLL
-  virtual int CapabilitiesGet( void );
-  virtual int WeaponMeleeAttack1Condition( float flDot, float flDist );
-#endif
-#endif
   CBaseHL2MPBludgeonWeapon( const CBaseHL2MPBludgeonWeapon & );
 
  protected:

@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose:
 //
@@ -23,7 +23,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-LFrame::LFrame( Panel *parent, const char *panelName, bool showTaskbarIcon, lua_State *L )
+LFrame::LFrame( Panel *parent, const char *panelName, bool showTaskbarIcon,
+                lua_State *L )
     : Frame( parent, panelName, showTaskbarIcon )
 {
 #if defined( LUA_SDK )
@@ -49,7 +50,8 @@ LFrame::~LFrame()
 
 LUA_API lua_Frame *lua_toframe( lua_State *L, int idx )
 {
-  PHandle *phPanel = dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
+  PHandle *phPanel =
+      dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
   if ( phPanel == NULL )
     return NULL;
   return dynamic_cast< lua_Frame * >( phPanel->Get() );
@@ -98,7 +100,9 @@ static int Frame_CanChainKeysToParent( lua_State *L )
 
 static int Frame_CanStartDragging( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkframe( L, 1 )->CanStartDragging( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ), luaL_checkint( L, 5 ) ) );
+  lua_pushboolean( L, luaL_checkframe( L, 1 )->CanStartDragging(
+                          luaL_checkint( L, 2 ), luaL_checkint( L, 3 ),
+                          luaL_checkint( L, 4 ), luaL_checkint( L, 5 ) ) );
   return 1;
 }
 
@@ -203,7 +207,7 @@ static int Frame_GetRefTable( lua_State *L )
   LFrame *plFrame = dynamic_cast< LFrame * >( luaL_checkframe( L, 1 ) );
   if ( plFrame )
   {
-    if ( plFrame->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plFrame->m_nTableReference ) )
     {
       lua_newtable( L );
       plFrame->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -241,7 +245,8 @@ static int Frame_IsSmallCaption( lua_State *L )
 
 static int Frame_KB_AddBoundKey( lua_State *L )
 {
-  luaL_checkframe( L, 1 )->KB_AddBoundKey( luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkframe( L, 1 )->KB_AddBoundKey(
+      luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -253,7 +258,9 @@ static int Frame_KB_ChainToMap( lua_State *L )
 
 static int Frame_LoadControlSettings( lua_State *L )
 {
-  luaL_checkframe( L, 1 )->LoadControlSettings( luaL_checkstring( L, 2 ), luaL_optstring( L, 3, NULL ), luaL_optkeyvalues( L, 4, NULL ) );
+  luaL_checkframe( L, 1 )->LoadControlSettings( luaL_checkstring( L, 2 ),
+                                                luaL_optstring( L, 3, NULL ),
+                                                luaL_optkeyvalues( L, 4, NULL ) );
   return 0;
 }
 
@@ -301,7 +308,8 @@ static int Frame_SetDeleteSelfOnClose( lua_State *L )
 
 static int Frame_SetImages( lua_State *L )
 {
-  luaL_checkframe( L, 1 )->SetImages( luaL_checkstring( L, 2 ), luaL_optstring( L, 3, 0 ) );
+  luaL_checkframe( L, 1 )->SetImages( luaL_checkstring( L, 2 ),
+                                      luaL_optstring( L, 3, 0 ) );
   return 0;
 }
 
@@ -331,7 +339,8 @@ static int Frame_SetMinimizeButtonVisible( lua_State *L )
 
 static int Frame_SetMinimizeToSysTrayButtonVisible( lua_State *L )
 {
-  luaL_checkframe( L, 1 )->SetMinimizeToSysTrayButtonVisible( luaL_checkboolean( L, 2 ) );
+  luaL_checkframe( L, 1 )->SetMinimizeToSysTrayButtonVisible(
+      luaL_checkboolean( L, 2 ) );
   return 0;
 }
 
@@ -355,7 +364,8 @@ static int Frame_SetSmallCaption( lua_State *L )
 
 static int Frame_SetTitle( lua_State *L )
 {
-  luaL_checkframe( L, 1 )->SetTitle( luaL_checkstring( L, 2 ), luaL_checkboolean( L, 3 ) );
+  luaL_checkframe( L, 1 )->SetTitle( luaL_checkstring( L, 2 ),
+                                     luaL_checkboolean( L, 3 ) );
   return 0;
 }
 
@@ -375,11 +385,12 @@ static int Frame___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LFrame *plFrame = dynamic_cast< LFrame * >( pFrame );
-  if ( plFrame && plFrame->m_nTableReference != LUA_NOREF )
+  if ( plFrame && luasrc_isrefvalid( L, plFrame->m_nTableReference ) )
   {
     lua_getref( L, plFrame->m_nTableReference );
     lua_pushvalue( L, 2 );
@@ -439,13 +450,14 @@ static int Frame___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LFrame *plFrame = dynamic_cast< LFrame * >( pFrame );
   if ( plFrame )
   {
-    if ( plFrame->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plFrame->m_nTableReference ) )
     {
       lua_newtable( L );
       plFrame->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -463,7 +475,8 @@ static int Frame___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
 }
@@ -544,7 +557,8 @@ static const luaL_Reg Framemeta[] = {
     { "SetMenuButtonResponsive", Frame_SetMenuButtonResponsive },
     { "SetMenuButtonVisible", Frame_SetMenuButtonVisible },
     { "SetMinimizeButtonVisible", Frame_SetMinimizeButtonVisible },
-    { "SetMinimizeToSysTrayButtonVisible", Frame_SetMinimizeToSysTrayButtonVisible },
+    { "SetMinimizeToSysTrayButtonVisible",
+      Frame_SetMinimizeToSysTrayButtonVisible },
     { "SetMoveable", Frame_SetMoveable },
     { "SetSizeable", Frame_SetSizeable },
     { "SetSmallCaption", Frame_SetSmallCaption },
@@ -559,14 +573,14 @@ static const luaL_Reg Framemeta[] = {
 
 static int luasrc_Frame( lua_State *L )
 {
-  Frame *pFrame = new LFrame( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ), luaL_optstring( L, 2, NULL ), luaL_optboolean( L, 3, true ), L );
+  Frame *pFrame =
+      new LFrame( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ),
+                  luaL_optstring( L, 2, NULL ), luaL_optboolean( L, 3, true ), L );
   lua_pushframe( L, pFrame );
   return 1;
 }
 
-static const luaL_Reg Frame_funcs[] = {
-    { "Frame", luasrc_Frame },
-    { NULL, NULL } };
+static const luaL_Reg Frame_funcs[] = { { "Frame", luasrc_Frame }, { NULL, NULL } };
 
 /*
 ** Open Frame object

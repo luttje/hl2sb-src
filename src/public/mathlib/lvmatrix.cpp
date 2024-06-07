@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -15,15 +16,9 @@
 // 0   0  0  1
 
 // Note that concatenating matrices needs to multiply them in reverse order.
-// ie: if I want to apply matrix A, B, then C, the equation needs to look like this:
-// C * B * A * v
-// ie:
-// v = A * v;
-// v = B * v;
-// v = C * v;
+// ie: if I want to apply matrix A, B, then C, the equation needs to look like
+// this: C * B * A * v ie: v = A * v; v = B * v; v = C * v;
 //=============================================================================
-
-#define lvmatrix_cpp
 
 #include "cbase.h"
 #include <string.h>
@@ -70,13 +65,15 @@ LUALIB_API lua_VMatrix &luaL_checkvmatrix( lua_State *L, int narg )
 
 static int VMatrix_ApplyRotation( lua_State *L )
 {
-  lua_pushvector( L, luaL_checkvmatrix( L, 1 ).ApplyRotation( luaL_checkvector( L, 2 ) ) );
+  lua_pushvector(
+      L, luaL_checkvmatrix( L, 1 ).ApplyRotation( luaL_checkvector( L, 2 ) ) );
   return 1;
 }
 
 static int VMatrix_As3x4( lua_State *L )
 {
-  lua_pushmatrix( L, luaL_checkvmatrix( L, 1 ).As3x4() );
+  lua_pushmatrix( L,
+                  const_cast< matrix3x4_t & >( luaL_checkvmatrix( L, 1 ).As3x4() ) );
   return 1;
 }
 
@@ -94,7 +91,8 @@ static int VMatrix_CopyFrom3x4( lua_State *L )
 
 static int VMatrix_GetBasisVectors( lua_State *L )
 {
-  luaL_checkvmatrix( L, 1 ).GetBasisVectors( luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ), luaL_checkvector( L, 4 ) );
+  luaL_checkvmatrix( L, 1 ).GetBasisVectors(
+      luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ), luaL_checkvector( L, 4 ) );
   return 0;
 }
 
@@ -139,13 +137,22 @@ static int VMatrix_Init( lua_State *L )
   if ( lua_gettop( L ) < 17 )
     luaL_checkvmatrix( L, 1 ).Init( luaL_checkmatrix( L, 2 ) );
   else
-    luaL_checkvmatrix( L, 1 ).Init( luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ), luaL_checknumber( L, 5 ), luaL_checknumber( L, 6 ), luaL_checknumber( L, 7 ), luaL_checknumber( L, 8 ), luaL_checknumber( L, 9 ), luaL_checknumber( L, 10 ), luaL_checknumber( L, 11 ), luaL_checknumber( L, 12 ), luaL_checknumber( L, 13 ), luaL_checknumber( L, 14 ), luaL_checknumber( L, 15 ), luaL_checknumber( L, 16 ), luaL_checknumber( L, 17 ) );
+    luaL_checkvmatrix( L, 1 ).Init(
+        luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ),
+        luaL_checknumber( L, 4 ), luaL_checknumber( L, 5 ),
+        luaL_checknumber( L, 6 ), luaL_checknumber( L, 7 ),
+        luaL_checknumber( L, 8 ), luaL_checknumber( L, 9 ),
+        luaL_checknumber( L, 10 ), luaL_checknumber( L, 11 ),
+        luaL_checknumber( L, 12 ), luaL_checknumber( L, 13 ),
+        luaL_checknumber( L, 14 ), luaL_checknumber( L, 15 ),
+        luaL_checknumber( L, 16 ), luaL_checknumber( L, 17 ) );
   return 0;
 }
 
 static int VMatrix_InverseGeneral( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkvmatrix( L, 1 ).InverseGeneral( luaL_checkvmatrix( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkvmatrix( L, 1 ).InverseGeneral( luaL_checkvmatrix( L, 2 ) ) );
   return 1;
 }
 
@@ -169,7 +176,8 @@ static int VMatrix_IsRotationMatrix( lua_State *L )
 
 static int VMatrix_MatrixMul( lua_State *L )
 {
-  luaL_checkvmatrix( L, 1 ).MatrixMul( luaL_checkvmatrix( L, 2 ), luaL_checkvmatrix( L, 3 ) );
+  luaL_checkvmatrix( L, 1 ).MatrixMul( luaL_checkvmatrix( L, 2 ),
+                                       luaL_checkvmatrix( L, 3 ) );
   return 0;
 }
 
@@ -205,7 +213,8 @@ static int VMatrix_Set3x4( lua_State *L )
 
 static int VMatrix_SetBasisVectors( lua_State *L )
 {
-  luaL_checkvmatrix( L, 1 ).SetBasisVectors( luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ), luaL_checkvector( L, 4 ) );
+  luaL_checkvmatrix( L, 1 ).SetBasisVectors(
+      luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ), luaL_checkvector( L, 4 ) );
   return 0;
 }
 
@@ -235,7 +244,8 @@ static int VMatrix_SetUp( lua_State *L )
 
 static int VMatrix_SetupMatrixOrgAngles( lua_State *L )
 {
-  luaL_checkvmatrix( L, 1 ).SetupMatrixOrgAngles( luaL_checkvector( L, 2 ), luaL_checkangle( L, 3 ) );
+  luaL_checkvmatrix( L, 1 ).SetupMatrixOrgAngles( luaL_checkvector( L, 2 ),
+                                                  luaL_checkangle( L, 3 ) );
   return 0;
 }
 
@@ -253,7 +263,8 @@ static int VMatrix_Transpose3x3( lua_State *L )
 
 static int VMatrix_V3Mul( lua_State *L )
 {
-  luaL_checkvmatrix( L, 1 ).V3Mul( luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  luaL_checkvmatrix( L, 1 ).V3Mul( luaL_checkvector( L, 2 ),
+                                   luaL_checkvector( L, 3 ) );
   return 0;
 }
 
@@ -265,7 +276,8 @@ static int VMatrix_VMul3x3( lua_State *L )
 
 static int VMatrix_VMul3x3Transpose( lua_State *L )
 {
-  lua_pushvector( L, luaL_checkvmatrix( L, 1 ).VMul3x3Transpose( luaL_checkvector( L, 2 ) ) );
+  lua_pushvector(
+      L, luaL_checkvmatrix( L, 1 ).VMul3x3Transpose( luaL_checkvector( L, 2 ) ) );
   return 1;
 }
 
@@ -277,7 +289,8 @@ static int VMatrix_VMul4x3( lua_State *L )
 
 static int VMatrix_VMul4x3Transpose( lua_State *L )
 {
-  lua_pushvector( L, luaL_checkvmatrix( L, 1 ).VMul4x3Transpose( luaL_checkvector( L, 2 ) ) );
+  lua_pushvector(
+      L, luaL_checkvmatrix( L, 1 ).VMul4x3Transpose( luaL_checkvector( L, 2 ) ) );
   return 1;
 }
 
@@ -427,20 +440,27 @@ static int luasrc_VMatrix( lua_State *L )
   }
   else if ( lua_gettop( L ) < 16 )
   {
-    VMatrix matrix = VMatrix( luaL_checkvector( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+    VMatrix matrix = VMatrix( luaL_checkvector( L, 1 ), luaL_checkvector( L, 2 ),
+                              luaL_checkvector( L, 3 ) );
     lua_pushvmatrix( L, matrix );
   }
   else
   {
-    VMatrix matrix = VMatrix( luaL_checknumber( L, 1 ), luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ), luaL_checknumber( L, 5 ), luaL_checknumber( L, 6 ), luaL_checknumber( L, 7 ), luaL_checknumber( L, 8 ), luaL_checknumber( L, 9 ), luaL_checknumber( L, 10 ), luaL_checknumber( L, 11 ), luaL_checknumber( L, 12 ), luaL_checknumber( L, 13 ), luaL_checknumber( L, 14 ), luaL_checknumber( L, 15 ), luaL_checknumber( L, 16 ) );
+    VMatrix matrix =
+        VMatrix( luaL_checknumber( L, 1 ), luaL_checknumber( L, 2 ),
+                 luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ),
+                 luaL_checknumber( L, 5 ), luaL_checknumber( L, 6 ),
+                 luaL_checknumber( L, 7 ), luaL_checknumber( L, 8 ),
+                 luaL_checknumber( L, 9 ), luaL_checknumber( L, 10 ),
+                 luaL_checknumber( L, 11 ), luaL_checknumber( L, 12 ),
+                 luaL_checknumber( L, 13 ), luaL_checknumber( L, 14 ),
+                 luaL_checknumber( L, 15 ), luaL_checknumber( L, 16 ) );
     lua_pushvmatrix( L, matrix );
   }
   return 1;
 }
 
-static const luaL_Reg _G_funcs[] = {
-    { "VMatrix", luasrc_VMatrix },
-    { NULL, NULL } };
+static const luaL_Reg _G_funcs[] = { { "VMatrix", luasrc_VMatrix }, { NULL, NULL } };
 
 static int vmatrix_SetupMatrixIdentity( lua_State *L )
 {
@@ -462,7 +482,8 @@ static int vmatrix_SetupMatrixTranslation( lua_State *L )
 
 static int vmatrix_SetupMatrixAxisRot( lua_State *L )
 {
-  lua_pushvmatrix( L, SetupMatrixAxisRot( luaL_checkvector( L, 1 ), luaL_checknumber( L, 2 ) ) );
+  lua_pushvmatrix(
+      L, SetupMatrixAxisRot( luaL_checkvector( L, 1 ), luaL_checknumber( L, 2 ) ) );
   return 1;
 }
 
@@ -474,7 +495,8 @@ static int vmatrix_SetupMatrixAngles( lua_State *L )
 
 static int vmatrix_SetupMatrixOrgAngles( lua_State *L )
 {
-  lua_pushvmatrix( L, SetupMatrixOrgAngles( luaL_checkvector( L, 1 ), luaL_checkangle( L, 2 ) ) );
+  lua_pushvmatrix(
+      L, SetupMatrixOrgAngles( luaL_checkvector( L, 1 ), luaL_checkangle( L, 2 ) ) );
   return 1;
 }
 
@@ -504,55 +526,65 @@ static int vmatrix_MatrixCopy( lua_State *L )
 
 static int vmatrix_MatrixMultiply( lua_State *L )
 {
-  MatrixMultiply( luaL_checkvmatrix( L, 1 ), luaL_checkvmatrix( L, 2 ), luaL_checkvmatrix( L, 3 ) );
+  MatrixMultiply( luaL_checkvmatrix( L, 1 ), luaL_checkvmatrix( L, 2 ),
+                  luaL_checkvmatrix( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_MatrixGetColumn( lua_State *L )
 {
-  MatrixGetColumn( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ), &luaL_checkvector( L, 3 ) );
+  MatrixGetColumn( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ),
+                   &luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_MatrixSetColumn( lua_State *L )
 {
-  MatrixSetColumn( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ), luaL_checkvector( L, 3 ) );
+  MatrixSetColumn( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ),
+                   luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_MatrixGetRow( lua_State *L )
 {
-  MatrixGetRow( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ), &luaL_checkvector( L, 3 ) );
+  MatrixGetRow( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ),
+                &luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_MatrixSetRow( lua_State *L )
 {
-  MatrixSetRow( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ), luaL_checkvector( L, 3 ) );
+  MatrixSetRow( luaL_checkvmatrix( L, 1 ), luaL_checkint( L, 2 ),
+                luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_Vector3DMultiply( lua_State *L )
 {
-  Vector3DMultiply( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  Vector3DMultiply( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ),
+                    luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_Vector3DMultiplyPositionProjective( lua_State *L )
 {
-  Vector3DMultiplyPositionProjective( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  Vector3DMultiplyPositionProjective( luaL_checkvmatrix( L, 1 ),
+                                      luaL_checkvector( L, 2 ),
+                                      luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_Vector3DMultiplyProjective( lua_State *L )
 {
-  Vector3DMultiplyProjective( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  Vector3DMultiplyProjective( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ),
+                              luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_Vector3DMultiplyTranspose( lua_State *L )
 {
-  Vector3DMultiplyTranspose( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  Vector3DMultiplyTranspose( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ),
+                             luaL_checkvector( L, 3 ) );
   return 0;
 }
 
@@ -562,11 +594,14 @@ static int vmatrix_MatrixBuildTranslation( lua_State *L )
   {
     case LUA_TNUMBER:
     default:
-      MatrixBuildTranslation( luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ) );
+      MatrixBuildTranslation(
+          luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ),
+          luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ) );
       break;
     case LUA_TUSERDATA:
       if ( luaL_checkudata( L, 2, "Vector" ) )
-        MatrixBuildTranslation( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ) );
+        MatrixBuildTranslation( luaL_checkvmatrix( L, 1 ),
+                                luaL_checkvector( L, 2 ) );
       else
         luaL_typerror( L, 2, "Vector" );
       break;
@@ -582,7 +617,9 @@ static int vmatrix_MatrixTranslate( lua_State *L )
 
 static int vmatrix_MatrixBuildRotationAboutAxis( lua_State *L )
 {
-  MatrixBuildRotationAboutAxis( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checknumber( L, 3 ) );
+  MatrixBuildRotationAboutAxis( luaL_checkvmatrix( L, 1 ),
+                                luaL_checkvector( L, 2 ),
+                                luaL_checknumber( L, 3 ) );
   return 0;
 }
 
@@ -594,13 +631,15 @@ static int vmatrix_MatrixBuildRotateZ( lua_State *L )
 
 static int vmatrix_MatrixRotate( lua_State *L )
 {
-  MatrixRotate( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checknumber( L, 3 ) );
+  MatrixRotate( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ),
+                luaL_checknumber( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_MatrixBuildRotation( lua_State *L )
 {
-  MatrixBuildRotation( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ), luaL_checkvector( L, 3 ) );
+  MatrixBuildRotation( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ),
+                       luaL_checkvector( L, 3 ) );
   return 0;
 }
 
@@ -610,11 +649,13 @@ static int vmatrix_MatrixBuildScale( lua_State *L )
   {
     case LUA_TNUMBER:
     default:
-      MatrixBuildScale( luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ) );
+      MatrixBuildScale( luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ),
+                        luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ) );
       break;
     case LUA_TUSERDATA:
       if ( luaL_checkudata( L, 2, "Vector" ) )
-        MatrixBuildScale( luaL_checkvmatrix( L, 1 ), luaL_checkvector( L, 2 ) );
+        MatrixBuildScale( luaL_checkvmatrix( L, 1 ),
+                          luaL_checkvector( L, 2 ) );
       else
         luaL_typerror( L, 2, "Vector" );
       break;
@@ -624,20 +665,25 @@ static int vmatrix_MatrixBuildScale( lua_State *L )
 
 static int vmatrix_MatrixBuildPerspective( lua_State *L )
 {
-  MatrixBuildPerspective( luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ), luaL_checknumber( L, 5 ) );
+  MatrixBuildPerspective( luaL_checkvmatrix( L, 1 ), luaL_checknumber( L, 2 ),
+                          luaL_checknumber( L, 3 ), luaL_checknumber( L, 4 ),
+                          luaL_checknumber( L, 5 ) );
   return 0;
 }
 
 static int vmatrix_CalculateAABBFromProjectionMatrix( lua_State *L )
 {
-  CalculateAABBFromProjectionMatrix( luaL_checkvmatrix( L, 1 ), &luaL_checkvector( L, 2 ), &luaL_checkvector( L, 3 ) );
+  CalculateAABBFromProjectionMatrix( luaL_checkvmatrix( L, 1 ),
+                                     &luaL_checkvector( L, 2 ),
+                                     &luaL_checkvector( L, 3 ) );
   return 0;
 }
 
 static int vmatrix_CalculateSphereFromProjectionMatrix( lua_State *L )
 {
   float flRadius = 0;
-  CalculateSphereFromProjectionMatrix( luaL_checkvmatrix( L, 1 ), &luaL_checkvector( L, 2 ), &flRadius );
+  CalculateSphereFromProjectionMatrix( luaL_checkvmatrix( L, 1 ),
+                                       &luaL_checkvector( L, 2 ), &flRadius );
   lua_pushnumber( L, flRadius );
   return 1;
 }
@@ -689,7 +735,8 @@ static const luaL_Reg VMatrix_funcs[] = {
     { "MatrixGetRow", vmatrix_MatrixGetRow },
     { "MatrixSetRow", vmatrix_MatrixSetRow },
     { "Vector3DMultiply", vmatrix_Vector3DMultiply },
-    { "Vector3DMultiplyPositionProjective", vmatrix_Vector3DMultiplyPositionProjective },
+    { "Vector3DMultiplyPositionProjective",
+      vmatrix_Vector3DMultiplyPositionProjective },
     { "Vector3DMultiplyProjective", vmatrix_Vector3DMultiplyProjective },
     { "Vector3DMultiplyTranspose", vmatrix_Vector3DMultiplyTranspose },
     { "MatrixBuildTranslation", vmatrix_MatrixBuildTranslation },
@@ -700,8 +747,10 @@ static const luaL_Reg VMatrix_funcs[] = {
     { "MatrixBuildRotation", vmatrix_MatrixBuildRotation },
     { "MatrixBuildScale", vmatrix_MatrixBuildScale },
     { "MatrixBuildPerspective", vmatrix_MatrixBuildPerspective },
-    { "CalculateAABBFromProjectionMatrix", vmatrix_CalculateAABBFromProjectionMatrix },
-    { "CalculateSphereFromProjectionMatrix", vmatrix_CalculateSphereFromProjectionMatrix },
+    { "CalculateAABBFromProjectionMatrix",
+      vmatrix_CalculateAABBFromProjectionMatrix },
+    { "CalculateSphereFromProjectionMatrix",
+      vmatrix_CalculateSphereFromProjectionMatrix },
     { "MatrixFromAngles", vmatrix_MatrixFromAngles },
     { "MatrixToAngles", vmatrix_MatrixToAngles },
     { "MatrixInverseTR", vmatrix_MatrixInverseTR },

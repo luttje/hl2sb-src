@@ -13,6 +13,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+ConVar r_drawtracers( "r_drawtracers", "1", FCVAR_CHEAT );
+ConVar r_drawtracers_firstperson( "r_drawtracers_firstperson", "1", FCVAR_ARCHIVE, "Toggle visibility of first person weapon tracers" );
+
 #define TRACER_SPEED 5000
 
 //-----------------------------------------------------------------------------
@@ -24,7 +27,6 @@ Vector GetTracerOrigin( const CEffectData &data )
   QAngle vecAngles;
 
   int iAttachment = data.m_nAttachmentIndex;
-  ;
 
   // Attachment?
   if ( data.m_fFlags & TRACER_FLAG_USEATTACHMENT )
@@ -78,6 +80,17 @@ void TracerCallback( const CEffectData &data )
   if ( !player )
     return;
 
+  if ( !r_drawtracers.GetBool() )
+    return;
+
+  if ( !r_drawtracers_firstperson.GetBool() )
+  {
+    C_BasePlayer *pPlayer = dynamic_cast< C_BasePlayer * >( data.GetEntity() );
+
+    if ( pPlayer && !pPlayer->ShouldDrawThisPlayer() )
+      return;
+  }
+
   // Grab the data
   Vector vecStart = GetTracerOrigin( data );
   float flVelocity = data.m_flScale;
@@ -120,6 +133,17 @@ void ParticleTracerCallback( const CEffectData &data )
   C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
   if ( !player )
     return;
+
+  if ( !r_drawtracers.GetBool() )
+    return;
+
+  if ( !r_drawtracers_firstperson.GetBool() )
+  {
+    C_BasePlayer *pPlayer = dynamic_cast< C_BasePlayer * >( data.GetEntity() );
+
+    if ( pPlayer && !pPlayer->ShouldDrawThisPlayer() )
+      return;
+  }
 
   // Grab the data
   Vector vecStart = GetTracerOrigin( data );

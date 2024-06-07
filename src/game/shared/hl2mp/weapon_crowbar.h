@@ -33,10 +33,7 @@ class CWeaponCrowbar : public CBaseHL2MPBludgeonWeapon
 
   DECLARE_NETWORKCLASS();
   DECLARE_PREDICTABLE();
-
-#ifndef CLIENT_DLL
   DECLARE_ACTTABLE();
-#endif
 
   CWeaponCrowbar();
 
@@ -54,8 +51,10 @@ class CWeaponCrowbar : public CBaseHL2MPBludgeonWeapon
 
   // Animation event
 #ifndef CLIENT_DLL
-  virtual void Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator );
-  void HandleAnimEventMeleeHit( animevent_t *pEvent, CBaseCombatCharacter *pOperator );
+  virtual void Operator_HandleAnimEvent( animevent_t *pEvent,
+                                         CBaseCombatCharacter *pOperator );
+  void HandleAnimEventMeleeHit( animevent_t *pEvent,
+                                CBaseCombatCharacter *pOperator );
   int WeaponMeleeAttack1Condition( float flDot, float flDist );
 #endif
 

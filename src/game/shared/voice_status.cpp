@@ -29,6 +29,7 @@
 #include "tier0/dbg.h"
 #include "cdll_int.h"
 #include <vgui/IPanel.h>
+
 #ifdef LUA_SDK
 #include "luamanager.h"
 #include "lbaseplayer_shared.h"
@@ -44,7 +45,9 @@ extern int cam_thirdperson;
 #define VOICE_MODEL_INTERVAL 0.3
 #define SQUELCHOSCILLATE_PER_SECOND 2.0f
 
-ConVar voice_modenable( "voice_modenable", "1", FCVAR_ARCHIVE | FCVAR_CLIENTCMD_CAN_EXECUTE, "Enable/disable voice in this mod." );
+ConVar voice_modenable( "voice_modenable", "1",
+                        FCVAR_ARCHIVE | FCVAR_CLIENTCMD_CAN_EXECUTE,
+                        "Enable/disable voice in this mod." );
 ConVar voice_clientdebug( "voice_clientdebug", "0" );
 
 // ---------------------------------------------------------------------- //
@@ -136,9 +139,7 @@ CVoiceStatus::~CVoiceStatus()
   }
 }
 
-int CVoiceStatus::Init(
-    IVoiceStatusHelper *pHelper,
-    VPANEL pParentPanel )
+int CVoiceStatus::Init( IVoiceStatusHelper *pHelper, VPANEL pParentPanel )
 {
   const char *pGameDir = engine->GetGameDirectory();
   if ( pGameDir )
@@ -150,7 +151,8 @@ int CVoiceStatus::Init(
   Assert( !g_pInternalVoiceStatus );
   g_pInternalVoiceStatus = this;
 
-  m_pHeadLabelMaterial = materials->FindMaterial( "voice/icntlk_pl", TEXTURE_GROUP_VGUI );
+  m_pHeadLabelMaterial =
+      materials->FindMaterial( "voice/icntlk_pl", TEXTURE_GROUP_VGUI );
   m_pHeadLabelMaterial->IncrementReferenceCount();
 
   m_bInSquelchMode = false;
@@ -231,7 +233,8 @@ void CVoiceStatus::DrawHeadLabels()
     RETURN_LUA_NONE();
 #endif
 
-    // Don't show an icon for dead or spectating players (ie: invisible entities).
+    // Don't show an icon for dead or spectating players (ie: invisible
+    // entities).
     if ( pPlayer->IsPlayerDead() )
       continue;
 
@@ -257,22 +260,26 @@ void CVoiceStatus::DrawHeadLabels()
 
     meshBuilder.Color3f( 1.0, 1.0, 1.0 );
     meshBuilder.TexCoord2f( 0, 0, 0 );
-    meshBuilder.Position3fv( ( vOrigin + ( vRight * -flSize ) + ( vUp * flSize ) ).Base() );
+    meshBuilder.Position3fv(
+        ( vOrigin + ( vRight * -flSize ) + ( vUp * flSize ) ).Base() );
     meshBuilder.AdvanceVertex();
 
     meshBuilder.Color3f( 1.0, 1.0, 1.0 );
     meshBuilder.TexCoord2f( 0, 1, 0 );
-    meshBuilder.Position3fv( ( vOrigin + ( vRight * flSize ) + ( vUp * flSize ) ).Base() );
+    meshBuilder.Position3fv(
+        ( vOrigin + ( vRight * flSize ) + ( vUp * flSize ) ).Base() );
     meshBuilder.AdvanceVertex();
 
     meshBuilder.Color3f( 1.0, 1.0, 1.0 );
     meshBuilder.TexCoord2f( 0, 1, 1 );
-    meshBuilder.Position3fv( ( vOrigin + ( vRight * flSize ) + ( vUp * -flSize ) ).Base() );
+    meshBuilder.Position3fv(
+        ( vOrigin + ( vRight * flSize ) + ( vUp * -flSize ) ).Base() );
     meshBuilder.AdvanceVertex();
 
     meshBuilder.Color3f( 1.0, 1.0, 1.0 );
     meshBuilder.TexCoord2f( 0, 0, 1 );
-    meshBuilder.Position3fv( ( vOrigin + ( vRight * -flSize ) + ( vUp * -flSize ) ).Base() );
+    meshBuilder.Position3fv(
+        ( vOrigin + ( vRight * -flSize ) + ( vUp * -flSize ) ).Base() );
     meshBuilder.AdvanceVertex();
     meshBuilder.End();
     pMesh->Draw();
@@ -286,7 +293,8 @@ void CVoiceStatus::UpdateSpeakerStatus( int entindex, bool bTalking )
 
   if ( voice_clientdebug.GetInt() )
   {
-    Msg( "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n", entindex, bTalking );
+    Msg( "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n",
+         entindex, bTalking );
   }
 
   // Is it the local player talking?
@@ -431,8 +439,10 @@ void CVoiceStatus::HandleVoiceMaskMsg( bf_read &msg )
     if ( voice_clientdebug.GetInt() )
     {
       Msg( "CVoiceStatus::HandleVoiceMaskMsg\n" );
-      Msg( "    - m_AudiblePlayers[%d] = %u\n", dw, m_AudiblePlayers.GetDWord( dw ) );
-      Msg( "    - m_ServerBannedPlayers[%d] = %u\n", dw, m_ServerBannedPlayers.GetDWord( dw ) );
+      Msg( "    - m_AudiblePlayers[%d] = %u\n", dw,
+           m_AudiblePlayers.GetDWord( dw ) );
+      Msg( "    - m_ServerBannedPlayers[%d] = %u\n", dw,
+           m_ServerBannedPlayers.GetDWord( dw ) );
     }
   }
 
@@ -469,10 +479,9 @@ bool CVoiceStatus::IsInSquelchMode()
   return m_bInSquelchMode;
 }
 
-void SetOrUpdateBounds(
-    vgui::Panel *pPanel,
-    int left, int top, int wide, int tall,
-    bool bOnlyUpdateBounds, int &topCoord, int &bottomCoord )
+void SetOrUpdateBounds( vgui::Panel *pPanel, int left, int top, int wide,
+                        int tall, bool bOnlyUpdateBounds, int &topCoord,
+                        int &bottomCoord )
 {
   if ( bOnlyUpdateBounds )
   {
@@ -504,9 +513,9 @@ bool CVoiceStatus::IsPlayerBlocked( int iPlayer )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: returns true if the player can't hear the other client due to game rules (eg. the other team)
-// Input  : playerID -
-// Output : Returns true on success, false on failure.
+// Purpose: returns true if the player can't hear the other client due to game
+// rules (eg. the other team) Input  : playerID - Output : Returns true on
+// success, false on failure.
 //-----------------------------------------------------------------------------
 bool CVoiceStatus::IsPlayerAudible( int iPlayer )
 {
@@ -563,7 +572,9 @@ void CVoiceStatus::SetPlayerBlockedState( int iPlayer, bool blocked )
   // Squelch or (try to) unsquelch this player.
   if ( voice_clientdebug.GetInt() )
   {
-    Msg( "CVoiceStatus::SetPlayerBlockedState: setting player %d ban to %d\n", iPlayer, !m_BanMgr.GetPlayerBan( pi.guid ) );
+    Msg( "CVoiceStatus::SetPlayerBlockedState: setting player %d ban to "
+         "%d\n",
+         iPlayer, !m_BanMgr.GetPlayerBan( pi.guid ) );
   }
 
   m_BanMgr.SetPlayerBan( pi.guid, !m_BanMgr.GetPlayerBan( pi.guid ) );
@@ -581,6 +592,7 @@ void CVoiceStatus::SetHeadLabelMaterial( const char *pszMaterial )
     m_pHeadLabelMaterial = NULL;
   }
 
-  m_pHeadLabelMaterial = materials->FindMaterial( pszMaterial, TEXTURE_GROUP_VGUI );
+  m_pHeadLabelMaterial =
+      materials->FindMaterial( pszMaterial, TEXTURE_GROUP_VGUI );
   m_pHeadLabelMaterial->IncrementReferenceCount();
 }

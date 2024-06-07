@@ -13,26 +13,26 @@
 #include "hl2mp_player_shared.h"
 #include "basecombatweapon_shared.h"
 #include "hl2mp_weapon_parse.h"
-#if defined( HL2SB )
-// Andrew; see https://developer.valvesoftware.com/wiki/Fixing_AI_in_multiplayer#Weapons
-#ifndef CLIENT_DLL
-#include "AI_BaseNPC.h"
-#endif
-#endif
 
 #if defined( CLIENT_DLL )
+#include "c_hl2mp_player.h"
 #define CWeaponHL2MPBase C_WeaponHL2MPBase
-void UTIL_ClipPunchAngleOffset( QAngle &in, const QAngle &punch, const QAngle &clip );
+void UTIL_ClipPunchAngleOffset( QAngle &in, const QAngle &punch,
+                                const QAngle &clip );
 #endif
 
 class CHL2MP_Player;
 
+#if defined( CLIENT_DLL )
+#define CHL2MP_Player C_HL2MP_Player
+#endif
+
 // These are the names of the ammo types that go in the CAmmoDefs and that the
 // weapon script files reference.
 
-// Given an ammo type (like from a weapon's GetPrimaryAmmoType()), this compares it
-// against the ammo name you specify.
-// MIKETODO: this should use indexing instead of searching and strcmp()'ing all the time.
+// Given an ammo type (like from a weapon's GetPrimaryAmmoType()), this compares
+// it against the ammo name you specify. MIKETODO: this should use indexing
+// instead of searching and strcmp()'ing all the time.
 bool IsAmmoType( int iAmmoType, const char *pAmmoName );
 
 class CWeaponHL2MPBase : public CBaseCombatWeapon
@@ -46,8 +46,6 @@ class CWeaponHL2MPBase : public CBaseCombatWeapon
 
 #ifdef GAME_DLL
   DECLARE_DATADESC();
-
-  void SendReloadSoundEvent( void );
 
   void Materialize( void );
   virtual int ObjectCaps( void );
@@ -65,6 +63,7 @@ class CWeaponHL2MPBase : public CBaseCombatWeapon
 
   virtual void FireBullets( const FireBulletsInfo_t &info );
   virtual void FallInit( void );
+  virtual bool Reload();
 
  public:
 #if defined( CLIENT_DLL )
@@ -72,7 +71,9 @@ class CWeaponHL2MPBase : public CBaseCombatWeapon
   virtual bool ShouldPredict();
   virtual void OnDataChanged( DataUpdateType_t type );
 
-  virtual bool OnFireEvent( C_BaseViewModel *pViewModel, const Vector &origin, const QAngle &angles, int event, const char *options );
+  virtual bool OnFireEvent( C_BaseViewModel *pViewModel, const Vector &origin,
+                            const QAngle &angles, int event,
+                            const char *options );
 
 #else
 

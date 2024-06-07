@@ -150,6 +150,8 @@ typedef enum
   VOTE_FAILED_MAP_NOT_VALID,
   VOTE_FAILED_CANNOT_KICK_FOR_TIME,
   VOTE_FAILED_CANNOT_KICK_DURING_ROUND,
+  VOTE_FAILED_VOTE_IN_PROGRESS,
+  VOTE_FAILED_KICK_LIMIT_REACHED,
 
   // TF-specific?
   VOTE_FAILED_MODIFICATION_ALREADY_ACTIVE,
@@ -448,6 +450,7 @@ enum
   OBS_MODE_FIXED,      // view from a fixed camera position
   OBS_MODE_IN_EYE,     // follow a player in first person view
   OBS_MODE_CHASE,      // follow a player in third person view
+  OBS_MODE_POI,        // PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
   OBS_MODE_ROAMING,    // free roaming
 
   NUM_OBSERVER_MODES,
@@ -680,6 +683,7 @@ struct FireBulletsInfo_t
     m_vecDirShooting.Init( VEC_T_NAN, VEC_T_NAN, VEC_T_NAN );
 #endif
     m_bPrimaryAttack = true;
+    m_bUseServerRandomSeed = false;
   }
 
   FireBulletsInfo_t( int nShots, const Vector &vecSrc, const Vector &vecDir, const Vector &vecSpread, float flDistance, int nAmmoType, bool bPrimaryAttack = true )
@@ -698,6 +702,7 @@ struct FireBulletsInfo_t
     m_pAdditionalIgnoreEnt = NULL;
     m_flDamageForceScale = 1.0f;
     m_bPrimaryAttack = bPrimaryAttack;
+    m_bUseServerRandomSeed = false;
   }
 
   int m_iShots;
@@ -714,6 +719,7 @@ struct FireBulletsInfo_t
   CBaseEntity *m_pAttacker;
   CBaseEntity *m_pAdditionalIgnoreEnt;
   bool m_bPrimaryAttack;
+  bool m_bUseServerRandomSeed;
 };
 
 //-----------------------------------------------------------------------------

@@ -1,12 +1,11 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ========//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//========//
 //
 // Purpose:
 //
 // $NoKeywords: $
 //
 //=============================================================================//
-#define ldbg_cpp
-
 #include "cbase.h"
 #include "lua.hpp"
 #include "luasrclib.h"
@@ -23,7 +22,8 @@ static int luasrc_SpewActivate( lua_State *L )
 
 static int luasrc_IsSpewActive( lua_State *L )
 {
-  lua_pushboolean( L, IsSpewActive( luaL_checkstring( L, 1 ), luaL_checkint( L, 2 ) ) );
+  lua_pushboolean( L,
+                   IsSpewActive( luaL_checkstring( L, 1 ), luaL_checkint( L, 2 ) ) );
   return 1;
 }
 
@@ -47,7 +47,8 @@ static int luasrc_Warning( lua_State *L )
 
 static int luasrc_DWarning( lua_State *L )
 {
-  DWarning( luaL_checkstring( L, 1 ), luaL_checkint( L, 2 ), luaL_checkstring( L, 3 ) );
+  DWarning( luaL_checkstring( L, 1 ), luaL_checkint( L, 2 ),
+            luaL_checkstring( L, 3 ) );
   return 0;
 }
 
@@ -153,31 +154,30 @@ static int luasrc_NetLog( lua_State *L )
   return 0;
 }
 
-static const luaL_Reg dbg_funcs[] = {
-    { "SpewActivate", luasrc_SpewActivate },
-    { "IsSpewActive", luasrc_IsSpewActive },
-    { "Msg", luasrc_Msg },
-    { "DMsg", luasrc_DMsg },
-    { "Warning", luasrc_Warning },
-    { "DWarning", luasrc_DWarning },
-    { "Log", luasrc_Log },
-    { "DLog", luasrc_DLog },
-    { "Error", luasrc_Error },
-    { "DevMsg", luasrc_DevMsg },
-    { "DevWarning", luasrc_DevWarning },
-    { "DevLog", luasrc_DevLog },
-    { "ConColorMsg", luasrc_ConColorMsg },
-    { "ConMsg", luasrc_ConMsg },
-    { "ConWarning", luasrc_ConWarning },
-    { "ConLog", luasrc_ConLog },
-    { "ConDColorMsg", luasrc_ConDColorMsg },
-    { "ConDMsg", luasrc_ConDMsg },
-    { "ConDWarning", luasrc_ConDWarning },
-    { "ConDLog", luasrc_ConDLog },
-    { "NetMsg", luasrc_NetMsg },
-    { "NetWarning", luasrc_NetWarning },
-    { "NetLog", luasrc_NetLog },
-    { NULL, NULL } };
+static const luaL_Reg dbg_funcs[] = { { "SpewActivate", luasrc_SpewActivate },
+                                      { "IsSpewActive", luasrc_IsSpewActive },
+                                      { "Msg", luasrc_Msg },
+                                      { "DMsg", luasrc_DMsg },
+                                      { "Warning", luasrc_Warning },
+                                      { "DWarning", luasrc_DWarning },
+                                      { "Log", luasrc_Log },
+                                      { "DLog", luasrc_DLog },
+                                      { "Error", luasrc_Error },
+                                      { "DevMsg", luasrc_DevMsg },
+                                      { "DevWarning", luasrc_DevWarning },
+                                      { "DevLog", luasrc_DevLog },
+                                      { "ConColorMsg", luasrc_ConColorMsg },
+                                      { "ConMsg", luasrc_ConMsg },
+                                      { "ConWarning", luasrc_ConWarning },
+                                      { "ConLog", luasrc_ConLog },
+                                      { "ConDColorMsg", luasrc_ConDColorMsg },
+                                      { "ConDMsg", luasrc_ConDMsg },
+                                      { "ConDWarning", luasrc_ConDWarning },
+                                      { "ConDLog", luasrc_ConDLog },
+                                      { "NetMsg", luasrc_NetMsg },
+                                      { "NetWarning", luasrc_NetWarning },
+                                      { "NetLog", luasrc_NetLog },
+                                      { NULL, NULL } };
 
 LUALIB_API int luaopen_dbg( lua_State *L )
 {

@@ -83,8 +83,8 @@ class CSpriteTrail : public CSprite
 #if defined( CLIENT_DLL )
   enum {
       // NOTE: # of points max must be a power of two!
-      MAX_SPRITE_TRAIL_POINTS = 64,
-      MAX_SPRITE_TRAIL_MASK = 0x3F,
+      MAX_SPRITE_TRAIL_POINTS = 256,
+      MAX_SPRITE_TRAIL_MASK = MAX_SPRITE_TRAIL_POINTS - 1,
   };
 
   TrailPoint_t *GetTrailPoint( int n );
@@ -115,6 +115,14 @@ class CSpriteTrail : public CSprite
   string_t m_iszSpriteName;
   bool m_bAnimate;
   bool m_bDrawForMoveParent;
+
+#if defined( CLIENT_DLL )
+ public:
+  void SetUpdateTime( float setTo )
+  {
+    m_flUpdateTime = setTo;
+  }
+#endif
 };
 
 #endif  // SPRITETRAIL_H

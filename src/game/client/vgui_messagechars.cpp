@@ -377,7 +377,7 @@ class CMessageChars : public IMessageChars
     if ( messageCharsPanel )
     {
       messageCharsPanel->SetParent( ( vgui::Panel * )NULL );
-      delete messageCharsPanel;
+      messageCharsPanel->MarkForDeletion();
       messageCharsPanel = NULL;
     }
   }

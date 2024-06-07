@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Spawn and use functions for editor-placed triggers.
 //
@@ -45,7 +45,8 @@ DEFINE_KEYFIELD( m_iFilterName, FIELD_STRING, "filtername" ),
 
     END_DATADESC()
 
-        static CUtlDict< CEntityFactory< CBaseScriptedTrigger > *, unsigned short > m_TriggerFactoryDatabase;
+        static CUtlDict< CEntityFactory< CBaseScriptedTrigger > *,
+                         unsigned short > m_TriggerFactoryDatabase;
 
 void RegisterScriptedTrigger( const char *className )
 {
@@ -60,7 +61,8 @@ void RegisterScriptedTrigger( const char *className )
     return;
   }
 
-  CEntityFactory< CBaseScriptedTrigger > *pFactory = new CEntityFactory< CBaseScriptedTrigger >( className );
+  CEntityFactory< CBaseScriptedTrigger > *pFactory =
+      new CEntityFactory< CBaseScriptedTrigger >( className );
 
   lookup = m_TriggerFactoryDatabase.Insert( className, pFactory );
   Assert( lookup != m_TriggerFactoryDatabase.InvalidIndex() );
@@ -68,7 +70,9 @@ void RegisterScriptedTrigger( const char *className )
 
 void ResetTriggerFactoryDatabase( void )
 {
-  for ( int i = m_TriggerFactoryDatabase.First(); i != m_TriggerFactoryDatabase.InvalidIndex(); i = m_TriggerFactoryDatabase.Next( i ) )
+  for ( int i = m_TriggerFactoryDatabase.First();
+        i != m_TriggerFactoryDatabase.InvalidIndex();
+        i = m_TriggerFactoryDatabase.Next( i ) )
   {
     delete m_TriggerFactoryDatabase[i];
   }
@@ -117,7 +121,7 @@ void CBaseScriptedTrigger::InitScriptedTrigger( void )
 #if defined( LUA_SDK )
 #if 0
 	// Let the instance reinitialize itself for the client.
-	if ( m_nTableReference != LUA_NOREF )
+	if (luasrc_isrefvalid(L, m_nTableReference))
 		return;
 #endif
 
@@ -151,7 +155,7 @@ void CBaseScriptedTrigger::InitScriptedTrigger( void )
     lua_pop( L, 1 );
   }
 
-  if ( m_nTableReference == LUA_NOREF )
+  if ( !luasrc_isrefvalid( L, m_nTableReference ) )
   {
     LoadScriptedTrigger();
     m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -195,8 +199,8 @@ void CBaseScriptedTrigger::Spawn()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Returns true if this entity passes the filter criteria, false if not.
-// Input  : pOther - The entity to be filtered.
+// Purpose: Returns true if this entity passes the filter criteria, false if
+// not. Input  : pOther - The entity to be filtered.
 //-----------------------------------------------------------------------------
 bool CBaseScriptedTrigger::PassesTriggerFilters( CBaseEntity *pOther )
 {

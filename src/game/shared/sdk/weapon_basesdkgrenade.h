@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose:
 //
@@ -29,7 +29,7 @@ class CBaseSDKGrenade : public CWeaponSDKBase
 
   virtual void Precache();
 
-  virtual bool Deploy();
+  bool Deploy();
   bool Holster( CBaseCombatWeapon *pSwitchingTo );
 
   void PrimaryAttack();
@@ -54,9 +54,7 @@ class CBaseSDKGrenade : public CWeaponSDKBase
   int CapabilitiesGet();
 
   // Each derived grenade class implements this.
-  virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon );
-  // check a throw from vecSrc.  If not valid, move the position back along the line to vecEye
-  void CheckThrowPosition( CBasePlayer *pPlayer, const Vector &vecEye, Vector &vecSrc );
+  virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer );
 #endif
 
  protected:

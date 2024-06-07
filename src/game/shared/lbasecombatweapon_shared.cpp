@@ -1,10 +1,10 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
-#define lbasecombatweapon_shared_cpp
 
 #include "cbase.h"
 #include "luamanager.h"
@@ -23,7 +23,8 @@
 
 LUA_API lua_CBaseCombatWeapon *lua_toweapon( lua_State *L, int idx )
 {
-  CBaseHandle *hWeapon = dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
+  CBaseHandle *hWeapon =
+      dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
   if ( hWeapon == NULL )
     return NULL;
   return dynamic_cast< lua_CBaseCombatWeapon * >( hWeapon->Get() );
@@ -35,7 +36,8 @@ LUA_API lua_CBaseCombatWeapon *lua_toweapon( lua_State *L, int idx )
 
 LUA_API void lua_pushweapon( lua_State *L, lua_CBaseCombatWeapon *pWeapon )
 {
-  CBaseHandle *hWeapon = ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
+  CBaseHandle *hWeapon =
+      ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
   hWeapon->Set( ( CBaseEntity * )pWeapon );
   luaL_getmetatable( L, "CBaseCombatWeapon" );
   lua_setmetatable( L, -2 );
@@ -63,14 +65,17 @@ static int CBaseCombatWeapon_Activate( lua_State *L )
 
 static int CBaseCombatWeapon_ActivityListCount( lua_State *L )
 {
-  lua_pushinteger( L, luaL_checkweapon( L, 1 )->ActivityListCount() );
+  int iCount = 0;
+  luaL_checkweapon( L, 1 )->ActivityList( iCount );
+  lua_pushinteger( L, iCount );
   return 1;
 }
 
 static int CBaseCombatWeapon_ActivityOverride( lua_State *L )
 {
   bool *pRequired = ( bool * )luaL_checkboolean( L, 3 );
-  lua_pushinteger( L, luaL_checkweapon( L, 1 )->ActivityOverride( ( Activity )luaL_checkint( L, 2 ), pRequired ) );
+  lua_pushinteger( L, luaL_checkweapon( L, 1 )->ActivityOverride(
+                          ( Activity )luaL_checkint( L, 2 ), pRequired ) );
   return 1;
 }
 
@@ -148,13 +153,18 @@ static int CBaseCombatWeapon_Clip2( lua_State *L )
 
 static int CBaseCombatWeapon_DefaultDeploy( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkweapon( L, 1 )->DefaultDeploy( ( char * )luaL_checkstring( L, 2 ), ( char * )luaL_checkstring( L, 3 ), luaL_checkint( L, 4 ), ( char * )luaL_checkstring( L, 5 ) ) );
+  lua_pushboolean(
+      L, luaL_checkweapon( L, 1 )->DefaultDeploy(
+             ( char * )luaL_checkstring( L, 2 ), ( char * )luaL_checkstring( L, 3 ),
+             luaL_checkint( L, 4 ), ( char * )luaL_checkstring( L, 5 ) ) );
   return 1;
 }
 
 static int CBaseCombatWeapon_DefaultReload( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkweapon( L, 1 )->DefaultReload( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) ) );
+  lua_pushboolean(
+      L, luaL_checkweapon( L, 1 )->DefaultReload(
+             luaL_checkint( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) ) );
   return 1;
 }
 
@@ -214,7 +224,8 @@ static int CBaseCombatWeapon_GetBulletType( lua_State *L )
 
 static int CBaseCombatWeapon_GetDamage( lua_State *L )
 {
-  lua_pushnumber( L, luaL_checkweapon( L, 1 )->GetDamage( luaL_checknumber( L, 2 ), luaL_checkint( L, 3 ) ) );
+  lua_pushnumber( L, luaL_checkweapon( L, 1 )->GetDamage( luaL_checknumber( L, 2 ),
+                                                          luaL_checkint( L, 3 ) ) );
   return 1;
 }
 
@@ -383,7 +394,8 @@ static int CBaseCombatWeapon_GetSecondaryAttackActivity( lua_State *L )
 
 static int CBaseCombatWeapon_GetShootSound( lua_State *L )
 {
-  lua_pushstring( L, luaL_checkweapon( L, 1 )->GetShootSound( luaL_checkint( L, 2 ) ) );
+  lua_pushstring( L,
+                  luaL_checkweapon( L, 1 )->GetShootSound( luaL_checkint( L, 2 ) ) );
   return 1;
 }
 
@@ -401,7 +413,8 @@ static int CBaseCombatWeapon_GetSubType( lua_State *L )
 
 static int CBaseCombatWeapon_GetViewModel( lua_State *L )
 {
-  lua_pushstring( L, luaL_checkweapon( L, 1 )->GetViewModel( luaL_optint( L, 2, 0 ) ) );
+  lua_pushstring( L,
+                  luaL_checkweapon( L, 1 )->GetViewModel( luaL_optint( L, 2, 0 ) ) );
   return 1;
 }
 
@@ -598,7 +611,8 @@ static int CBaseCombatWeapon_IsAllowedToSwitch( lua_State *L )
 
 static int CBaseCombatWeapon_IsLocked( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkweapon( L, 1 )->IsLocked( luaL_checkentity( L, 2 ) ) );
+  lua_pushboolean( L,
+                   luaL_checkweapon( L, 1 )->IsLocked( luaL_checkentity( L, 2 ) ) );
   return 1;
 }
 
@@ -664,7 +678,8 @@ static int CBaseCombatWeapon_ItemPreFrame( lua_State *L )
 
 static int CBaseCombatWeapon_Lock( lua_State *L )
 {
-  luaL_checkweapon( L, 1 )->Lock( luaL_checknumber( L, 2 ), luaL_checkentity( L, 3 ) );
+  luaL_checkweapon( L, 1 )->Lock( luaL_checknumber( L, 2 ),
+                                  luaL_checkentity( L, 3 ) );
   return 0;
 }
 
@@ -748,7 +763,8 @@ static int CBaseCombatWeapon_SendViewModelAnim( lua_State *L )
 
 static int CBaseCombatWeapon_SendWeaponAnim( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkweapon( L, 1 )->SendWeaponAnim( luaL_checkint( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkweapon( L, 1 )->SendWeaponAnim( luaL_checkint( L, 2 ) ) );
   return 1;
 }
 
@@ -760,7 +776,8 @@ static int CBaseCombatWeapon_SetActivity( lua_State *L )
 
 static int CBaseCombatWeapon_SetIdealActivity( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkweapon( L, 1 )->SetIdealActivity( ( Activity )luaL_checkint( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkweapon( L, 1 )->SetIdealActivity(
+                          ( Activity )luaL_checkint( L, 2 ) ) );
   return 1;
 }
 
@@ -898,7 +915,8 @@ static int CBaseCombatWeapon_WeaponIdle( lua_State *L )
 
 static int CBaseCombatWeapon_WeaponSound( lua_State *L )
 {
-  luaL_checkweapon( L, 1 )->WeaponSound( ( WeaponSound_t )luaL_checkint( L, 2 ), luaL_optnumber( L, 2, 0.0f ) );
+  luaL_checkweapon( L, 1 )->WeaponSound( ( WeaponSound_t )luaL_checkint( L, 2 ),
+                                         luaL_optnumber( L, 2, 0.0f ) );
   return 0;
 }
 
@@ -918,7 +936,8 @@ static int CBaseCombatWeapon___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   const char *field = luaL_checkstring( L, 2 );
@@ -970,7 +989,7 @@ static int CBaseCombatWeapon___index( lua_State *L )
     lua_pushinteger( L, pWeapon->m_iWorldModelIndex );
   else if ( Q_strcmp( field, "m_nViewModelIndex" ) == 0 )
     lua_pushinteger( L, pWeapon->m_nViewModelIndex );
-  else if ( pWeapon->m_nTableReference != LUA_NOREF )
+  else if ( luasrc_isrefvalid( L, pWeapon->m_nTableReference ) )
   {
     lua_getref( L, pWeapon->m_nTableReference );
     lua_getfield( L, -1, field );
@@ -1023,7 +1042,8 @@ static int CBaseCombatWeapon___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   const char *field = luaL_checkstring( L, 2 );
@@ -1044,7 +1064,8 @@ static int CBaseCombatWeapon___newindex( lua_State *L )
   else if ( Q_strcmp( field, "m_flNextPrimaryAttack" ) == 0 )
     pWeapon->m_flNextPrimaryAttack.GetForModify() = luaL_checknumber( L, 3 );
   else if ( Q_strcmp( field, "m_flNextSecondaryAttack" ) == 0 )
-    pWeapon->m_flNextSecondaryAttack.GetForModify() = luaL_checknumber( L, 3 );
+    pWeapon->m_flNextSecondaryAttack.GetForModify() =
+        luaL_checknumber( L, 3 );
   else if ( Q_strcmp( field, "m_flTimeWeaponIdle" ) == 0 )
     pWeapon->m_flTimeWeaponIdle.GetForModify() = luaL_checknumber( L, 3 );
   else if ( Q_strcmp( field, "m_flUnlockTime" ) == 0 )
@@ -1077,7 +1098,7 @@ static int CBaseCombatWeapon___newindex( lua_State *L )
     pWeapon->m_nViewModelIndex.GetForModify() = luaL_checkint( L, 3 );
   else
   {
-    if ( pWeapon->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, pWeapon->m_nTableReference ) )
     {
       lua_newtable( L );
       pWeapon->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -1102,7 +1123,8 @@ static int CBaseCombatWeapon___tostring( lua_State *L )
   if ( pWeapon == NULL )
     lua_pushstring( L, "NULL" );
   else
-    lua_pushfstring( L, "CBaseCombatWeapon: %d %s", pWeapon->entindex(), pWeapon->GetClassname() );
+    lua_pushfstring( L, "CBaseCombatWeapon: %d %s", pWeapon->entindex(),
+                     pWeapon->GetClassname() );
   return 1;
 }
 
@@ -1161,12 +1183,14 @@ static const luaL_Reg CBaseCombatWeaponmeta[] = {
     { "GetRumbleEffect", CBaseCombatWeapon_GetRumbleEffect },
     { "GetSecondaryAmmoCount", CBaseCombatWeapon_GetSecondaryAmmoCount },
     { "GetSecondaryAmmoType", CBaseCombatWeapon_GetSecondaryAmmoType },
-    { "GetSecondaryAttackActivity", CBaseCombatWeapon_GetSecondaryAttackActivity },
+    { "GetSecondaryAttackActivity",
+      CBaseCombatWeapon_GetSecondaryAttackActivity },
     { "GetShootSound", CBaseCombatWeapon_GetShootSound },
     { "GetSlot", CBaseCombatWeapon_GetSlot },
     { "GetSubType", CBaseCombatWeapon_GetSubType },
     { "GetViewModel", CBaseCombatWeapon_GetViewModel },
-    { "GetViewModelSequenceDuration", CBaseCombatWeapon_GetViewModelSequenceDuration },
+    { "GetViewModelSequenceDuration",
+      CBaseCombatWeapon_GetViewModelSequenceDuration },
     { "GetWeaponFlags", CBaseCombatWeapon_GetWeaponFlags },
     { "GetWeaponIdleTime", CBaseCombatWeapon_GetWeaponIdleTime },
     { "GetWeight", CBaseCombatWeapon_GetWeight },
@@ -1185,7 +1209,8 @@ static const luaL_Reg CBaseCombatWeaponmeta[] = {
     { "IsMeleeWeapon", CBaseCombatWeapon_IsMeleeWeapon },
     { "IsPredicted", CBaseCombatWeapon_IsPredicted },
     { "IsScripted", CBaseCombatWeapon_IsScripted },
-    { "IsViewModelSequenceFinished", CBaseCombatWeapon_IsViewModelSequenceFinished },
+    { "IsViewModelSequenceFinished",
+      CBaseCombatWeapon_IsViewModelSequenceFinished },
     { "IsWeaponVisible", CBaseCombatWeapon_IsWeaponVisible },
     { "IsWeaponZoomed", CBaseCombatWeapon_IsWeaponZoomed },
     { "ItemBusyFrame", CBaseCombatWeapon_ItemBusyFrame },
@@ -1217,8 +1242,10 @@ static const luaL_Reg CBaseCombatWeaponmeta[] = {
     { "SetViewModelIndex", CBaseCombatWeapon_SetViewModelIndex },
     { "SetWeaponIdleTime", CBaseCombatWeapon_SetWeaponIdleTime },
     { "SetWeaponVisible", CBaseCombatWeapon_SetWeaponVisible },
-    { "ShouldDisplayAltFireHUDHint", CBaseCombatWeapon_ShouldDisplayAltFireHUDHint },
-    { "ShouldDisplayReloadHUDHint", CBaseCombatWeapon_ShouldDisplayReloadHUDHint },
+    { "ShouldDisplayAltFireHUDHint",
+      CBaseCombatWeapon_ShouldDisplayAltFireHUDHint },
+    { "ShouldDisplayReloadHUDHint",
+      CBaseCombatWeapon_ShouldDisplayReloadHUDHint },
     { "ShouldShowControlPanels", CBaseCombatWeapon_ShouldShowControlPanels },
     { "Spawn", CBaseCombatWeapon_Spawn },
     { "StartSprinting", CBaseCombatWeapon_StartSprinting },

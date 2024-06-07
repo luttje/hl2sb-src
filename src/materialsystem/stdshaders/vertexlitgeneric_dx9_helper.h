@@ -69,6 +69,7 @@ struct VertexLitGeneric_DX9_Vars_t
   int m_nPhongWarpTexture;
   int m_nPhongBoost;
   int m_nPhongFresnelRanges;
+  int m_nPhongExponentFactor;
   int m_nSelfIllumEnvMapMask_Alpha;
   int m_nAmbientOnly;
   int m_nHDRColorScale;

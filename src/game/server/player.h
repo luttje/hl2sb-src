@@ -470,7 +470,7 @@ class CBasePlayer : public CBaseCombatCharacter
   }
   virtual bool Weapon_ShouldSelectItem( CBaseCombatWeapon *pWeapon );
   void Weapon_DropSlot( int weaponSlot );
-  CBaseCombatWeapon *Weapon_GetLast( void )
+  CBaseCombatWeapon *GetLastWeapon( void )
   {
     return m_hLastWeapon.Get();
   }
@@ -643,6 +643,7 @@ class CBasePlayer : public CBaseCombatCharacter
   virtual void PickupObject( CBaseEntity *pObject, bool bLimitMassAndSize = true ) {}
   virtual void ForceDropOfCarriedPhysObjects( CBaseEntity *pOnlyIfHoldindThis = NULL ) {}
   virtual float GetHeldObjectMass( IPhysicsObject *pHeldObject );
+  virtual CBaseEntity *GetHeldObject( void );
 
   void CheckSuitUpdate();
   void SetSuitUpdate( const char *name, int fgroup, int iNoRepeat );
@@ -762,6 +763,7 @@ class CBasePlayer : public CBaseCombatCharacter
   void SetTouchedPhysics( bool bTouch );
   bool TouchedPhysics( void );
   Vector GetSmoothedVelocity( void );
+  CBaseEntity *FindPlayerStart( const char *pszClassName );
 
   virtual void RefreshCollisionBounds( void );
   virtual void InitVCollision( const Vector &vecAbsOrigin, const Vector &vecAbsVelocity );
@@ -961,6 +963,14 @@ class CBasePlayer : public CBaseCombatCharacter
   bool IsPredictingWeapons( void ) const;
   int CurrentCommandNumber() const;
   const CUserCmd *GetCurrentUserCommand() const;
+  int GetLockViewanglesTickNumber() const
+  {
+    return m_iLockViewanglesTickNumber;
+  }
+  QAngle GetLockViewanglesData() const
+  {
+    return m_qangLockViewangles;
+  }
 
   int GetFOV( void );                                                                          // Get the current FOV value
   int GetDefaultFOV( void ) const;                                                             // Default FOV if not specified otherwise
@@ -1155,7 +1165,11 @@ class CBasePlayer : public CBaseCombatCharacter
   {
     return m_hMyWearables[i];
   }
-  int GetNumWearables( void )
+  const CEconWearable *GetWearable( int i ) const
+  {
+    return m_hMyWearables[i];
+  }
+  int GetNumWearables( void ) const
   {
     return m_hMyWearables.Count();
   }
@@ -1325,6 +1339,8 @@ class CBasePlayer : public CBaseCombatCharacter
   // Last received usercmd (in case we drop a lot of packets )
   CUserCmd m_LastCmd;
   CUserCmd *m_pCurrentCommand;
+  int m_iLockViewanglesTickNumber;
+  QAngle m_qangLockViewangles;
 
   float m_flStepSoundTime;  // time to check for next footstep sound
 
@@ -1387,19 +1403,6 @@ class CBasePlayer : public CBaseCombatCharacter
   bool m_bPlayerUnderwater;
 
   EHANDLE m_hViewEntity;
-
-#ifdef ARGG
- public:
-  // adnan
-  // send the use angles for the current player... set when they press use
-  // UPDATE: this could be improved somehow by only storing these on the server side
-  //  - set a flag on the client and send that, stating that the viewangles shouldnt change
-  //  - ... maybe not
-  CNetworkQAngle( m_vecUseAngles );
-  // end adnan
-
- private:
-#endif
 
   // Movement constraints
   CNetworkHandle( CBaseEntity, m_hConstraintEntity );
@@ -1655,10 +1658,6 @@ inline bool CBasePlayer::IsFiringWeapon( void ) const
 {
   return m_weaponFiredTimer.HasStarted() && m_weaponFiredTimer.IsLessThen( 1.0f );
 }
-
-#ifdef HL2SB
-extern CBaseEntity *FindPlayerStart( const char *pszClassName );
-#endif
 
 //-----------------------------------------------------------------------------
 // Converts an entity to a player

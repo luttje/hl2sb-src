@@ -182,8 +182,10 @@ class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
 
   // panel position & size
   // all units are in pixels
-  void SetPos( int x, int y );                             // sets position of panel, in local space (ie. relative to parent's position)
-  void GetPos( int &x, int &y );                           // gets local position of panel
+  void SetPos( int x, int y );    // sets position of panel, in local space (ie. relative to parent's position)
+  void GetPos( int &x, int &y );  // gets local position of panel
+  int GetXPos();
+  int GetYPos();
   void SetSize( int wide, int tall );                      // sets size of panel
   void GetSize( int &wide, int &tall );                    // gets size of panel
   void SetBounds( int x, int y, int wide, int tall );      // combination of SetPos/SetSize
@@ -281,6 +283,8 @@ class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
     PIN_CENTER_RIGHT,
     PIN_CENTER_BOTTOM,
     PIN_CENTER_LEFT,
+
+    PIN_LAST
   };
 
   // specifies the auto-resize directions for the panel
@@ -405,6 +409,7 @@ class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
   virtual void OnMousePressed( MouseCode code );
   virtual void OnMouseDoublePressed( MouseCode code );
   virtual void OnMouseReleased( MouseCode code );
+  virtual void OnMouseMismatchedRelease( MouseCode code, Panel *pPressedPanel );
   virtual void OnMouseWheeled( int delta );
 
   // Trip pressing (e.g., select all text in a TextEntry) requires this to be enabled
@@ -720,6 +725,8 @@ class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
   virtual void PaintTraverse( bool Repaint, bool allowForce = true );
 
  protected:
+  virtual void OnChildSettingsApplied( KeyValues *pInResourceData, Panel *pChild );
+
   MESSAGE_FUNC_ENUM_ENUM( OnRequestFocus, "OnRequestFocus", VPANEL, subFocus, VPANEL, defaultPanel );
   MESSAGE_FUNC_INT_INT( OnScreenSizeChanged, "OnScreenSizeChanged", oldwide, oldtall );
   virtual void *QueryInterface( EInterfaceID id );
@@ -988,6 +995,8 @@ class Panel : public IClientPanel, virtual IForceVirtualInheritancePanel
   bool m_bWorldPositionCurrentFrame;  // if set, Panel gets PerformLayout called after the camera and the renderer's m_matrixWorldToScreen has been setup, so panels can be correctly attached to entities in the world
 
   bool m_bForceStereoRenderToFrameBuffer;
+
+  static Panel *m_sMousePressedPanels[( MOUSE_MIDDLE - MOUSE_LEFT ) + 1];
 
   CPanelAnimationVar( float, m_flAlpha, "alpha", "255" );
 

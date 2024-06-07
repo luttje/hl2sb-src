@@ -9,7 +9,7 @@
 #define HL2MP_PLAYER_H
 #pragma once
 
-class C_HL2MP_Player;
+#include "hl2mp_playeranimstate.h"
 #include "c_basehlplayer.h"
 #include "hl2mp_player_shared.h"
 #include "beamdraw.h"
@@ -36,11 +36,8 @@ class C_HL2MP_Player : public C_BaseHLPlayer
   virtual int DrawModel( int flags );
   virtual void AddEntity( void );
 
-  QAngle GetAnimEyeAngles( void )
-  {
-    return m_angEyeAngles;
-  }
-  Vector GetAttackSpread( CBaseCombatWeapon *pWeapon, CBaseEntity *pTarget = NULL );
+  Vector GetAttackSpread( CBaseCombatWeapon *pWeapon,
+                          CBaseEntity *pTarget = NULL );
 
   // Should this object cast shadows?
   virtual ShadowType_t ShadowCastType( void );
@@ -50,7 +47,8 @@ class C_HL2MP_Player : public C_BaseHLPlayer
   virtual void OnDataChanged( DataUpdateType_t type );
   virtual float GetFOV( void );
   virtual CStudioHdr *OnNewModel( void );
-  virtual void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator );
+  virtual void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir,
+                            trace_t *ptr, CDmgAccumulator *pAccumulator );
   virtual void ItemPreFrame( void );
   virtual void ItemPostFrame( void );
   virtual float GetMinFOV() const
@@ -59,14 +57,18 @@ class C_HL2MP_Player : public C_BaseHLPlayer
   }
   virtual Vector GetAutoaimVector( float flDelta );
   virtual void NotifyShouldTransmit( ShouldTransmitState_t state );
-  virtual void CreateLightEffects( void ) {}
+  virtual void CreateLightEffects( void )
+  {
+  }
   virtual bool ShouldReceiveProjectedTextures( int flags );
   virtual void PostDataUpdate( DataUpdateType_t updateType );
-  virtual void PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface, float fvol, bool force );
+  virtual void PlayStepSound( Vector &vecOrigin, surfacedata_t *psurface,
+                              float fvol, bool force );
   virtual void PreThink( void );
   virtual void DoImpactEffect( trace_t &tr, int nDamageType );
   IRagdoll *GetRepresentativeRagdoll() const;
-  virtual void CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear, float &zFar, float &fov );
+  virtual void CalcView( Vector &eyeOrigin, QAngle &eyeAngles, float &zNear,
+                         float &zFar, float &fov );
   virtual const QAngle &EyeAngles( void );
 
   bool CanSprint( void );
@@ -90,12 +92,25 @@ class C_HL2MP_Player : public C_BaseHLPlayer
     return m_fIsWalking;
   }
 
-  virtual void PostThink( void );
+  virtual void UpdateClientSideAnimation();
+  void DoAnimationEvent( PlayerAnimEvent_t event, int nData = 0 );
+  virtual void CalculateIKLocks( float currentTime );
+
+  static void RecvProxy_CycleLatch( const CRecvProxyData *pData, void *pStruct, void *pOut );
+
+  virtual float GetServerIntendedCycle()
+  {
+    return m_flServerCycle;
+  }
+  virtual void SetServerIntendedCycle( float cycle )
+  {
+    m_flServerCycle = cycle;
+  }
 
  private:
   C_HL2MP_Player( const C_HL2MP_Player & );
 
-  CPlayerAnimState m_PlayerAnimState;
+  CHL2MPPlayerAnimState *m_PlayerAnimState;
 
   QAngle m_angEyeAngles;
 
@@ -132,6 +147,8 @@ class C_HL2MP_Player : public C_BaseHLPlayer
   CNetworkVar( HL2MPPlayerState, m_iPlayerState );
 
   bool m_fIsWalking;
+  int m_cycleLatch;  // The animation cycle goes out of sync very easily. Mostly from the player entering/exiting PVS. Server will frequently update us with a new one.
+  float m_flServerCycle;
 };
 
 inline C_HL2MP_Player *ToHL2MPPlayer( CBaseEntity *pEntity )
@@ -156,12 +173,17 @@ class C_HL2MPRagdoll : public C_BaseAnimatingOverlay
   int GetPlayerEntIndex() const;
   IRagdoll *GetIRagdoll() const;
 
-  void ImpactTrace( trace_t *pTrace, int iDamageType, const char *pCustomImpactName );
+  void ImpactTrace( trace_t *pTrace, int iDamageType,
+                    const char *pCustomImpactName );
   void UpdateOnRemove( void );
-  virtual void SetupWeights( const matrix3x4_t *pBoneToWorld, int nFlexWeightCount, float *pFlexWeights, float *pFlexDelayedWeights );
+  virtual void SetupWeights( const matrix3x4_t *pBoneToWorld,
+                             int nFlexWeightCount, float *pFlexWeights,
+                             float *pFlexDelayedWeights );
 
  private:
-  C_HL2MPRagdoll( const C_HL2MPRagdoll & ) {}
+  C_HL2MPRagdoll( const C_HL2MPRagdoll & )
+  {
+  }
 
   void Interp_Copy( C_BaseAnimatingOverlay *pDestinationEntity );
   void CreateHL2MPRagdoll( void );

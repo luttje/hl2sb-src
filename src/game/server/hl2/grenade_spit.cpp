@@ -237,12 +237,8 @@ void CGrenadeSpit::Think( void )
   if ( m_pHissSound == NULL )
     return;
 
-    // Add a doppler effect to the balls as they travel
-#ifdef HL2SB
-  CBaseEntity *pPlayer = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
+  // Add a doppler effect to the balls as they travel
   CBaseEntity *pPlayer = AI_GetSinglePlayer();
-#endif
   if ( pPlayer != NULL )
   {
     Vector dir;

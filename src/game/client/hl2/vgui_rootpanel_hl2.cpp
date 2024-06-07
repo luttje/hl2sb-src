@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "vgui_int.h"
 #include "ienginevgui.h"
+
 #ifdef LUA_SDK
 #include "vgui/IVgui.h"
 #include "vgui_rootpanel_hl2.h"
@@ -24,7 +25,8 @@ C_ScriptedBaseGameUIPanel *g_pScriptedBaseGameUIPanel = NULL;
 //-----------------------------------------------------------------------------
 void VGUI_CreateGameUIRootPanel( void )
 {
-  g_pScriptedBaseGameUIPanel = new C_ScriptedBaseGameUIPanel( enginevgui->GetPanel( PANEL_GAMEUIDLL ) );
+  g_pScriptedBaseGameUIPanel =
+      new C_ScriptedBaseGameUIPanel( enginevgui->GetPanel( PANEL_GAMEUIDLL ) );
 }
 
 //-----------------------------------------------------------------------------

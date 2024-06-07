@@ -109,7 +109,6 @@ class C_BaseTeamObjectiveResource : public C_BaseEntity
     Assert( iCapper != TEAM_UNASSIGNED );
 
     return GetIconForTeam( index, iCapper );
-    ;
   }
 
   // Icon for the specified team

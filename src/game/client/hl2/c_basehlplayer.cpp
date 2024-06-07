@@ -53,6 +53,11 @@ RecvPropDataTable( RECVINFO_DT( m_HL2Local ), 0, &REFERENCE_RECV_TABLE( DT_HL2Lo
 
 static ConCommand dropprimary( "dropprimary", CC_DropPrimary, "dropprimary: Drops the primary weapon of the player." );
 
+// Tony; link to the correct class.
+#if !defined( HL2MP )
+LINK_ENTITY_TO_CLASS( player, C_BaseHLPlayer );
+#endif
+
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------

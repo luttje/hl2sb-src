@@ -521,7 +521,7 @@ void CInput::ApplyMouse( QAngle &viewangles, CUserCmd *cmd, float mouse_x, float
       }
       else
       {
-        viewangles[PITCH] += m_pitch->GetFloat() * mouse_y;
+        viewangles[PITCH] += CAM_CapPitch( m_pitch->GetFloat() * mouse_y );
       }
 
       // Check pitch bounds
@@ -685,18 +685,8 @@ void CInput::MouseMove( CUserCmd *cmd )
     ResetMouse();
   }
 
-#ifdef ARGG
-  // adnan
-  // only set the new viewangles if we're not supposed to override them
-  if ( !( g_pClientMode->OverrideViewAngles() ) )
-  {
-#endif
-    // Store out the new viewangles.
-    engine->SetViewAngles( viewangles );
-#ifdef ARGG
-  }
-  // end adnan
-#endif
+  // Store out the new viewangles.
+  engine->SetViewAngles( viewangles );
 }
 
 //-----------------------------------------------------------------------------

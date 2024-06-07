@@ -22,9 +22,11 @@
 //-----------------------------------------------------------------------------
 // A generator of uniformly distributed random numbers
 //-----------------------------------------------------------------------------
-class IUniformRandomStream
+class VSTDLIB_CLASS IUniformRandomStream
 {
  public:
+  // virtual ~IUniformRandomStream() { }
+
   // Sets the seed of the random number generator
   virtual void SetSeed( int iSeed ) = 0;
 
@@ -92,6 +94,30 @@ VSTDLIB_INTERFACE float RandomFloat( float flMinVal = 0.0f, float flMaxVal = 1.0
 VSTDLIB_INTERFACE float RandomFloatExp( float flMinVal = 0.0f, float flMaxVal = 1.0f, float flExponent = 1.0f );
 VSTDLIB_INTERFACE int RandomInt( int iMinVal, int iMaxVal );
 VSTDLIB_INTERFACE float RandomGaussianFloat( float flMean = 0.0f, float flStdDev = 1.0f );
+
+//-----------------------------------------------------------------------------
+// IUniformRandomStream interface for free functions
+//-----------------------------------------------------------------------------
+class VSTDLIB_CLASS CDefaultUniformRandomStream : public IUniformRandomStream
+{
+ public:
+  virtual void SetSeed( int iSeed ) OVERRIDE
+  {
+    RandomSeed( iSeed );
+  }
+  virtual float RandomFloat( float flMinVal, float flMaxVal ) OVERRIDE
+  {
+    return ::RandomFloat( flMinVal, flMaxVal );
+  }
+  virtual int RandomInt( int iMinVal, int iMaxVal ) OVERRIDE
+  {
+    return ::RandomInt( iMinVal, iMaxVal );
+  }
+  virtual float RandomFloatExp( float flMinVal, float flMaxVal, float flExponent ) OVERRIDE
+  {
+    return ::RandomFloatExp( flMinVal, flMaxVal, flExponent );
+  }
+};
 
 //-----------------------------------------------------------------------------
 // Installs a global random number generator, which will affect the Random functions above

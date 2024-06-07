@@ -447,7 +447,8 @@ class CDynamicProp : public CBreakableProp, public IPositionWatcher
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-class CPhysicsProp : public CBreakableProp
+DECLARE_AUTO_LIST( IPhysicsPropAutoList );
+class CPhysicsProp : public CBreakableProp, public IPhysicsPropAutoList
 {
   DECLARE_CLASS( CPhysicsProp, CBreakableProp );
   DECLARE_SERVERCLASS();

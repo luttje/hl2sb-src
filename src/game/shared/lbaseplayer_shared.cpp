@@ -1,11 +1,10 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose: Implements shared baseplayer class functionality
 //
 // $NoKeywords: $
 //=============================================================================//
-
-#define lbaseplayer_shared_cpp
 
 #include "cbase.h"
 #include "luamanager.h"
@@ -31,7 +30,8 @@
 
 LUA_API lua_CBasePlayer *lua_toplayer( lua_State *L, int idx )
 {
-  CBaseHandle *phPlayer = dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
+  CBaseHandle *phPlayer =
+      dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
   if ( phPlayer == NULL )
     return NULL;
   return dynamic_cast< lua_CBasePlayer * >( phPlayer->Get() );
@@ -43,7 +43,8 @@ LUA_API lua_CBasePlayer *lua_toplayer( lua_State *L, int idx )
 
 LUA_API void lua_pushplayer( lua_State *L, CBasePlayer *pPlayer )
 {
-  CBaseHandle *phPlayer = ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
+  CBaseHandle *phPlayer =
+      ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
   phPlayer->Set( pPlayer );
   luaL_getmetatable( L, "CBasePlayer" );
   lua_setmetatable( L, -2 );
@@ -127,13 +128,17 @@ static int CBasePlayer_EyePosition( lua_State *L )
 
 static int CBasePlayer_EyePositionAndVectors( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->EyePositionAndVectors( &luaL_checkvector( L, 2 ), &luaL_checkvector( L, 3 ), &luaL_checkvector( L, 4 ), &luaL_checkvector( L, 5 ) );
+  luaL_checkplayer( L, 1 )->EyePositionAndVectors(
+      &luaL_checkvector( L, 2 ), &luaL_checkvector( L, 3 ),
+      &luaL_checkvector( L, 4 ), &luaL_checkvector( L, 5 ) );
   return 0;
 }
 
 static int CBasePlayer_EyeVectors( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->EyeVectors( &luaL_checkvector( L, 2 ), &luaL_optvector( L, 3, NULL ), &luaL_optvector( L, 4, NULL ) );
+  luaL_checkplayer( L, 1 )->EyeVectors( &luaL_checkvector( L, 2 ),
+                                        &luaL_optvector( L, 3, NULL ),
+                                        &luaL_optvector( L, 4, NULL ) );
   return 0;
 }
 
@@ -158,10 +163,12 @@ static int CBasePlayer_GetAmmoCount( lua_State *L )
   {
     case LUA_TNUMBER:
     default:
-      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetAmmoCount( luaL_checkint( L, 2 ) ) );
+      lua_pushinteger(
+          L, luaL_checkplayer( L, 1 )->GetAmmoCount( luaL_checkint( L, 2 ) ) );
       break;
     case LUA_TSTRING:
-      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetAmmoCount( ( char * )luaL_checkstring( L, 2 ) ) );
+      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetAmmoCount(
+                              ( char * )luaL_checkstring( L, 2 ) ) );
       break;
   }
   return 1;
@@ -198,11 +205,10 @@ static int CBasePlayer_GetDefaultFOV( lua_State *L )
   return 1;
 }
 
-static int CBasePlayer_GetEFNoInterpParity( lua_State *L )
-{
-  lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetEFNoInterpParity() );
-  return 1;
-}
+// static int CBasePlayer_GetEFNoInterpParity (lua_State *L) {
+//   lua_pushinteger(L, luaL_checkplayer(L, 1)->GetEFNoInterpParity());
+//   return 1;
+// }
 
 static int CBasePlayer_GetFOV( lua_State *L )
 {
@@ -274,6 +280,7 @@ static int CBasePlayer_GetPlayerLocalData( lua_State *L )
 {
   CBasePlayer *pPlayer = luaL_checkplayer( L, 1 );
   lua_newtable( L );
+
   lua_pushinteger( L, pPlayer->m_Local.m_iHideHUD );
   lua_setfield( L, -2, "m_iHideHUD" );
 
@@ -423,7 +430,8 @@ static int CBasePlayer_GetUserID( lua_State *L )
 // FIXME: push CBaseViewModel instead
 static int CBasePlayer_GetViewModel( lua_State *L )
 {
-  lua_pushanimating( L, luaL_checkplayer( L, 1 )->GetViewModel( luaL_optint( L, 2, 0 ) ) );
+  lua_pushanimating(
+      L, luaL_checkplayer( L, 1 )->GetViewModel( luaL_optint( L, 2, 0 ) ) );
   return 1;
 }
 
@@ -445,11 +453,10 @@ static int CBasePlayer_HintMessage( lua_State *L )
   return 0;
 }
 
-static int CBasePlayer_IncrementEFNoInterpParity( lua_State *L )
-{
-  luaL_checkplayer( L, 1 )->IncrementEFNoInterpParity();
-  return 0;
-}
+// static int CBasePlayer_IncrementEFNoInterpParity (lua_State *L) {
+//   luaL_checkplayer(L, 1)->IncrementEFNoInterpParity();
+//   return 0;
+// }
 
 static int CBasePlayer_IsBot( lua_State *L )
 {
@@ -495,7 +502,8 @@ static int CBasePlayer_IsSuitEquipped( lua_State *L )
 
 static int CBasePlayer_IsUseableEntity( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsUseableEntity( luaL_checkentity( L, 2 ), luaL_checkint( L, 3 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsUseableEntity(
+                          luaL_checkentity( L, 2 ), luaL_checkint( L, 3 ) ) );
   return 1;
 }
 
@@ -532,7 +540,8 @@ static int CBasePlayer_MaxSpeed( lua_State *L )
 
 static int CBasePlayer_MyCombatCharacterPointer( lua_State *L )
 {
-  lua_pushplayer( L, ( CBasePlayer * )luaL_checkplayer( L, 1 )->MyCombatCharacterPointer() );
+  lua_pushplayer(
+      L, ( CBasePlayer * )luaL_checkplayer( L, 1 )->MyCombatCharacterPointer() );
   return 1;
 }
 
@@ -562,7 +571,9 @@ static int CBasePlayer_PlayerUse( lua_State *L )
 
 static int CBasePlayer_PlayStepSound( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->PlayStepSound( luaL_checkvector( L, 2 ), &lua_tosurfacedata( L, 3 ), luaL_checknumber( L, 4 ), luaL_checkboolean( L, 5 ) );
+  luaL_checkplayer( L, 1 )->PlayStepSound(
+      luaL_checkvector( L, 2 ), &lua_tosurfacedata( L, 3 ),
+      luaL_checknumber( L, 4 ), luaL_checkboolean( L, 5 ) );
   return 0;
 }
 
@@ -590,10 +601,12 @@ static int CBasePlayer_RemoveAmmo( lua_State *L )
   {
     case LUA_TNUMBER:
     default:
-      luaL_checkplayer( L, 1 )->RemoveAmmo( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ) );
+      luaL_checkplayer( L, 1 )->RemoveAmmo( luaL_checkint( L, 2 ),
+                                            luaL_checkint( L, 3 ) );
       break;
     case LUA_TSTRING:
-      luaL_checkplayer( L, 1 )->RemoveAmmo( luaL_checkint( L, 2 ), luaL_checkstring( L, 3 ) );
+      luaL_checkplayer( L, 1 )->RemoveAmmo( luaL_checkint( L, 2 ),
+                                            luaL_checkstring( L, 3 ) );
       break;
   }
   return 0;
@@ -601,7 +614,8 @@ static int CBasePlayer_RemoveAmmo( lua_State *L )
 
 static int CBasePlayer_RemoveFromPlayerSimulationList( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->RemoveFromPlayerSimulationList( luaL_checkentity( L, 2 ) );
+  luaL_checkplayer( L, 1 )->RemoveFromPlayerSimulationList(
+      luaL_checkentity( L, 2 ) );
   return 0;
 }
 
@@ -619,7 +633,8 @@ static int CBasePlayer_ResetObserverMode( lua_State *L )
 
 static int CBasePlayer_SelectItem( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->SelectItem( luaL_checkstring( L, 2 ), luaL_optint( L, 3, 0 ) );
+  luaL_checkplayer( L, 1 )->SelectItem( luaL_checkstring( L, 2 ),
+                                        luaL_optint( L, 3, 0 ) );
   return 0;
 }
 
@@ -631,7 +646,8 @@ static int CBasePlayer_SelectLastItem( lua_State *L )
 
 static int CBasePlayer_SetAmmoCount( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->SetAmmoCount( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ) );
+  luaL_checkplayer( L, 1 )->SetAmmoCount( luaL_checkint( L, 2 ),
+                                          luaL_checkint( L, 3 ) );
   return 0;
 }
 
@@ -655,7 +671,9 @@ static int CBasePlayer_SetBloodColor( lua_State *L )
 
 static int CBasePlayer_SetFOV( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->SetFOV( luaL_checkentity( L, 2 ), luaL_checkint( L, 3 ), luaL_checknumber( L, 4 ), luaL_optint( L, 5, 0 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->SetFOV(
+                          luaL_checkentity( L, 2 ), luaL_checkint( L, 3 ),
+                          luaL_checknumber( L, 4 ), luaL_optint( L, 5, 0 ) ) );
   return 1;
 }
 
@@ -681,6 +699,7 @@ static int CBasePlayer_SetPlayerLocalData( lua_State *L )
 {
   CBasePlayer *pPlayer = luaL_checkplayer( L, 1 );
   const char *field = luaL_checkstring( L, 2 );
+
   if ( Q_strcmp( field, "m_iHideHUD" ) == 0 )
     pPlayer->m_Local.m_iHideHUD = luaL_checkint( L, 3 );
 
@@ -728,6 +747,7 @@ static int CBasePlayer_SetPlayerLocalData( lua_State *L )
 
   else if ( Q_strcmp( field, "m_bSlowMovement" ) == 0 )
     pPlayer->m_Local.m_bSlowMovement = ( bool )luaL_checkboolean( L, 3 );
+
   return 0;
 }
 
@@ -739,7 +759,8 @@ static int CBasePlayer_SetPlayerUnderwater( lua_State *L )
 
 static int CBasePlayer_SetPreviouslyPredictedOrigin( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->SetPreviouslyPredictedOrigin( luaL_checkvector( L, 2 ) );
+  luaL_checkplayer( L, 1 )->SetPreviouslyPredictedOrigin(
+      luaL_checkvector( L, 2 ) );
   return 0;
 }
 
@@ -757,23 +778,29 @@ static int CBasePlayer_SetStepSoundCache( lua_State *L )
   if ( index == 0 )
   {
     if ( Q_strcmp( field, "m_SoundParameters" ) == 0 )
-      pPlayer->m_StepSoundCache[0].m_SoundParameters = lua_tosoundparameters( L, 4 );
+      pPlayer->m_StepSoundCache[0].m_SoundParameters =
+          lua_tosoundparameters( L, 4 );
     else if ( Q_strcmp( field, "m_usSoundNameIndex" ) == 0 )
-      pPlayer->m_StepSoundCache[0].m_usSoundNameIndex = ( unsigned short )luaL_checkinteger( L, 4 );
+      pPlayer->m_StepSoundCache[0].m_usSoundNameIndex =
+          ( unsigned short )luaL_checkinteger( L, 4 );
   }
   else if ( index == 1 )
   {
     if ( Q_strcmp( field, "m_SoundParameters" ) == 0 )
-      pPlayer->m_StepSoundCache[1].m_SoundParameters = lua_tosoundparameters( L, 4 );
+      pPlayer->m_StepSoundCache[1].m_SoundParameters =
+          lua_tosoundparameters( L, 4 );
     else if ( Q_strcmp( field, "m_usSoundNameIndex" ) == 0 )
-      pPlayer->m_StepSoundCache[1].m_usSoundNameIndex = ( unsigned short )luaL_checkinteger( L, 4 );
+      pPlayer->m_StepSoundCache[1].m_usSoundNameIndex =
+          ( unsigned short )luaL_checkinteger( L, 4 );
   }
   return 1;
 }
 
 static int CBasePlayer_SetSuitUpdate( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->SetSuitUpdate( ( char * )luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkplayer( L, 1 )->SetSuitUpdate( ( char * )luaL_checkstring( L, 2 ),
+                                           luaL_checkint( L, 3 ),
+                                           luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -821,7 +848,8 @@ static int CBasePlayer_Spawn( lua_State *L )
 
 static int CBasePlayer_SwitchToNextBestWeapon( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->SwitchToNextBestWeapon( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->SwitchToNextBestWeapon(
+                          luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
@@ -857,13 +885,15 @@ static int CBasePlayer_ViewPunchReset( lua_State *L )
 
 static int CBasePlayer_Weapon_CanSwitchTo( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_CanSwitchTo( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->Weapon_CanSwitchTo( luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_Weapon_OwnsThisType( lua_State *L )
 {
-  lua_pushweapon( L, luaL_checkplayer( L, 1 )->Weapon_OwnsThisType( luaL_checkstring( L, 2 ), luaL_optint( L, 3, 0 ) ) );
+  lua_pushweapon( L, luaL_checkplayer( L, 1 )->Weapon_OwnsThisType(
+                         luaL_checkstring( L, 2 ), luaL_optint( L, 3, 0 ) ) );
   return 1;
 }
 
@@ -882,19 +912,22 @@ static int CBasePlayer_Weapon_ShootPosition( lua_State *L )
 
 static int CBasePlayer_Weapon_ShouldSelectItem( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_ShouldSelectItem( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_ShouldSelectItem(
+                          luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_Weapon_ShouldSetLast( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_ShouldSetLast( luaL_checkweapon( L, 2 ), luaL_checkweapon( L, 3 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_ShouldSetLast(
+                          luaL_checkweapon( L, 2 ), luaL_checkweapon( L, 3 ) ) );
   return 1;
 }
 
 static int CBasePlayer_Weapon_Switch( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_Switch( luaL_checkweapon( L, 2 ), luaL_optint( L, 3, 0 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_Switch(
+                          luaL_checkweapon( L, 2 ), luaL_optint( L, 3, 0 ) ) );
   return 1;
 }
 
@@ -907,6 +940,7 @@ static int CBasePlayer_WeaponCount( lua_State *L )
 static int CBasePlayer___index( lua_State *L )
 {
   CBasePlayer *pPlayer = lua_toplayer( L, 1 );
+
   if ( pPlayer == NULL )
   { /* avoid extra test when d is not 0 */
     lua_Debug ar1;
@@ -914,10 +948,13 @@ static int CBasePlayer___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
+
   const char *field = luaL_checkstring( L, 2 );
+
   if ( Q_strcmp( field, "m_afButtonLast" ) == 0 )
     lua_pushinteger( L, pPlayer->m_afButtonLast );
   else if ( Q_strcmp( field, "m_afButtonPressed" ) == 0 )
@@ -934,20 +971,23 @@ static int CBasePlayer___index( lua_State *L )
     lua_pushinteger( L, pPlayer->m_StuckLast );
   else if ( Q_strcmp( field, "m_szAnimExtension" ) == 0 )
     lua_pushstring( L, pPlayer->m_szAnimExtension );
-  else if ( pPlayer->m_nTableReference != LUA_NOREF )
+  else if ( luasrc_isrefvalid( L, pPlayer->m_nTableReference ) )
   {
     lua_getref( L, pPlayer->m_nTableReference );
     lua_getfield( L, -1, field );
+
     if ( lua_isnil( L, -1 ) )
     {
       lua_pop( L, 2 );
       lua_getmetatable( L, 1 );
       lua_getfield( L, -1, field );
+
       if ( lua_isnil( L, -1 ) )
       {
         lua_pop( L, 2 );
         luaL_getmetatable( L, "CBaseAnimating" );
         lua_getfield( L, -1, field );
+
         if ( lua_isnil( L, -1 ) )
         {
           lua_pop( L, 2 );
@@ -961,11 +1001,13 @@ static int CBasePlayer___index( lua_State *L )
   {
     lua_getmetatable( L, 1 );
     lua_getfield( L, -1, field );
+
     if ( lua_isnil( L, -1 ) )
     {
       lua_pop( L, 2 );
       luaL_getmetatable( L, "CBaseAnimating" );
       lua_getfield( L, -1, field );
+
       if ( lua_isnil( L, -1 ) )
       {
         lua_pop( L, 2 );
@@ -987,7 +1029,8 @@ static int CBasePlayer___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   const char *field = luaL_checkstring( L, 2 );
@@ -1014,7 +1057,7 @@ static int CBasePlayer___newindex( lua_State *L )
     Q_strcpy( pPlayer->m_szAnimExtension, luaL_checkstring( L, 3 ) );
   else
   {
-    if ( pPlayer->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, pPlayer->m_nTableReference ) )
     {
       lua_newtable( L );
       pPlayer->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -1039,7 +1082,8 @@ static int CBasePlayer___tostring( lua_State *L )
   if ( pPlayer == NULL )
     lua_pushstring( L, "NULL" );
   else
-    lua_pushfstring( L, "CBasePlayer: %d \"%s\"", pPlayer->GetUserID(), pPlayer->GetPlayerName() );
+    lua_pushfstring( L, "CBasePlayer: %d \"%s\"", pPlayer->GetUserID(),
+                     pPlayer->GetPlayerName() );
   return 1;
 }
 
@@ -1062,7 +1106,7 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "GetBonusProgress", CBasePlayer_GetBonusProgress },
     { "GetDeathTime", CBasePlayer_GetDeathTime },
     { "GetDefaultFOV", CBasePlayer_GetDefaultFOV },
-    { "GetEFNoInterpParity", CBasePlayer_GetEFNoInterpParity },
+    //{"GetEFNoInterpParity", CBasePlayer_GetEFNoInterpParity},
     { "GetFOV", CBasePlayer_GetFOV },
     { "GetFOVDistanceAdjustFactor", CBasePlayer_GetFOVDistanceAdjustFactor },
     { "GetFOVTime", CBasePlayer_GetFOVTime },
@@ -1091,7 +1135,7 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "GetWaterJumpTime", CBasePlayer_GetWaterJumpTime },
     { "GetWeapon", CBasePlayer_GetWeapon },
     { "HintMessage", CBasePlayer_HintMessage },
-    { "IncrementEFNoInterpParity", CBasePlayer_IncrementEFNoInterpParity },
+    //{"IncrementEFNoInterpParity", CBasePlayer_IncrementEFNoInterpParity},
     { "IsBot", CBasePlayer_IsBot },
     { "IsHLTV", CBasePlayer_IsHLTV },
     { "IsInAVehicle", CBasePlayer_IsInAVehicle },
@@ -1115,7 +1159,8 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "PreThink", CBasePlayer_PreThink },
     { "RemoveAllAmmo", CBasePlayer_RemoveAllAmmo },
     { "RemoveAmmo", CBasePlayer_RemoveAmmo },
-    { "RemoveFromPlayerSimulationList", CBasePlayer_RemoveFromPlayerSimulationList },
+    { "RemoveFromPlayerSimulationList",
+      CBasePlayer_RemoveFromPlayerSimulationList },
     { "ResetAutoaim", CBasePlayer_ResetAutoaim },
     { "ResetObserverMode", CBasePlayer_ResetObserverMode },
     { "SelectItem", CBasePlayer_SelectItem },
@@ -1138,13 +1183,15 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "SetWaterJumpTime", CBasePlayer_SetWaterJumpTime },
     { "SharedSpawn", CBasePlayer_SharedSpawn },
     { "ShouldShowHints", CBasePlayer_ShouldShowHints },
-    { "SimulatePlayerSimulatedEntities", CBasePlayer_SimulatePlayerSimulatedEntities },
+    { "SimulatePlayerSimulatedEntities",
+      CBasePlayer_SimulatePlayerSimulatedEntities },
     { "SmoothViewOnStairs", CBasePlayer_SmoothViewOnStairs },
     { "Spawn", CBasePlayer_Spawn },
     { "SwitchToNextBestWeapon", CBasePlayer_SwitchToNextBestWeapon },
     { "UpdateClientData", CBasePlayer_UpdateClientData },
     { "UpdateUnderwaterState", CBasePlayer_UpdateUnderwaterState },
-    { "UsingStandardWeaponsInVehicle", CBasePlayer_UsingStandardWeaponsInVehicle },
+    { "UsingStandardWeaponsInVehicle",
+      CBasePlayer_UsingStandardWeaponsInVehicle },
     { "ViewPunch", CBasePlayer_ViewPunch },
     { "ViewPunchReset", CBasePlayer_ViewPunchReset },
     { "Weapon_CanSwitchTo", CBasePlayer_Weapon_CanSwitchTo },
@@ -1168,8 +1215,7 @@ static int luasrc_ToBasePlayer( lua_State *L )
 }
 
 static const luaL_Reg CBasePlayer_funcs[] = {
-    { "ToBasePlayer", luasrc_ToBasePlayer },
-    { NULL, NULL } };
+    { "ToBasePlayer", luasrc_ToBasePlayer }, { NULL, NULL } };
 
 /*
 ** Open CBasePlayer object

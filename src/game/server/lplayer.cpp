@@ -1,10 +1,8 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose: Functions dealing with the player.
 //
 //===========================================================================//
-
-#define lplayer_cpp
 
 #include "cbase.h"
 #include "luamanager.h"
@@ -22,13 +20,19 @@ static int CBasePlayer_GiveAmmo( lua_State *L )
   switch ( lua_type( L, 3 ) )
   {
     case LUA_TNUMBER:
-      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ), luaL_optboolean( L, 4, false ) ) );
+      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo(
+                              luaL_checkint( L, 2 ), luaL_checkint( L, 3 ),
+                              luaL_optboolean( L, 4, false ) ) );
       break;
     case LUA_TSTRING:
-      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo( luaL_checkint( L, 2 ), luaL_checkstring( L, 3 ), luaL_optboolean( L, 4, false ) ) );
+      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo(
+                              luaL_checkint( L, 2 ), luaL_checkstring( L, 3 ),
+                              luaL_optboolean( L, 4, false ) ) );
       break;
     default:
-      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo( luaL_checkint( L, 2 ), luaL_checkint( L, 3 ), luaL_optboolean( L, 4, false ) ) );
+      lua_pushinteger( L, luaL_checkplayer( L, 1 )->GiveAmmo(
+                              luaL_checkint( L, 2 ), luaL_checkint( L, 3 ),
+                              luaL_optboolean( L, 4, false ) ) );
       break;
   }
   return 1;
@@ -132,13 +136,15 @@ static int CBasePlayer_ForceSimulation( lua_State *L )
 
 static int CBasePlayer_TakeHealth( lua_State *L )
 {
-  lua_pushinteger( L, luaL_checkplayer( L, 1 )->TakeHealth( luaL_checknumber( L, 2 ), luaL_checkinteger( L, 3 ) ) );
+  lua_pushinteger( L, luaL_checkplayer( L, 1 )->TakeHealth(
+                          luaL_checknumber( L, 2 ), luaL_checkinteger( L, 3 ) ) );
   return 1;
 }
 
 static int CBasePlayer_DamageEffect( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->DamageEffect( luaL_checknumber( L, 2 ), luaL_checkinteger( L, 3 ) );
+  luaL_checkplayer( L, 1 )->DamageEffect( luaL_checknumber( L, 2 ),
+                                          luaL_checkinteger( L, 3 ) );
   return 0;
 }
 
@@ -186,7 +192,8 @@ static int CBasePlayer_BodyAngles( lua_State *L )
 
 static int CBasePlayer_BodyTarget( lua_State *L )
 {
-  lua_pushvector( L, luaL_checkplayer( L, 1 )->BodyTarget( luaL_checkvector( L, 2 ), luaL_checkboolean( L, 3 ) ) );
+  lua_pushvector( L, luaL_checkplayer( L, 1 )->BodyTarget(
+                         luaL_checkvector( L, 2 ), luaL_checkboolean( L, 3 ) ) );
   return 1;
 }
 
@@ -198,7 +205,8 @@ static int CBasePlayer_ShouldFadeOnDeath( lua_State *L )
 
 static int CBasePlayer_OnTakeDamage_Alive( lua_State *L )
 {
-  lua_pushinteger( L, luaL_checkplayer( L, 1 )->OnTakeDamage_Alive( luaL_checkdamageinfo( L, 2 ) ) );
+  lua_pushinteger( L, luaL_checkplayer( L, 1 )->OnTakeDamage_Alive(
+                          luaL_checkdamageinfo( L, 2 ) ) );
   return 1;
 }
 
@@ -210,13 +218,14 @@ static int CBasePlayer_Event_Killed( lua_State *L )
 
 static int CBasePlayer_Event_KilledOther( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->Event_KilledOther( luaL_checkentity( L, 2 ), luaL_checkdamageinfo( L, 3 ) );
+  luaL_checkplayer( L, 1 )->Event_KilledOther( luaL_checkentity( L, 2 ),
+                                               luaL_checkdamageinfo( L, 3 ) );
   return 0;
 }
 
 static int CBasePlayer_Event_Dying( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->Event_Dying();
+  luaL_checkplayer( L, 1 )->Event_Dying( luaL_checkdamageinfo( L, 2 ) );
   return 0;
 }
 
@@ -282,13 +291,15 @@ static int CBasePlayer_IsDead( lua_State *L )
 
 static int CBasePlayer_HasPhysicsFlag( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->HasPhysicsFlag( luaL_checkinteger( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->HasPhysicsFlag( luaL_checkinteger( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_Weapon_CanUse( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->Weapon_CanUse( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->Weapon_CanUse( luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
@@ -300,7 +311,9 @@ static int CBasePlayer_Weapon_Equip( lua_State *L )
 
 static int CBasePlayer_Weapon_Drop( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->Weapon_Drop( luaL_checkweapon( L, 2 ), &luaL_optvector( L, 3, NULL ), &luaL_optvector( L, 4, NULL ) );
+  luaL_checkplayer( L, 1 )->Weapon_Drop( luaL_checkweapon( L, 2 ),
+                                         &luaL_optvector( L, 3, NULL ),
+                                         &luaL_optvector( L, 4, NULL ) );
   return 0;
 }
 
@@ -310,21 +323,24 @@ static int CBasePlayer_Weapon_DropSlot( lua_State *L )
   return 0;
 }
 
-static int CBasePlayer_Weapon_GetLast( lua_State *L )
+static int CBasePlayer_Weapon_GetLastWeapon( lua_State *L )
 {
-  lua_pushweapon( L, luaL_checkplayer( L, 1 )->Weapon_GetLast() );
+  lua_pushweapon( L, luaL_checkplayer( L, 1 )->GetLastWeapon() );
   return 1;
 }
 
 static int CBasePlayer_HasAnyAmmoOfType( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->HasAnyAmmoOfType( luaL_checkinteger( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->HasAnyAmmoOfType( luaL_checkinteger( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_RumbleEffect( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->RumbleEffect( luaL_checkinteger( L, 2 ), luaL_checkinteger( L, 3 ), luaL_checkinteger( L, 4 ) );
+  luaL_checkplayer( L, 1 )->RumbleEffect( luaL_checkinteger( L, 2 ),
+                                          luaL_checkinteger( L, 3 ),
+                                          luaL_checkinteger( L, 4 ) );
   return 0;
 }
 
@@ -361,7 +377,8 @@ static int CBasePlayer_FlashlightTurnOff( lua_State *L )
 static int CBasePlayer_IsIlluminatedByFlashlight( lua_State *L )
 {
   float flDot;
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsIlluminatedByFlashlight( luaL_checkentity( L, 2 ), &flDot ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsIlluminatedByFlashlight(
+                          luaL_checkentity( L, 2 ), &flDot ) );
   lua_pushnumber( L, flDot );
   return 2;
 }
@@ -417,7 +434,8 @@ static int CBasePlayer_IsSinglePlayerGameEnding( lua_State *L )
 
 static int CBasePlayer_StartObserverMode( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->StartObserverMode( luaL_checkinteger( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->StartObserverMode( luaL_checkinteger( L, 2 ) ) );
   return 1;
 }
 
@@ -429,25 +447,29 @@ static int CBasePlayer_StopObserverMode( lua_State *L )
 
 static int CBasePlayer_ModeWantsSpectatorGUI( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->ModeWantsSpectatorGUI( luaL_checkinteger( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->ModeWantsSpectatorGUI(
+                          luaL_checkinteger( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_FindNextObserverTarget( lua_State *L )
 {
-  lua_pushentity( L, luaL_checkplayer( L, 1 )->FindNextObserverTarget( luaL_checkboolean( L, 2 ) ) );
+  lua_pushentity( L, luaL_checkplayer( L, 1 )->FindNextObserverTarget(
+                         luaL_checkboolean( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_GetNextObserverSearchStartPoint( lua_State *L )
 {
-  lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetNextObserverSearchStartPoint( luaL_checkboolean( L, 2 ) ) );
+  lua_pushinteger( L, luaL_checkplayer( L, 1 )->GetNextObserverSearchStartPoint(
+                          luaL_checkboolean( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_IsValidObserverTarget( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsValidObserverTarget( luaL_checkentity( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->IsValidObserverTarget(
+                          luaL_checkentity( L, 2 ) ) );
   return 1;
 }
 
@@ -459,7 +481,8 @@ static int CBasePlayer_CheckObserverSettings( lua_State *L )
 
 static int CBasePlayer_JumptoPosition( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->JumptoPosition( luaL_checkvector( L, 2 ), luaL_checkangle( L, 3 ) );
+  luaL_checkplayer( L, 1 )->JumptoPosition( luaL_checkvector( L, 2 ),
+                                            luaL_checkangle( L, 3 ) );
   return 0;
 }
 
@@ -477,7 +500,9 @@ static int CBasePlayer_ValidateCurrentObserverTarget( lua_State *L )
 
 static int CBasePlayer_StartReplayMode( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->StartReplayMode( luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ), luaL_checkinteger( L, 4 ) ) );
+  lua_pushboolean( L, luaL_checkplayer( L, 1 )->StartReplayMode(
+                          luaL_checknumber( L, 2 ), luaL_checknumber( L, 3 ),
+                          luaL_checkinteger( L, 4 ) ) );
   return 1;
 }
 
@@ -519,7 +544,8 @@ static int CBasePlayer_GetVehicleAnalogControlBias( lua_State *L )
 
 static int CBasePlayer_SetVehicleAnalogControlBias( lua_State *L )
 {
-  luaL_checkplayer( L, 1 )->SetVehicleAnalogControlBias( luaL_checkinteger( L, 2 ) );
+  luaL_checkplayer( L, 1 )->SetVehicleAnalogControlBias(
+      luaL_checkinteger( L, 2 ) );
   return 0;
 }
 
@@ -537,19 +563,22 @@ static int CBasePlayer_GetVehicleEntity( lua_State *L )
 
 static int CBasePlayer_BumpWeapon( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->BumpWeapon( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean( L,
+                   luaL_checkplayer( L, 1 )->BumpWeapon( luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_RemovePlayerItem( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkplayer( L, 1 )->RemovePlayerItem( luaL_checkweapon( L, 2 ) ) );
+  lua_pushboolean(
+      L, luaL_checkplayer( L, 1 )->RemovePlayerItem( luaL_checkweapon( L, 2 ) ) );
   return 1;
 }
 
 static int CBasePlayer_HasNamedPlayerItem( lua_State *L )
 {
-  lua_pushentity( L, luaL_checkplayer( L, 1 )->HasNamedPlayerItem( luaL_checkstring( L, 2 ) ) );
+  lua_pushentity(
+      L, luaL_checkplayer( L, 1 )->HasNamedPlayerItem( luaL_checkstring( L, 2 ) ) );
   return 1;
 }
 
@@ -561,7 +590,8 @@ static int CBasePlayer_HasWeapons( lua_State *L )
 
 static int CBasePlayer_GiveNamedItem( lua_State *L )
 {
-  lua_pushentity( L, luaL_checkplayer( L, 1 )->GiveNamedItem( luaL_checkstring( L, 2 ), luaL_optinteger( L, 3, 0 ) ) );
+  lua_pushentity( L, luaL_checkplayer( L, 1 )->GiveNamedItem(
+                         luaL_checkstring( L, 2 ), luaL_optinteger( L, 3, 0 ) ) );
   return 1;
 }
 
@@ -637,7 +667,7 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "Weapon_Equip", CBasePlayer_Weapon_Equip },
     { "Weapon_Drop", CBasePlayer_Weapon_Drop },
     { "Weapon_DropSlot", CBasePlayer_Weapon_DropSlot },
-    { "Weapon_GetLast", CBasePlayer_Weapon_GetLast },
+    { "Weapon_GetLastWeapon", CBasePlayer_Weapon_GetLastWeapon },
     { "HasAnyAmmoOfType", CBasePlayer_HasAnyAmmoOfType },
     { "RumbleEffect", CBasePlayer_RumbleEffect },
     { "IsOnLadder", CBasePlayer_IsOnLadder },
@@ -658,12 +688,14 @@ static const luaL_Reg CBasePlayermeta[] = {
     { "StopObserverMode", CBasePlayer_StopObserverMode },
     { "ModeWantsSpectatorGUI", CBasePlayer_ModeWantsSpectatorGUI },
     { "FindNextObserverTarget", CBasePlayer_FindNextObserverTarget },
-    { "GetNextObserverSearchStartPoint", CBasePlayer_GetNextObserverSearchStartPoint },
+    { "GetNextObserverSearchStartPoint",
+      CBasePlayer_GetNextObserverSearchStartPoint },
     { "IsValidObserverTarget", CBasePlayer_IsValidObserverTarget },
     { "CheckObserverSettings", CBasePlayer_CheckObserverSettings },
     { "JumptoPosition", CBasePlayer_JumptoPosition },
     { "ForceObserverMode", CBasePlayer_ForceObserverMode },
-    { "ValidateCurrentObserverTarget", CBasePlayer_ValidateCurrentObserverTarget },
+    { "ValidateCurrentObserverTarget",
+      CBasePlayer_ValidateCurrentObserverTarget },
     { "StartReplayMode", CBasePlayer_StartReplayMode },
     { "StopReplayMode", CBasePlayer_StopReplayMode },
     { "GetDelayTicks", CBasePlayer_GetDelayTicks },

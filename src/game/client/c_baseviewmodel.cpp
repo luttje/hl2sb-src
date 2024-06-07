@@ -18,6 +18,9 @@
 #include "tools/bonelist.h"
 #include <KeyValues.h>
 #include "hltvcamera.h"
+#ifdef TF_CLIENT_DLL
+#include "tf_weaponbase.h"
+#endif
 
 #if defined( REPLAY_ENABLED )
 #include "replay/replaycamera.h"
@@ -32,33 +35,39 @@
 #include "tier0/memdbgon.h"
 
 #if defined( CSTRIKE_DLL ) || defined( LUA_SDK )
-ConVar cl_righthand( "cl_righthand", "1", FCVAR_ARCHIVE, "Use right-handed view models." );
+ConVar cl_righthand( "cl_righthand", "1", FCVAR_ARCHIVE,
+                     "Use right-handed view models." );
 #endif
 
 #ifdef TF_CLIENT_DLL
-ConVar cl_flipviewmodels( "cl_flipviewmodels", "0", FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_NOT_CONNECTED, "Flip view models." );
+ConVar cl_flipviewmodels( "cl_flipviewmodels", "0",
+                          FCVAR_USERINFO | FCVAR_ARCHIVE | FCVAR_NOT_CONNECTED,
+                          "Flip view models." );
 #endif
 
 void PostToolMessage( HTOOLHANDLE hEntity, KeyValues *msg );
 
 void FormatViewModelAttachment( Vector &vOrigin, bool bInverse )
 {
-  // Presumably, SetUpView has been called so we know our FOV and render origin.
+  // Presumably, SetUpView has been called so we know our FOV and render
+  // origin.
   const CViewSetup *pViewSetup = view->GetPlayerViewSetup();
 
   float worldx = tan( pViewSetup->fov * M_PI / 360.0 );
   float viewx = tan( pViewSetup->fovViewmodel * M_PI / 360.0 );
 
   // aspect ratio cancels out, so only need one factor
-  // the difference between the screen coordinates of the 2 systems is the ratio
-  // of the coefficients of the projection matrices (tan (fov/2) is that coefficient)
-  float factorX = worldx / viewx;
-
+  // the difference between the screen coordinates of the 2 systems is the
+  // ratio of the coefficients of the projection matrices (tan (fov/2) is that
+  // coefficient) NOTE: viewx was coming in as 0 when folks set their
+  // viewmodel_fov to 0 and show their weapon.
+  float factorX = viewx ? ( worldx / viewx ) : 0.0f;
   float factorY = factorX;
 
   // Get the coordinates in the viewer's space.
   Vector tmp = vOrigin - pViewSetup->origin;
-  Vector vTransformed( MainViewRight().Dot( tmp ), MainViewUp().Dot( tmp ), MainViewForward().Dot( tmp ) );
+  Vector vTransformed( MainViewRight().Dot( tmp ), MainViewUp().Dot( tmp ),
+                       MainViewForward().Dot( tmp ) );
 
   // Now squash X and Y.
   if ( bInverse )
@@ -81,11 +90,14 @@ void FormatViewModelAttachment( Vector &vOrigin, bool bInverse )
   }
 
   // Transform back to world space.
-  Vector vOut = ( MainViewRight() * vTransformed.x ) + ( MainViewUp() * vTransformed.y ) + ( MainViewForward() * vTransformed.z );
+  Vector vOut = ( MainViewRight() * vTransformed.x ) +
+                ( MainViewUp() * vTransformed.y ) +
+                ( MainViewForward() * vTransformed.z );
   vOrigin = pViewSetup->origin + vOut;
 }
 
-void C_BaseViewModel::FormatViewModelAttachment( int nAttachment, matrix3x4_t &attachmentToWorld )
+void C_BaseViewModel::FormatViewModelAttachment(
+    int nAttachment, matrix3x4_t &attachmentToWorld )
 {
   Vector vecOrigin;
   MatrixPosition( attachmentToWorld, vecOrigin );
@@ -107,16 +119,19 @@ void C_BaseViewModel::UncorrectViewModelAttachment( Vector &vOrigin )
 //-----------------------------------------------------------------------------
 // Purpose
 //-----------------------------------------------------------------------------
-void C_BaseViewModel::FireEvent( const Vector &origin, const QAngle &angles, int event, const char *options )
+void C_BaseViewModel::FireEvent( const Vector &origin, const QAngle &angles,
+                                 int event, const char *options )
 {
-  // We override sound requests so that we can play them locally on the owning player
+  // We override sound requests so that we can play them locally on the owning
+  // player
   if ( ( event == AE_CL_PLAYSOUND ) || ( event == CL_EVENT_SOUND ) )
   {
     // Only do this if we're owned by someone
     if ( GetOwner() != NULL )
     {
       CLocalPlayerFilter filter;
-      EmitSound( filter, GetOwner()->GetSoundSourceIndex(), options, &GetAbsOrigin() );
+      EmitSound( filter, GetOwner()->GetSoundSourceIndex(), options,
+                 &GetAbsOrigin() );
       return;
     }
   }
@@ -127,9 +142,12 @@ void C_BaseViewModel::FireEvent( const Vector &origin, const QAngle &angles, int
   {
     // NVNT notify the haptics system of our viewmodel's event
     if ( haptics )
-      haptics->ProcessHapticEvent( 4, "Weapons", pWeapon->GetName(), "AnimationEvents", VarArgs( "%i", event ) );
+      haptics->ProcessHapticEvent( 4, "Weapons", pWeapon->GetName(),
+                                   "AnimationEvents",
+                                   VarArgs( "%i", event ) );
 
-    bool bResult = pWeapon->OnFireEvent( this, origin, angles, event, options );
+    bool bResult =
+        pWeapon->OnFireEvent( this, origin, angles, event, options );
     if ( !bResult )
     {
       BaseClass::FireEvent( origin, angles, event, options );
@@ -153,7 +171,8 @@ bool C_BaseViewModel::Interpolate( float currentTime )
   if ( GetPredictable() || IsClientCreated() )
   {
     Assert( pPlayer );
-    float curtime = pPlayer ? pPlayer->GetFinalPredictedTime() : gpGlobals->curtime;
+    float curtime =
+        pPlayer ? pPlayer->GetFinalPredictedTime() : gpGlobals->curtime;
     elapsed_time = curtime - m_flAnimTime;
     // Adjust for interpolated partial frame
     if ( !engine->IsPaused() )
@@ -168,7 +187,8 @@ bool C_BaseViewModel::Interpolate( float currentTime )
     elapsed_time = 0;
   }
 
-  float dt = elapsed_time * GetSequenceCycleRate( pStudioHdr, GetSequence() ) * GetPlaybackRate();
+  float dt = elapsed_time * GetSequenceCycleRate( pStudioHdr, GetSequence() ) *
+             GetPlaybackRate();
   if ( dt >= 1.0f )
   {
     if ( !IsSequenceLooping( GetSequence() ) )
@@ -193,7 +213,8 @@ bool C_BaseViewModel::ShouldFlipViewModel()
   if ( pWeapon )
   {
     const FileWeaponInfo_t *pInfo = &pWeapon->GetWpnData();
-    return pInfo->m_bAllowFlipping && pInfo->m_bBuiltRightHanded != cl_righthand.GetBool();
+    return pInfo->m_bAllowFlipping &&
+           pInfo->m_bBuiltRightHanded != cl_righthand.GetBool();
   }
 #endif
 
@@ -214,8 +235,9 @@ void C_BaseViewModel::ApplyBoneMatrixTransform( matrix3x4_t &transform )
   {
     matrix3x4_t viewMatrix, viewMatrixInverse;
 
-    // We could get MATERIAL_VIEW here, but this is called sometimes before the renderer
-    // has set that matrix. Luckily, this is called AFTER the CViewSetup has been initialized.
+    // We could get MATERIAL_VIEW here, but this is called sometimes before
+    // the renderer has set that matrix. Luckily, this is called AFTER the
+    // CViewSetup has been initialized.
     const CViewSetup *pSetup = view->GetPlayerViewSetup();
     AngleMatrix( pSetup->angles, pSetup->origin, viewMatrixInverse );
     MatrixInvert( viewMatrixInverse, viewMatrix );
@@ -226,7 +248,8 @@ void C_BaseViewModel::ApplyBoneMatrixTransform( matrix3x4_t &transform )
 
     // Flip it along X.
 
-    // (This is the slower way to do it, and it equates to negating the top row).
+    // (This is the slower way to do it, and it equates to negating the top
+    // row).
     // matrix3x4_t mScale;
     // SetIdentityMatrix( mScale );
     // mScale[0][0] = 1;
@@ -316,12 +339,24 @@ int C_BaseViewModel::DrawModel( int flags )
     {
       m_nOldAnimationParity = m_nAnimationParity;
     }
-    // Tell the weapon itself that we've rendered, in case it wants to do something
+    // Tell the weapon itself that we've rendered, in case it wants to do
+    // something
     if ( pWeapon )
     {
       pWeapon->ViewModelDrawn( this );
     }
   }
+
+#ifdef TF_CLIENT_DLL
+  CTFWeaponBase *pTFWeapon = dynamic_cast< CTFWeaponBase * >( pWeapon );
+  if ( ( flags & STUDIO_RENDER ) && pTFWeapon &&
+       pTFWeapon->m_viewmodelStatTrakAddon )
+  {
+    pTFWeapon->m_viewmodelStatTrakAddon->RemoveEffects( EF_NODRAW );
+    pTFWeapon->m_viewmodelStatTrakAddon->DrawModel( flags );
+    pTFWeapon->m_viewmodelStatTrakAddon->AddEffects( EF_NODRAW );
+  }
+#endif
 
   return ret;
 }
@@ -343,7 +378,8 @@ int C_BaseViewModel::InternalDrawModel( int flags )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called by the player when the player's overriding the viewmodel drawing. Avoids infinite recursion.
+// Purpose: Called by the player when the player's overriding the viewmodel
+// drawing. Avoids infinite recursion.
 //-----------------------------------------------------------------------------
 int C_BaseViewModel::DrawOverriddenViewmodel( int flags )
 {
@@ -416,18 +452,22 @@ bool C_BaseViewModel::UsesPowerOfTwoFrameBufferTexture( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: If the animation parity of the weapon has changed, we reset cycle to avoid popping
+// Purpose: If the animation parity of the weapon has changed, we reset cycle to
+// avoid popping
 //-----------------------------------------------------------------------------
 void C_BaseViewModel::UpdateAnimationParity( void )
 {
   C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 
-  // If we're predicting, then we don't use animation parity because we change the animations on the clientside
-  // while predicting. When not predicting, only the server changes the animations, so a parity mismatch
-  // tells us if we need to reset the animation.
+  // If we're predicting, then we don't use animation parity because we change
+  // the animations on the clientside while predicting. When not predicting,
+  // only the server changes the animations, so a parity mismatch tells us if
+  // we need to reset the animation.
   if ( m_nOldAnimationParity != m_nAnimationParity && !GetPredictable() )
   {
-    float curtime = ( pPlayer && IsIntermediateDataAllocated() ) ? pPlayer->GetFinalPredictedTime() : gpGlobals->curtime;
+    float curtime = ( pPlayer && IsIntermediateDataAllocated() )
+                        ? pPlayer->GetFinalPredictedTime()
+                        : gpGlobals->curtime;
     // FIXME: this is bad
     // Simulate a networked m_flAnimTime and m_flCycle
     // FIXME:  Do we need the magic 0.1?
@@ -457,7 +497,8 @@ void C_BaseViewModel::PostDataUpdate( DataUpdateType_t updateType )
 //-----------------------------------------------------------------------------
 void C_BaseViewModel::AddEntity( void )
 {
-  // Server says don't interpolate this frame, so set previous info to new info.
+  // Server says don't interpolate this frame, so set previous info to new
+  // info.
   if ( IsNoInterpolationFrame() )
   {
     ResetLatched();
@@ -467,11 +508,13 @@ void C_BaseViewModel::AddEntity( void )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void C_BaseViewModel::GetBoneControllers( float controllers[MAXSTUDIOBONECTRLS] )
+void C_BaseViewModel::GetBoneControllers(
+    float controllers[MAXSTUDIOBONECTRLS] )
 {
   BaseClass::GetBoneControllers( controllers );
 
-  // Tell the weapon itself that we've rendered, in case it wants to do something
+  // Tell the weapon itself that we've rendered, in case it wants to do
+  // something
   C_BaseCombatWeapon *pWeapon = GetActiveWeapon();
   if ( pWeapon )
   {

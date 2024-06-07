@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose: Basic button control
 //
@@ -22,7 +23,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-LButton::LButton( Panel *parent, const char *panelName, const char *text, Panel *pActionSignalTarget, const char *pCmd, lua_State *L )
+LButton::LButton( Panel *parent, const char *panelName, const char *text,
+                  Panel *pActionSignalTarget, const char *pCmd, lua_State *L )
     : Button( parent, panelName, text, pActionSignalTarget, pCmd )
 {
 #if defined( LUA_SDK )
@@ -48,7 +50,8 @@ LButton::~LButton()
 
 LUA_API lua_Button *lua_tobutton( lua_State *L, int idx )
 {
-  PHandle *phPanel = dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
+  PHandle *phPanel =
+      dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
   if ( phPanel == NULL )
     return NULL;
   return dynamic_cast< lua_Button * >( phPanel->Get() );
@@ -148,7 +151,7 @@ static int Button_GetRefTable( lua_State *L )
   LButton *plButton = dynamic_cast< LButton * >( luaL_checkbutton( L, 1 ) );
   if ( plButton )
   {
-    if ( plButton->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plButton->m_nTableReference ) )
     {
       lua_newtable( L );
       plButton->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -186,7 +189,8 @@ static int Button_IsDrawingFocusBox( lua_State *L )
 
 static int Button_IsMouseClickEnabled( lua_State *L )
 {
-  lua_pushboolean( L, luaL_checkbutton( L, 1 )->IsMouseClickEnabled( ( MouseCode )luaL_checkint( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkbutton( L, 1 )->IsMouseClickEnabled(
+                          ( MouseCode )luaL_checkint( L, 2 ) ) );
   return 1;
 }
 
@@ -204,7 +208,8 @@ static int Button_IsUseCaptureMouseEnabled( lua_State *L )
 
 static int Button_KB_AddBoundKey( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->KB_AddBoundKey( luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkbutton( L, 1 )->KB_AddBoundKey(
+      luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -264,7 +269,8 @@ static int Button_SetArmed( lua_State *L )
 
 static int Button_SetArmedColor( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->SetArmedColor( luaL_checkcolor( L, 2 ), luaL_checkcolor( L, 3 ) );
+  luaL_checkbutton( L, 1 )->SetArmedColor( luaL_checkcolor( L, 2 ),
+                                           luaL_checkcolor( L, 3 ) );
   return 0;
 }
 
@@ -300,7 +306,8 @@ static int Button_SetBlinkColor( lua_State *L )
 
 static int Button_SetButtonActivationType( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->SetButtonActivationType( ( Button::ActivationType_t )luaL_checkint( L, 2 ) );
+  luaL_checkbutton( L, 1 )->SetButtonActivationType(
+      ( Button::ActivationType_t )luaL_checkint( L, 2 ) );
   return 0;
 }
 
@@ -312,13 +319,15 @@ static int Button_SetButtonBorderEnabled( lua_State *L )
 
 static int Button_SetDefaultColor( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->SetDefaultColor( luaL_checkcolor( L, 2 ), luaL_checkcolor( L, 3 ) );
+  luaL_checkbutton( L, 1 )->SetDefaultColor( luaL_checkcolor( L, 2 ),
+                                             luaL_checkcolor( L, 3 ) );
   return 0;
 }
 
 static int Button_SetDepressedColor( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->SetDepressedColor( luaL_checkcolor( L, 2 ), luaL_checkcolor( L, 3 ) );
+  luaL_checkbutton( L, 1 )->SetDepressedColor( luaL_checkcolor( L, 2 ),
+                                               luaL_checkcolor( L, 3 ) );
   return 0;
 }
 
@@ -330,7 +339,8 @@ static int Button_SetDepressedSound( lua_State *L )
 
 static int Button_SetMouseClickEnabled( lua_State *L )
 {
-  luaL_checkbutton( L, 1 )->SetMouseClickEnabled( ( MouseCode )luaL_checkint( L, 2 ), luaL_checkboolean( L, 3 ) );
+  luaL_checkbutton( L, 1 )->SetMouseClickEnabled( ( MouseCode )luaL_checkint( L, 2 ),
+                                                  luaL_checkboolean( L, 3 ) );
   return 0;
 }
 
@@ -380,11 +390,12 @@ static int Button___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LButton *plButton = dynamic_cast< LButton * >( pButton );
-  if ( plButton && plButton->m_nTableReference != LUA_NOREF )
+  if ( plButton && luasrc_isrefvalid( L, plButton->m_nTableReference ) )
   {
     lua_getref( L, plButton->m_nTableReference );
     lua_pushvalue( L, 2 );
@@ -430,13 +441,14 @@ static int Button___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LButton *plButton = dynamic_cast< LButton * >( pButton );
   if ( plButton )
   {
-    if ( plButton->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plButton->m_nTableReference ) )
     {
       lua_newtable( L );
       plButton->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -454,7 +466,8 @@ static int Button___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
 }
@@ -551,14 +564,16 @@ static const luaL_Reg Buttonmeta[] = {
 
 static int luasrc_Button( lua_State *L )
 {
-  Button *pButton = new LButton( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ), luaL_checkstring( L, 2 ), luaL_checkstring( L, 3 ), luaL_optpanel( L, 4, 0 ), luaL_optstring( L, 5, 0 ), L );
+  Button *pButton =
+      new LButton( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ),
+                   luaL_checkstring( L, 2 ), luaL_checkstring( L, 3 ),
+                   luaL_optpanel( L, 4, 0 ), luaL_optstring( L, 5, 0 ), L );
   lua_pushbutton( L, pButton );
   return 1;
 }
 
-static const luaL_Reg Button_funcs[] = {
-    { "Button", luasrc_Button },
-    { NULL, NULL } };
+static const luaL_Reg Button_funcs[] = { { "Button", luasrc_Button },
+                                         { NULL, NULL } };
 
 /*
 ** Open Button object

@@ -28,7 +28,12 @@
 // Base Projectile.
 //
 //=============================================================================
+#ifdef CLIENT_DLL
 class CBaseProjectile : public CBaseAnimating
+#else   // CLIENT_DLL
+DECLARE_AUTO_LIST( IBaseProjectileAutoList );
+class CBaseProjectile : public CBaseAnimating, public IBaseProjectileAutoList
+#endif  // !CLIENT_DLL
 {
  public:
   DECLARE_CLASS( CBaseProjectile, CBaseAnimating );
@@ -39,6 +44,14 @@ class CBaseProjectile : public CBaseAnimating
   virtual void Spawn();
 
 #ifdef GAME_DLL
+  virtual int GetBaseProjectileType() const
+  {
+    return -1;
+  }  // no base
+  virtual int GetProjectileType() const
+  {
+    return -1;
+  }  // no type
   virtual int GetDestroyableHitCount( void ) const
   {
     return m_iDestroyableHitCount;
@@ -48,7 +61,7 @@ class CBaseProjectile : public CBaseAnimating
     ++m_iDestroyableHitCount;
   }
 
-  bool CanCollideWithTeammates() const
+  virtual bool CanCollideWithTeammates() const
   {
     return m_bCanCollideWithTeammates;
   }

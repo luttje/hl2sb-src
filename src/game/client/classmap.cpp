@@ -65,10 +65,12 @@ class CClassMap : public IClassMap
 {
  public:
 #ifdef LUA_SDK
-  virtual void Add( const char *mapname, const char *classname, int size, DISPATCHFUNCTION factory /*= 0*/, bool scripted );
+  virtual void Add( const char *mapname, const char *classname, int size,
+                    DISPATCHFUNCTION factory /*= 0*/, bool scripted );
   virtual void RemoveAllScripted( void );
 #else
-  virtual void Add( const char *mapname, const char *classname, int size, DISPATCHFUNCTION factory /*= 0*/ );
+  virtual void Add( const char *mapname, const char *classname, int size,
+                    DISPATCHFUNCTION factory /*= 0*/ );
 #endif
   virtual const char *Lookup( const char *classname );
 #ifdef LUA_SDK
@@ -88,13 +90,16 @@ IClassMap &GetClassMap( void )
 }
 
 #ifdef LUA_SDK
-void CClassMap::Add( const char *mapname, const char *classname, int size, DISPATCHFUNCTION factory = 0, bool scripted = false )
+void CClassMap::Add( const char *mapname, const char *classname, int size,
+                     DISPATCHFUNCTION factory = 0, bool scripted = false )
 #else
-void CClassMap::Add( const char *mapname, const char *classname, int size, DISPATCHFUNCTION factory = 0 )
+void CClassMap::Add( const char *mapname, const char *classname, int size,
+                     DISPATCHFUNCTION factory = 0 )
 #endif
 {
 #if defined( LUA_SDK )
-  for ( int i = m_ClassDict.First(); i != m_ClassDict.InvalidIndex(); i = m_ClassDict.Next( i ) )
+  for ( int i = m_ClassDict.First(); i != m_ClassDict.InvalidIndex();
+        i = m_ClassDict.Next( i ) )
   {
     classentry_t *lookup = &m_ClassDict[i];
     if ( !lookup )
@@ -122,6 +127,7 @@ void CClassMap::Add( const char *mapname, const char *classname, int size, DISPA
   element.SetMapName( mapname );
   element.factory = factory;
   element.size = size;
+
 #if defined( LUA_SDK )
   element.SetClassName( classname );
   element.scripted = scripted;
@@ -174,7 +180,8 @@ const char *CClassMap::Lookup( const char *classname )
 
 DISPATCHFUNCTION CClassMap::FindFactory( const char *classname )
 {
-  for ( int i = m_ClassDict.First(); i != m_ClassDict.InvalidIndex(); i = m_ClassDict.Next( i ) )
+  for ( int i = m_ClassDict.First(); i != m_ClassDict.InvalidIndex();
+        i = m_ClassDict.Next( i ) )
   {
     classentry_t *lookup = &m_ClassDict[i];
     if ( !lookup )
@@ -220,7 +227,8 @@ C_BaseEntity *CClassMap::CreateEntity( const char *mapname )
     if ( !lookup->factory )
     {
 #if defined( _DEBUG )
-      Msg( "No factory for %s/%s\n", lookup->GetMapName(), m_ClassDict.GetElementName( i ) );
+      Msg( "No factory for %s/%s\n", lookup->GetMapName(),
+           m_ClassDict.GetElementName( i ) );
 #endif
       continue;
     }

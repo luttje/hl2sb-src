@@ -382,10 +382,6 @@ class CViewRender : public IViewRender,
   virtual void Render2DEffectsPreHUD( const CViewSetup &view );
   virtual void Render2DEffectsPostHUD( const CViewSetup &view );
 
-#ifdef HL2SB
-  virtual void MP_PostSimulate();
-#endif
-
   void DisableFog( void );
 
   // Called once per level change

@@ -77,8 +77,8 @@ class CWeapon_SLAM : public CBaseHL2MPCombatWeapon
 
   CWeapon_SLAM();
 
-#ifndef CLIENT_DLL
   DECLARE_ACTTABLE();
+#ifndef CLIENT_DLL
   DECLARE_DATADESC();
 #endif
 

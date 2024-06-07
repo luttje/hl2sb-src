@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose:
 //
@@ -25,12 +25,6 @@ class CBaseGrenadeProjectile : public CBaseGrenade
   virtual void Spawn();
 
  public:
-  // Tony; by default projectiles don't have one, so make sure derived weapons do!!
-  virtual SDKWeaponID GetWeaponID( void ) const
-  {
-    return SDK_WEAPON_NONE;
-  }
-
   // This gets sent to the client and placed in the client's interpolation history
   // so the projectile starts out moving right off the bat.
   CNetworkVector( m_vInitialVelocity );
@@ -44,10 +38,6 @@ class CBaseGrenadeProjectile : public CBaseGrenade
   float m_flSpawnTime;
 #else
   DECLARE_DATADESC();
-
-  bool CreateVPhysics( void );
-  void SetVelocity( const Vector &velocity, const AngularImpulse &angVelocity );
-  void VPhysicsUpdate( IPhysicsObject *pPhysics );
 
   // Constants for all CS Grenades
   static inline float GetGrenadeGravity()
@@ -85,9 +75,6 @@ class CBaseGrenadeProjectile : public CBaseGrenade
   virtual void ResolveFlyCollisionCustom( trace_t &trace, Vector &vecVelocity );
 
   float m_flDetonateTime;
-  Vector vecLastOrigin;
-
-  bool m_inSolid;
 #endif
 };
 

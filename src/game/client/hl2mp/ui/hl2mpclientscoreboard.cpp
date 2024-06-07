@@ -4,7 +4,6 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
 #include "cbase.h"
 #include "hud.h"
 #include "hl2mpclientscoreboard.h"
@@ -375,10 +374,8 @@ void CHL2MPClientScoreBoardDialog::UpdateTeamInfo()
 
     if ( team )
     {
-      // choose dialog variables to set depending on team
-      const char *pDialogVarTeamScore = NULL;
-      const char *pDialogVarTeamPlayerCount = NULL;
-      const char *pDialogVarTeamPing = NULL;
+      sectionID = GetSectionFromTeamNumber( i );
+
 #if defined( LUA_SDK )
       wchar_t wgamemode[64];
       const char *gamemode = NULL;
@@ -402,73 +399,76 @@ void CHL2MPClientScoreBoardDialog::UpdateTeamInfo()
         gamemode = "Half-Life 2: Sandbox";
       }
       lua_pop( L, 1 );
-      g_pVGuiLocalize->ConvertANSIToUnicode( gamemode, wgamemode, sizeof( wgamemode ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode(
+          gamemode, wgamemode, sizeof( wgamemode ) );
 #endif
-      switch ( teamIndex )
-      {
-        case TEAM_REBELS:
-          teamName = g_pVGuiLocalize->Find( "#HL2MP_ScoreBoard_Rebels" );
-          pDialogVarTeamScore = "r_teamscore";
-          pDialogVarTeamPlayerCount = "r_teamplayercount";
-          pDialogVarTeamPing = "r_teamping";
-          break;
-        case TEAM_COMBINE:
-          teamName = g_pVGuiLocalize->Find( "#HL2MP_ScoreBoard_Combine" );
-          pDialogVarTeamScore = "c_teamscore";
-          pDialogVarTeamPlayerCount = "c_teamplayercount";
-          pDialogVarTeamPing = "c_teamping";
-          break;
-        case TEAM_UNASSIGNED:
-#if defined( LUA_SDK )
-          teamName = wgamemode;
-#else
-          teamName = g_pVGuiLocalize->Find( "#HL2MP_ScoreBoard_DM" );
-#endif
-          pDialogVarTeamPlayerCount = "dm_playercount";
-          pDialogVarTeamPing = "dm_ping";
-          break;
-        default:
-          Assert( false );
-          break;
-      }
 
-      // update # of players on each team
+      // update team name
       wchar_t name[64];
       wchar_t string1[1024];
       wchar_t wNumPlayers[6];
-      _snwprintf( wNumPlayers, ARRAYSIZE( wNumPlayers ), L"%i", team->Get_Number_Players() );
-      if ( !teamName && team )
+
+      if ( HL2MPRules()->IsTeamplay() == false )
       {
-        g_pVGuiLocalize->ConvertANSIToUnicode( team->Get_Name(), name, sizeof( name ) );
+        _snwprintf( wNumPlayers, ARRAYSIZE( wNumPlayers ), L"%i", iNumPlayersInGame );
+#ifdef WIN32
+        _snwprintf( name, ARRAYSIZE( name ), L"%s", g_pVGuiLocalize->Find( "#ScoreBoard_Deathmatch" ) );
+#else
+        _snwprintf( name, ARRAYSIZE( name ), L"%S", g_pVGuiLocalize->Find( "#ScoreBoard_Deathmatch" ) );
+#endif
+
+#if defined( LUA_SDK )
+        teamName = wgamemode;
+#else
         teamName = name;
-      }
-      if ( team->Get_Number_Players() == 1 )
-      {
-        g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Player" ), 2, teamName, wNumPlayers );
+#endif
+
+        if ( iNumPlayersInGame == 1 )
+        {
+          g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Player" ), 2, teamName, wNumPlayers );
+        }
+        else
+        {
+          g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Players" ), 2, teamName, wNumPlayers );
+        }
       }
       else
       {
-        g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Players" ), 2, teamName, wNumPlayers );
+        _snwprintf( wNumPlayers, ARRAYSIZE( wNumPlayers ), L"%i", team->Get_Number_Players() );
+
+        if ( !teamName && team )
+        {
+          g_pVGuiLocalize->ConvertANSIToUnicode( team->Get_Name(), name, sizeof( name ) );
+          teamName = name;
+        }
+
+        if ( team->Get_Number_Players() == 1 )
+        {
+          g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Player" ), 2, teamName, wNumPlayers );
+        }
+        else
+        {
+          g_pVGuiLocalize->ConstructString( string1, sizeof( string1 ), g_pVGuiLocalize->Find( "#ScoreBoard_Players" ), 2, teamName, wNumPlayers );
+        }
+
+        // update stats
+        wchar_t val[6];
+        V_snwprintf( val, ARRAYSIZE( val ), L"%d", team->Get_Score() );
+        m_pPlayerList->ModifyColumn( sectionID, "frags", val );
+        if ( team->Get_Ping() < 1 )
+        {
+          m_pPlayerList->ModifyColumn( sectionID, "ping", L"" );
+        }
+        else
+        {
+          V_snwprintf( val, ARRAYSIZE( val ), L"%d", team->Get_Ping() );
+          m_pPlayerList->ModifyColumn( sectionID, "ping", val );
+        }
       }
 
-      // update stats
-      wchar_t val[6];
-      V_snwprintf( val, ARRAYSIZE( val ), L"%d", team->Get_Score() );
-      m_pPlayerList->ModifyColumn( sectionID, "frags", val );
-      if ( team->Get_Ping() < 1 )
-      {
-        m_pPlayerList->ModifyColumn( sectionID, "ping", L"" );
-      }
-      else
-      {
-        V_snwprintf( val, ARRAYSIZE( val ), L"%d", team->Get_Ping() );
-        m_pPlayerList->ModifyColumn( sectionID, "ping", val );
-      }
+      m_pPlayerList->ModifyColumn( sectionID, "name", string1 );
     }
-
-    m_pPlayerList->ModifyColumn( sectionID, "name", string1 );
   }
-}
 }
 
 //-----------------------------------------------------------------------------

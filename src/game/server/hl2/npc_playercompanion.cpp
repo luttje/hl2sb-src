@@ -233,7 +233,7 @@ void CNPC_PlayerCompanion::Spawn()
 
   m_AnnounceAttackTimer.Set( 10, 30 );
 
-#if !defined( HL2SB ) && defined( HL2_EPISODIC )
+#ifdef HL2_EPISODIC
   // We strip this flag because it's been made obsolete by the StartScripting behavior
   if ( HasSpawnFlags( SF_NPC_ALTCOLLISION ) )
   {
@@ -242,7 +242,7 @@ void CNPC_PlayerCompanion::Spawn()
   }
 
   m_hFlare = NULL;
-#endif  // !HL2SB && HL2_EPISODIC
+#endif  // HL2_EPISODIC
 
   BaseClass::Spawn();
 }
@@ -258,14 +258,14 @@ int CNPC_PlayerCompanion::Restore( IRestore &restore )
     m_StandoffBehavior.SetActive( false );
   }
 
-#if !defined( HL2SB ) && defined( HL2_EPISODIC )
+#ifdef HL2_EPISODIC
   // We strip this flag because it's been made obsolete by the StartScripting behavior
   if ( HasSpawnFlags( SF_NPC_ALTCOLLISION ) )
   {
     Warning( "NPC %s using alternate collision! -- DISABLED\n", STRING( GetEntityName() ) );
     RemoveSpawnFlags( SF_NPC_ALTCOLLISION );
   }
-#endif  // !HL2SB && HL2_EPISODIC
+#endif  // HL2_EPISODIC
 
   return baseResult;
 }
@@ -346,15 +346,9 @@ void CNPC_PlayerCompanion::GatherConditions()
 {
   BaseClass::GatherConditions();
 
-#ifndef HL2SB
   if ( AI_IsSinglePlayer() )
   {
-#endif
-#ifdef HL2SB
-    CBasePlayer *pPlayer = UTIL_GetNearestPlayer( GetAbsOrigin() );
-#else
-  CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-#endif
+    CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
 
     if ( Classify() == CLASS_PLAYER_ALLY_VITAL )
     {
@@ -442,9 +436,7 @@ void CNPC_PlayerCompanion::GatherConditions()
         m_flBoostSpeed *= mult;
       }
     }
-#ifndef HL2SB
   }
-#endif
 
   // Update our readiness if we're
   if ( IsReadinessCapable() )
@@ -502,15 +494,9 @@ void CNPC_PlayerCompanion::GatherConditions()
     DoCustomSpeechAI();
   }
 
-#ifdef HL2SB
-  if ( hl2_episodic.GetBool() && !GetEnemy() && HasCondition( COND_HEAR_PLAYER ) )
-  {
-    Vector los = ( UTIL_GetNearestPlayer( GetAbsOrigin() )->EyePosition() - EyePosition() );
-#else
   if ( AI_IsSinglePlayer() && hl2_episodic.GetBool() && !GetEnemy() && HasCondition( COND_HEAR_PLAYER ) )
   {
     Vector los = ( UTIL_GetLocalPlayer()->EyePosition() - EyePosition() );
-#endif
     los.z = 0;
     VectorNormalize( los );
 
@@ -526,11 +512,7 @@ void CNPC_PlayerCompanion::GatherConditions()
 //-----------------------------------------------------------------------------
 void CNPC_PlayerCompanion::DoCustomSpeechAI( void )
 {
-#ifdef HL2SB
-  CBasePlayer *pPlayer = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
   CBasePlayer *pPlayer = AI_GetSinglePlayer();
-#endif
 
   // Don't allow this when we're getting in the car
 #ifdef HL2_EPISODIC
@@ -563,11 +545,7 @@ void CNPC_PlayerCompanion::DoCustomSpeechAI( void )
 //-----------------------------------------------------------------------------
 void CNPC_PlayerCompanion::PredictPlayerPush()
 {
-#ifdef HL2SB
-  CBasePlayer *pPlayer = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
   CBasePlayer *pPlayer = AI_GetSinglePlayer();
-#endif
   if ( pPlayer && pPlayer->GetSmoothedVelocity().LengthSqr() >= Square( 140 ) )
   {
     Vector predictedPosition = pPlayer->WorldSpaceCenter() + pPlayer->GetSmoothedVelocity() * .4;
@@ -988,97 +966,91 @@ int CNPC_PlayerCompanion::TranslateSchedule( int scheduleType )
 
         if ( CanReload() && pWeapon->UsesClipsForAmmo1() && pWeapon->Clip1() < ( pWeapon->GetMaxClip1() * .5 ) && OccupyStrategySlot( SQUAD_SLOT_EXCLUSIVE_RELOAD ) )
         {
-#ifdef HL2SB
-          CBasePlayer *pPlayer = UTIL_GetNearestPlayer( GetAbsOrigin() );
-#else
           if ( AI_IsSinglePlayer() )
           {
             CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-#endif
-          pWeapon = pPlayer->GetActiveWeapon();
-          if ( pWeapon && pWeapon->UsesClipsForAmmo1() &&
-               pWeapon->Clip1() < ( pWeapon->GetMaxClip1() * .75 ) &&
-               pPlayer->GetAmmoCount( pWeapon->GetPrimaryAmmoType() ) )
-          {
-            SpeakIfAllowed( TLK_PLRELOAD );
+            pWeapon = pPlayer->GetActiveWeapon();
+            if ( pWeapon && pWeapon->UsesClipsForAmmo1() &&
+                 pWeapon->Clip1() < ( pWeapon->GetMaxClip1() * .75 ) &&
+                 pPlayer->GetAmmoCount( pWeapon->GetPrimaryAmmoType() ) )
+            {
+              SpeakIfAllowed( TLK_PLRELOAD );
+            }
           }
-#ifndef HL2SB
+          return SCHED_RELOAD;
         }
-#endif
-        return SCHED_RELOAD;
       }
-  }
-  break;
+      break;
 
-  case SCHED_COWER:
-    return SCHED_PC_COWER;
+    case SCHED_COWER:
+      return SCHED_PC_COWER;
 
-  case SCHED_TAKE_COVER_FROM_BEST_SOUND:
-  {
-    CSound *pSound = GetBestSound( SOUND_DANGER );
-
-    if ( pSound && pSound->m_hOwner )
+    case SCHED_TAKE_COVER_FROM_BEST_SOUND:
     {
-      if ( pSound->m_hOwner->IsNPC() && FClassnameIs( pSound->m_hOwner, "npc_zombine" ) )
+      CSound *pSound = GetBestSound( SOUND_DANGER );
+
+      if ( pSound && pSound->m_hOwner )
       {
-        // Run fully away from a Zombine with a grenade.
-        return SCHED_PC_TAKE_COVER_FROM_BEST_SOUND;
+        if ( pSound->m_hOwner->IsNPC() && FClassnameIs( pSound->m_hOwner, "npc_zombine" ) )
+        {
+          // Run fully away from a Zombine with a grenade.
+          return SCHED_PC_TAKE_COVER_FROM_BEST_SOUND;
+        }
       }
+
+      return SCHED_PC_MOVE_TOWARDS_COVER_FROM_BEST_SOUND;
     }
 
-    return SCHED_PC_MOVE_TOWARDS_COVER_FROM_BEST_SOUND;
+    case SCHED_FLEE_FROM_BEST_SOUND:
+      return SCHED_PC_FLEE_FROM_BEST_SOUND;
+
+    case SCHED_ESTABLISH_LINE_OF_FIRE:
+    case SCHED_MOVE_TO_WEAPON_RANGE:
+      if ( IsMortar( GetEnemy() ) )
+        return SCHED_TAKE_COVER_FROM_ENEMY;
+      break;
+
+    case SCHED_CHASE_ENEMY:
+      if ( IsMortar( GetEnemy() ) )
+        return SCHED_TAKE_COVER_FROM_ENEMY;
+      if ( GetEnemy() && FClassnameIs( GetEnemy(), "npc_combinegunship" ) )
+        return SCHED_ESTABLISH_LINE_OF_FIRE;
+      break;
+
+    case SCHED_ESTABLISH_LINE_OF_FIRE_FALLBACK:
+      // If we're fighting a gunship, try again
+      if ( GetEnemy() && FClassnameIs( GetEnemy(), "npc_combinegunship" ) )
+        return SCHED_ESTABLISH_LINE_OF_FIRE;
+      break;
+
+    case SCHED_RANGE_ATTACK1:
+      if ( IsMortar( GetEnemy() ) )
+        return SCHED_TAKE_COVER_FROM_ENEMY;
+
+      if ( GetShotRegulator()->IsInRestInterval() )
+        return SCHED_STANDOFF;
+
+      if ( !OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+        return SCHED_STANDOFF;
+      break;
+
+    case SCHED_FAIL_TAKE_COVER:
+      if ( IsEnemyTurret() )
+      {
+        return SCHED_PC_FAIL_TAKE_COVER_TURRET;
+      }
+      break;
+    case SCHED_RUN_FROM_ENEMY_FALLBACK:
+    {
+      if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) )
+      {
+        return SCHED_RANGE_ATTACK1;
+      }
+      break;
+    }
   }
 
-  case SCHED_FLEE_FROM_BEST_SOUND:
-    return SCHED_PC_FLEE_FROM_BEST_SOUND;
-
-  case SCHED_ESTABLISH_LINE_OF_FIRE:
-  case SCHED_MOVE_TO_WEAPON_RANGE:
-    if ( IsMortar( GetEnemy() ) )
-      return SCHED_TAKE_COVER_FROM_ENEMY;
-    break;
-
-  case SCHED_CHASE_ENEMY:
-    if ( IsMortar( GetEnemy() ) )
-      return SCHED_TAKE_COVER_FROM_ENEMY;
-    if ( GetEnemy() && FClassnameIs( GetEnemy(), "npc_combinegunship" ) )
-      return SCHED_ESTABLISH_LINE_OF_FIRE;
-    break;
-
-  case SCHED_ESTABLISH_LINE_OF_FIRE_FALLBACK:
-    // If we're fighting a gunship, try again
-    if ( GetEnemy() && FClassnameIs( GetEnemy(), "npc_combinegunship" ) )
-      return SCHED_ESTABLISH_LINE_OF_FIRE;
-    break;
-
-  case SCHED_RANGE_ATTACK1:
-    if ( IsMortar( GetEnemy() ) )
-      return SCHED_TAKE_COVER_FROM_ENEMY;
-
-    if ( GetShotRegulator()->IsInRestInterval() )
-      return SCHED_STANDOFF;
-
-    if ( !OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-      return SCHED_STANDOFF;
-    break;
-
-  case SCHED_FAIL_TAKE_COVER:
-    if ( IsEnemyTurret() )
-    {
-      return SCHED_PC_FAIL_TAKE_COVER_TURRET;
-    }
-    break;
-  case SCHED_RUN_FROM_ENEMY_FALLBACK:
-  {
-    if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) )
-    {
-      return SCHED_RANGE_ATTACK1;
-    }
-    break;
-  }
-}
-
-return BaseClass::TranslateSchedule( scheduleType );
+  return BaseClass::TranslateSchedule( scheduleType );
 }
 
 //-----------------------------------------------------------------------------
@@ -1177,14 +1149,10 @@ void CNPC_PlayerCompanion::RunTask( const Task_t *pTask )
 
     case TASK_PC_GET_PATH_OFF_COMPANION:
     {
-#ifdef HL2SB
-      GetNavigator()->SetAllowBigStep( UTIL_GetNearestPlayer( GetAbsOrigin() ) );
-#else
-        if ( AI_IsSinglePlayer() )
-        {
-          GetNavigator()->SetAllowBigStep( UTIL_GetLocalPlayer() );
-        }
-#endif
+      if ( AI_IsSinglePlayer() )
+      {
+        GetNavigator()->SetAllowBigStep( UTIL_GetLocalPlayer() );
+      }
       ChainRunTask( TASK_MOVE_AWAY_PATH, 48 );
     }
     break;
@@ -1540,11 +1508,7 @@ void CNPC_PlayerCompanion::Touch( CBaseEntity *pOther )
     if ( m_afMemory & bits_MEMORY_PROVOKED )
       return;
 
-#ifdef HL2SB
-    TestPlayerPushing( ( pOther->IsPlayer() ) ? pOther : AI_GetNearestPlayer( GetAbsOrigin() ) );
-#else
-      TestPlayerPushing( ( pOther->IsPlayer() ) ? pOther : AI_GetSinglePlayer() );
-#endif
+    TestPlayerPushing( ( pOther->IsPlayer() ) ? pOther : AI_GetSinglePlayer() );
   }
 }
 
@@ -1928,11 +1892,7 @@ bool CNPC_PlayerCompanion::PickTacticalLookTarget( AILookTargetArgs_t *pArgs )
     // 1/3rd chance to authoritatively look at player
     if ( random->RandomInt( 0, 2 ) == 0 )
     {
-#ifdef HL2SB
-      pArgs->hTarget = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
-        pArgs->hTarget = AI_GetSinglePlayer();
-#endif
+      pArgs->hTarget = AI_GetSinglePlayer();
       return true;
     }
   }
@@ -2818,11 +2778,7 @@ void CNPC_PlayerCompanion::OnFriendDamaged( CBaseCombatCharacter *pSquadmate, CB
       }
     }
 
-#ifdef HL2SB
-    CBasePlayer *pPlayer = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
-      CBasePlayer *pPlayer = AI_GetSinglePlayer();
-#endif
+    CBasePlayer *pPlayer = AI_GetSinglePlayer();
     if ( pPlayer && IsInPlayerSquad() && ( pPlayer->GetAbsOrigin().AsVector2D() - GetAbsOrigin().AsVector2D() ).LengthSqr() < Square( 25 * 12 ) && IsAllowedToSpeak( TLK_WATCHOUT ) )
     {
       if ( !pPlayer->FInViewCone( pAttacker ) )
@@ -3120,10 +3076,8 @@ bool CNPC_PlayerCompanion::ShouldAlwaysTransition( void )
 //-----------------------------------------------------------------------------
 void CNPC_PlayerCompanion::InputOutsideTransition( inputdata_t &inputdata )
 {
-#ifndef HL2SB
   if ( !AI_IsSinglePlayer() )
     return;
-#endif
 
   // Must want to do this
   if ( ShouldAlwaysTransition() == false )
@@ -3133,11 +3087,7 @@ void CNPC_PlayerCompanion::InputOutsideTransition( inputdata_t &inputdata )
   if ( IsInAVehicle() )
     return;
 
-#ifdef HL2SB
-  CBaseEntity *pPlayer = UTIL_GetNearestPlayer( GetAbsOrigin() );
-#else
-    CBaseEntity *pPlayer = UTIL_GetLocalPlayer();
-#endif
+  CBaseEntity *pPlayer = UTIL_GetLocalPlayer();
   const Vector &playerPos = pPlayer->GetAbsOrigin();
 
   // Mark us as already having succeeded if we're vital or always meant to come with the player
@@ -3727,11 +3677,7 @@ bool CNPC_PlayerCompanion::IsNavigationUrgent( void )
     // could not see the player but the player could in fact see them.  Now the NPC's facing is
     // irrelevant and the player's viewcone is more authorative. -- jdw
 
-#ifdef HL2SB
-    CBasePlayer *pLocalPlayer = AI_GetNearestPlayer( GetAbsOrigin() );
-#else
-      CBasePlayer *pLocalPlayer = AI_GetSinglePlayer();
-#endif
+    CBasePlayer *pLocalPlayer = AI_GetSinglePlayer();
     if ( pLocalPlayer->FInViewCone( EyePosition() ) )
       return false;
 

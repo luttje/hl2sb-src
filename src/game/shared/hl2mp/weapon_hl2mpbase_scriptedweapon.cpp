@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -31,29 +32,28 @@ SendPropString( SENDINFO( m_iScriptedClassname ) ),
 #endif
     END_NETWORK_TABLE()
 
-        BEGIN_PREDICTION_DATA( CHL2MPScriptedWeapon )
-            END_PREDICTION_DATA()
+        BEGIN_PREDICTION_DATA( CHL2MPScriptedWeapon ) END_PREDICTION_DATA()
 
     //=========================================================
     //	>> CHLSelectFireScriptedWeapon
     //=========================================================
-    BEGIN_DATADESC( CHL2MPScriptedWeapon )
-        END_DATADESC()
+    BEGIN_DATADESC( CHL2MPScriptedWeapon ) END_DATADESC()
 
-// LINK_ENTITY_TO_CLASS( weapon_hl2mpbase_scriptedweapon, CHL2MPScriptedWeapon );
-// PRECACHE_WEAPON_REGISTER( weapon_hl2mpbase_scriptedweapon );
+// LINK_ENTITY_TO_CLASS( weapon_hl2mpbase_scriptedweapon, CHL2MPScriptedWeapon
+// ); PRECACHE_WEAPON_REGISTER( weapon_hl2mpbase_scriptedweapon );
 
 // These functions replace the macros above for runtime registration of
 // scripted weapons.
 #ifdef CLIENT_DLL
-            static C_BaseEntity *CCHL2MPScriptedWeaponFactory( void )
+        static C_BaseEntity *CCHL2MPScriptedWeaponFactory( void )
 {
   return static_cast< C_BaseEntity * >( new CHL2MPScriptedWeapon );
 };
 #endif
 
 #ifndef CLIENT_DLL
-static CUtlDict< CEntityFactory< CHL2MPScriptedWeapon > *, unsigned short > m_WeaponFactoryDatabase;
+static CUtlDict< CEntityFactory< CHL2MPScriptedWeapon > *, unsigned short >
+    m_WeaponFactoryDatabase;
 #endif
 
 void RegisterScriptedWeapon( const char *className )
@@ -64,7 +64,8 @@ void RegisterScriptedWeapon( const char *className )
     return;
   }
 
-  GetClassMap().Add( className, "CHL2MPScriptedWeapon", sizeof( CHL2MPScriptedWeapon ),
+  GetClassMap().Add( className, "CHL2MPScriptedWeapon",
+                     sizeof( CHL2MPScriptedWeapon ),
                      &CCHL2MPScriptedWeaponFactory, true );
 #else
   if ( EntityFactoryDictionary()->FindFactory( className ) )
@@ -79,14 +80,16 @@ void RegisterScriptedWeapon( const char *className )
   }
 
   // Andrew; This fixes months worth of pain and anguish.
-  CEntityFactory< CHL2MPScriptedWeapon > *pFactory = new CEntityFactory< CHL2MPScriptedWeapon >( className );
+  CEntityFactory< CHL2MPScriptedWeapon > *pFactory =
+      new CEntityFactory< CHL2MPScriptedWeapon >( className );
 
   lookup = m_WeaponFactoryDatabase.Insert( className, pFactory );
   Assert( lookup != m_WeaponFactoryDatabase.InvalidIndex() );
 #endif
   // BUGBUG: When attempting to precache weapons registered during runtime,
   // they don't appear as valid registered entities.
-  // static CPrecacheRegister precache_weapon_(&CPrecacheRegister::PrecacheFn_Other, className);
+  // static CPrecacheRegister
+  // precache_weapon_(&CPrecacheRegister::PrecacheFn_Other, className);
 }
 
 void ResetWeaponFactoryDatabase( void )
@@ -96,7 +99,9 @@ void ResetWeaponFactoryDatabase( void )
   GetClassMap().RemoveAllScripted();
 #endif
 #else
-  for ( int i = m_WeaponFactoryDatabase.First(); i != m_WeaponFactoryDatabase.InvalidIndex(); i = m_WeaponFactoryDatabase.Next( i ) )
+  for ( int i = m_WeaponFactoryDatabase.First();
+        i != m_WeaponFactoryDatabase.InvalidIndex();
+        i = m_WeaponFactoryDatabase.Next( i ) )
   {
     delete m_WeaponFactoryDatabase[i];
   }
@@ -106,19 +111,25 @@ void ResetWeaponFactoryDatabase( void )
 
 // acttable_t CHL2MPScriptedWeapon::m_acttable[] =
 // {
-// 	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PISTOL,					false },
-// 	{ ACT_MP_CROUCH_IDLE,				ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
+// 	{ ACT_MP_STAND_IDLE,				ACT_HL2MP_IDLE_PISTOL,
+// false }, 	{ ACT_MP_CROUCH_IDLE,
+// ACT_HL2MP_IDLE_CROUCH_PISTOL,			false },
 //
-// 	{ ACT_MP_RUN,						ACT_HL2MP_RUN_PISTOL,					false },
-// 	{ ACT_MP_CROUCHWALK,				ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
+// 	{ ACT_MP_RUN, ACT_HL2MP_RUN_PISTOL,
+// false }, 	{ ACT_MP_CROUCHWALK,
+// ACT_HL2MP_WALK_CROUCH_PISTOL,			false },
 //
-// 	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
-// 	{ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false },
+// 	{ ACT_MP_ATTACK_STAND_PRIMARYFIRE,
+// ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,	false }, 	{
+// ACT_MP_ATTACK_CROUCH_PRIMARYFIRE,	ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL,
+// false },
 //
-// 	{ ACT_MP_RELOAD_STAND,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
-// 	{ ACT_MP_RELOAD_CROUCH,				ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
+// 	{ ACT_MP_RELOAD_STAND,
+// ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false }, 	{ ACT_MP_RELOAD_CROUCH,
+// ACT_HL2MP_GESTURE_RELOAD_PISTOL,		false },
 //
-// 	{ ACT_MP_JUMP,						ACT_HL2MP_JUMP_PISTOL,					false },
+// 	{ ACT_MP_JUMP,
+// ACT_HL2MP_JUMP_PISTOL,					false },
 // };
 
 // IMPLEMENT_ACTTABLE( CHL2MPScriptedWeapon );
@@ -204,7 +215,7 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
 #if defined( LUA_SDK )
 #ifndef CLIENT_DLL
   // Let the instance reinitialize itself for the client.
-  if ( m_nTableReference != LUA_NOREF )
+  if ( luasrc_isrefvalid( L, m_nTableReference ) )
     return;
 #endif
 
@@ -215,7 +226,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   else
     Q_strncpy( className, GetClassname(), sizeof( className ) );
 #else
-  Q_strncpy( m_iScriptedClassname.GetForModify(), GetClassname(), sizeof( className ) );
+  Q_strncpy( m_iScriptedClassname.GetForModify(), GetClassname(),
+             sizeof( className ) );
   Q_strncpy( className, GetClassname(), sizeof( className ) );
 #endif
   Q_strlower( className );
@@ -255,11 +267,13 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isstring( L, -1 ) )
   {
-    Q_strncpy( m_pLuaWeaponInfo->szPrintName, lua_tostring( L, -1 ), MAX_WEAPON_STRING );
+    Q_strncpy( m_pLuaWeaponInfo->szPrintName, lua_tostring( L, -1 ),
+               MAX_WEAPON_STRING );
   }
   else
   {
-    Q_strncpy( m_pLuaWeaponInfo->szPrintName, WEAPON_PRINTNAME_MISSING, MAX_WEAPON_STRING );
+    Q_strncpy( m_pLuaWeaponInfo->szPrintName, WEAPON_PRINTNAME_MISSING,
+               MAX_WEAPON_STRING );
   }
   lua_pop( L, 1 );
   // View model & world model
@@ -268,7 +282,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isstring( L, -1 ) )
   {
-    Q_strncpy( m_pLuaWeaponInfo->szViewModel, lua_tostring( L, -1 ), MAX_WEAPON_STRING );
+    Q_strncpy( m_pLuaWeaponInfo->szViewModel, lua_tostring( L, -1 ),
+               MAX_WEAPON_STRING );
   }
   lua_pop( L, 1 );
   lua_getref( L, m_nTableReference );
@@ -276,7 +291,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isstring( L, -1 ) )
   {
-    Q_strncpy( m_pLuaWeaponInfo->szWorldModel, lua_tostring( L, -1 ), MAX_WEAPON_STRING );
+    Q_strncpy( m_pLuaWeaponInfo->szWorldModel, lua_tostring( L, -1 ),
+               MAX_WEAPON_STRING );
   }
   lua_pop( L, 1 );
   lua_getref( L, m_nTableReference );
@@ -284,7 +300,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isstring( L, -1 ) )
   {
-    Q_strncpy( m_pLuaWeaponInfo->szAnimationPrefix, lua_tostring( L, -1 ), MAX_WEAPON_PREFIX );
+    Q_strncpy( m_pLuaWeaponInfo->szAnimationPrefix, lua_tostring( L, -1 ),
+               MAX_WEAPON_PREFIX );
   }
   lua_pop( L, 1 );
   lua_getref( L, m_nTableReference );
@@ -341,7 +358,9 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->iMaxClip1 = lua_tonumber( L, -1 );  // Max primary clips gun can hold (assume they don't use clips by default)
+    m_pLuaWeaponInfo->iMaxClip1 =
+        lua_tonumber( L, -1 );  // Max primary clips gun can hold (assume they
+                                // don't use clips by default)
   }
   else
   {
@@ -353,7 +372,9 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->iMaxClip2 = lua_tonumber( L, -1 );  // Max secondary clips gun can hold (assume they don't use clips by default)
+    m_pLuaWeaponInfo->iMaxClip2 =
+        lua_tonumber( L, -1 );  // Max secondary clips gun can hold (assume
+                                // they don't use clips by default)
   }
   else
   {
@@ -365,7 +386,9 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->iDefaultClip1 = lua_tonumber( L, -1 );  // amount of primary ammo placed in the primary clip when it's picked up
+    m_pLuaWeaponInfo->iDefaultClip1 =
+        lua_tonumber( L, -1 );  // amount of primary ammo placed in the
+                                // primary clip when it's picked up
   }
   else
   {
@@ -377,7 +400,9 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->iDefaultClip2 = lua_tonumber( L, -1 );  // amount of secondary ammo placed in the secondary clip when it's picked up
+    m_pLuaWeaponInfo->iDefaultClip2 =
+        lua_tonumber( L, -1 );  // amount of secondary ammo placed in the
+                                // secondary clip when it's picked up
   }
   else
   {
@@ -402,20 +427,22 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->iWeight = lua_tonumber( L, -1 );
+    m_pLuaWeaponInfo->iRumbleEffect = lua_tonumber( L, -1 );
   }
   else
   {
-    m_pLuaWeaponInfo->iWeight = -1;
+    m_pLuaWeaponInfo->iRumbleEffect = -1;
   }
   lua_pop( L, 1 );
 
+  // TODO: Create a helper function to read these as int / bool to boolean
   lua_getref( L, m_nTableReference );
   lua_getfield( L, -1, "showusagehint" );
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->bShowUsageHint = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->bShowUsageHint =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -427,7 +454,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->bAutoSwitchTo = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->bAutoSwitchTo =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -439,7 +467,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->bAutoSwitchFrom = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->bAutoSwitchFrom =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -451,7 +480,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->m_bBuiltRightHanded = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->m_bBuiltRightHanded =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -463,7 +493,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->m_bAllowFlipping = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->m_bAllowFlipping =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -471,11 +502,12 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   }
   lua_pop( L, 1 );
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "MeleeWeapon" );
+  lua_getfield( L, -1, "meleeweapon" );
   lua_remove( L, -2 );
   if ( lua_isnumber( L, -1 ) )
   {
-    m_pLuaWeaponInfo->m_bMeleeWeapon = ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
+    m_pLuaWeaponInfo->m_bMeleeWeapon =
+        ( int )lua_tointeger( L, -1 ) != 0 ? true : false;
   }
   else
   {
@@ -491,10 +523,13 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   {
     const char *pAmmo = lua_tostring( L, -1 );
     if ( strcmp( "None", pAmmo ) == 0 )
-      Q_strncpy( m_pLuaWeaponInfo->szAmmo1, "", sizeof( m_pLuaWeaponInfo->szAmmo1 ) );
+      Q_strncpy( m_pLuaWeaponInfo->szAmmo1, "",
+                 sizeof( m_pLuaWeaponInfo->szAmmo1 ) );
     else
-      Q_strncpy( m_pLuaWeaponInfo->szAmmo1, pAmmo, sizeof( m_pLuaWeaponInfo->szAmmo1 ) );
-    m_pLuaWeaponInfo->iAmmoType = GetAmmoDef()->Index( m_pLuaWeaponInfo->szAmmo1 );
+      Q_strncpy( m_pLuaWeaponInfo->szAmmo1, pAmmo,
+                 sizeof( m_pLuaWeaponInfo->szAmmo1 ) );
+    m_pLuaWeaponInfo->iAmmoType =
+        GetAmmoDef()->Index( m_pLuaWeaponInfo->szAmmo1 );
   }
   lua_pop( L, 1 );
 
@@ -506,15 +541,19 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
   {
     const char *pAmmo = lua_tostring( L, -1 );
     if ( strcmp( "None", pAmmo ) == 0 )
-      Q_strncpy( m_pLuaWeaponInfo->szAmmo2, "", sizeof( m_pLuaWeaponInfo->szAmmo2 ) );
+      Q_strncpy( m_pLuaWeaponInfo->szAmmo2, "",
+                 sizeof( m_pLuaWeaponInfo->szAmmo2 ) );
     else
-      Q_strncpy( m_pLuaWeaponInfo->szAmmo2, pAmmo, sizeof( m_pLuaWeaponInfo->szAmmo2 ) );
-    m_pLuaWeaponInfo->iAmmo2Type = GetAmmoDef()->Index( m_pLuaWeaponInfo->szAmmo2 );
+      Q_strncpy( m_pLuaWeaponInfo->szAmmo2, pAmmo,
+                 sizeof( m_pLuaWeaponInfo->szAmmo2 ) );
+    m_pLuaWeaponInfo->iAmmo2Type =
+        GetAmmoDef()->Index( m_pLuaWeaponInfo->szAmmo2 );
   }
   lua_pop( L, 1 );
 
   // Now read the weapon sounds
-  memset( m_pLuaWeaponInfo->aShootSounds, 0, sizeof( m_pLuaWeaponInfo->aShootSounds ) );
+  memset( m_pLuaWeaponInfo->aShootSounds, 0,
+          sizeof( m_pLuaWeaponInfo->aShootSounds ) );
   lua_getref( L, m_nTableReference );
   lua_getfield( L, -1, "SoundData" );
   lua_remove( L, -2 );
@@ -528,7 +567,8 @@ void CHL2MPScriptedWeapon::InitScriptedWeapon( void )
         const char *soundname = lua_tostring( L, -1 );
         if ( soundname && soundname[0] )
         {
-          Q_strncpy( m_pLuaWeaponInfo->aShootSounds[i], soundname, MAX_WEAPON_STRING );
+          Q_strncpy( m_pLuaWeaponInfo->aShootSounds[i], soundname,
+                     MAX_WEAPON_STRING );
         }
       }
       lua_pop( L, 1 );
@@ -591,7 +631,8 @@ void CHL2MPScriptedWeapon::Precache( void )
     m_iPrimaryAmmoType = GetAmmoDef()->Index( GetWpnData().szAmmo1 );
     if ( m_iPrimaryAmmoType == -1 )
     {
-      Msg( "ERROR: Weapon (%s) using undefined primary ammo type (%s)\n", GetClassname(), GetWpnData().szAmmo1 );
+      Msg( "ERROR: Weapon (%s) using undefined primary ammo type (%s)\n",
+           GetClassname(), GetWpnData().szAmmo1 );
     }
   }
   if ( GetWpnData().szAmmo2[0] )
@@ -599,7 +640,8 @@ void CHL2MPScriptedWeapon::Precache( void )
     m_iSecondaryAmmoType = GetAmmoDef()->Index( GetWpnData().szAmmo2 );
     if ( m_iSecondaryAmmoType == -1 )
     {
-      Msg( "ERROR: Weapon (%s) using undefined secondary ammo type (%s)\n", GetClassname(), GetWpnData().szAmmo2 );
+      Msg( "ERROR: Weapon (%s) using undefined secondary ammo type (%s)\n",
+           GetClassname(), GetWpnData().szAmmo2 );
     }
   }
 
@@ -656,7 +698,7 @@ const char *CHL2MPScriptedWeapon::GetWorldModel( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "playermodel" );
+  lua_getfield( L, -1, "WorldModel" );
   lua_remove( L, -2 );
 
   RETURN_LUA_STRING();
@@ -669,7 +711,7 @@ const char *CHL2MPScriptedWeapon::GetAnimPrefix( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "anim_prefix" );
+  lua_getfield( L, -1, "AnimationPrefix" );
   lua_remove( L, -2 );
 
   RETURN_LUA_STRING();
@@ -695,7 +737,7 @@ int CHL2MPScriptedWeapon::GetMaxClip1( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "clip_size" );
+  lua_getfield( L, -1, "MaxClip" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -708,7 +750,7 @@ int CHL2MPScriptedWeapon::GetMaxClip2( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "clip2_size" );
+  lua_getfield( L, -1, "MaxClip2" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -721,7 +763,7 @@ int CHL2MPScriptedWeapon::GetDefaultClip1( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "default_clip" );
+  lua_getfield( L, -1, "DefaultClip" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -734,7 +776,7 @@ int CHL2MPScriptedWeapon::GetDefaultClip2( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "default_clip2" );
+  lua_getfield( L, -1, "DefaultClip2" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -829,7 +871,7 @@ int CHL2MPScriptedWeapon::GetWeaponFlags( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "item_flags" );
+  lua_getfield( L, -1, "WeaponFlags" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -842,7 +884,7 @@ int CHL2MPScriptedWeapon::GetSlot( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "bucket" );
+  lua_getfield( L, -1, "InventorySlot" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -855,7 +897,7 @@ int CHL2MPScriptedWeapon::GetPosition( void ) const
 {
 #if defined( LUA_SDK )
   lua_getref( L, m_nTableReference );
-  lua_getfield( L, -1, "bucket_position" );
+  lua_getfield( L, -1, "InventorySlotPosition" );
   lua_remove( L, -2 );
 
   RETURN_LUA_INTEGER();
@@ -976,7 +1018,8 @@ void CHL2MPScriptedWeapon::ItemPostFrame( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called each frame by the player PostThink, if the player's not ready to attack yet
+// Purpose: Called each frame by the player PostThink, if the player's not ready
+// to attack yet
 //-----------------------------------------------------------------------------
 void CHL2MPScriptedWeapon::ItemBusyFrame( void )
 {

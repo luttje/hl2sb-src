@@ -1344,7 +1344,8 @@ void CHalfLife2::PlayerThink( CBasePlayer *pPlayer )
 }
 
 #endif
-#ifdef LUA_SDK
+
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
 void CHalfLife2::Think( void )
 {
 #ifndef CLIENT_DLL
@@ -1361,26 +1362,9 @@ void CHalfLife2::Think( void )
   }
 #endif
 }
-#else
-#ifndef CLIENT_DLL
-void CHalfLife2::Think( void )
-{
-  BaseClass::Think();
-
-  if ( physcannon_mega_enabled.GetBool() == true )
-  {
-    m_bMegaPhysgun = true;
-  }
-  else
-  {
-    // FIXME: Is there a better place for this?
-    m_bMegaPhysgun = ( GlobalEntity_GetState( "super_phys_gun" ) == GLOBAL_ON );
-  }
-}
 #endif
-#endif
-#ifndef CLIENT_DLL
 
+#ifndef CLIENT_DLL
 //-----------------------------------------------------------------------------
 // Purpose: Returns how much damage the given ammo type should do to the victim
 //			when fired by the attacker.

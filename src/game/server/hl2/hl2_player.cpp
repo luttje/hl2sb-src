@@ -53,7 +53,7 @@
 
 #ifdef PORTAL
 #include "portal_player.h"
-#endif  // PORTAL
+#endif
 
 #ifdef LUA_SDK
 #include "luamanager.h"
@@ -3133,6 +3133,11 @@ float CHL2_Player::GetHeldObjectMass( IPhysicsObject *pHeldObject )
     mass = PhysCannonGetHeldObjectMass( GetActiveWeapon(), pHeldObject );
   }
   return mass;
+}
+
+CBaseEntity *CHL2_Player::GetHeldObject( void )
+{
+  return PhysCannonGetHeldEntity( GetActiveWeapon() );
 }
 
 //-----------------------------------------------------------------------------

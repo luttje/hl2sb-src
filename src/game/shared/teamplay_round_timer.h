@@ -119,6 +119,10 @@ class CTeamRoundTimer : public CBaseEntity
   {
     return m_nTimerMaxLength > 0;
   }
+  int GetTimerInitialLength( void )
+  {
+    return m_nTimerInitialLength;
+  }
 
  private:
   void CalculateOutputMessages( void );

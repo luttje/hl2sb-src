@@ -574,7 +574,7 @@ void ConCommand::Dispatch( const CCommand &command )
   }
 
   // Command without callback!!!
-  AssertMsg( 0, ( "Encountered ConCommand '%s' without a callback!\n", GetName() ) );
+  AssertMsg( 0, "Encountered ConCommand '%s' without a callback!\n", GetName() );
 }
 
 //-----------------------------------------------------------------------------
@@ -756,7 +756,7 @@ void ConVar::InternalSetValue( const char *value )
 
   // Redetermine value
   m_fValue = fNewValue;
-  m_nValue = ( int )( m_fValue );
+  m_nValue = ( int )( fNewValue );
 
   if ( !( m_nFlags & FCVAR_NEVER_AS_STRING ) )
   {
@@ -797,13 +797,17 @@ void ConVar::ChangeStringValue( const char *tempVal, float flOldValue )
     *m_pszString = 0;
   }
 
-  // Invoke any necessary callback function
-  if ( m_fnChangeCallback )
+  // If nothing has changed, don't do the callbacks.
+  if ( V_strcmp( pszOldValue, m_pszString ) != 0 )
   {
-    m_fnChangeCallback( this, pszOldValue, flOldValue );
-  }
+    // Invoke any necessary callback function
+    if ( m_fnChangeCallback )
+    {
+      m_fnChangeCallback( this, pszOldValue, flOldValue );
+    }
 
-  g_pCVar->CallGlobalChangeCallbacks( this, pszOldValue, flOldValue );
+    g_pCVar->CallGlobalChangeCallbacks( this, pszOldValue, flOldValue );
+  }
 
   stackfree( pszOldValue );
 }

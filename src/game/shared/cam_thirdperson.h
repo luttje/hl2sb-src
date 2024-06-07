@@ -41,35 +41,38 @@ class CThirdPersonManager
 {
  public:
   CThirdPersonManager();
-  void SetCameraOffsetAngles( Vector vecOffset )
+  void SetCameraOffsetAngles( const Vector& vecOffset )
   {
     m_vecCameraOffset = vecOffset;
   }
-  Vector GetCameraOffsetAngles( void )
+  const Vector& GetCameraOffsetAngles( void ) const
   {
     return m_vecCameraOffset;
   }
 
-  void SetDesiredCameraOffset( Vector vecOffset )
+  void SetDesiredCameraOffset( const Vector& vecOffset )
   {
     m_vecDesiredCameraOffset = vecOffset;
   }
-  Vector GetDesiredCameraOffset( void );
+  const Vector& GetDesiredCameraOffset( void ) const
+  {
+    return m_vecDesiredCameraOffset;
+  }
 
   Vector GetFinalCameraOffset( void );
 
-  void SetCameraOrigin( Vector vecOffset )
+  void SetCameraOrigin( const Vector& vecOffset )
   {
     m_vecCameraOrigin = vecOffset;
   }
-  Vector GetCameraOrigin( void )
+  const Vector& GetCameraOrigin( void ) const
   {
     return m_vecCameraOrigin;
   }
 
   void Update( void );
 
-  void PositionCamera( CBasePlayer *pPlayer, QAngle angles );
+  void PositionCamera( CBasePlayer* pPlayer, const QAngle& angles );
 
   void UseCameraOffsets( bool bUse )
   {
@@ -80,7 +83,7 @@ class CThirdPersonManager
     return m_bUseCameraOffsets;
   }
 
-  QAngle GetCameraViewAngles( void )
+  const QAngle& GetCameraViewAngles( void ) const
   {
     return m_ViewAngles;
   }

@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//===== Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ======//
 //
 // Purpose:
 //
@@ -9,13 +9,12 @@
 // $NoKeywords: $
 //===========================================================================//
 
-#define lconvar_cpp
-
 #include "cbase.h"
 #include "luamanager.h"
 #include "luasrclib.h"
 #include "lconvar.h"
 #include "lbaseplayer_shared.h"
+#include "datacache/imdlcache.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -316,7 +315,7 @@ LUALIB_API int luaopen_ConCommand( lua_State *L )
   luaL_register( L, NULL, ConCommandmeta );
   lua_pushvalue( L, -1 );           /* push metatable */
   lua_setfield( L, -2, "__index" ); /* metatable.__index = metatable */
-  lua_pushstring( L, "concommand" );
+  lua_pushstring( L, "concommands" );
   lua_setfield( L, -2, "__type" ); /* metatable.__type = "concommand" */
   luaL_register( L, "_G", ConCommand_funcs );
   lua_pop( L, 1 );

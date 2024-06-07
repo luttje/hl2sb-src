@@ -116,7 +116,7 @@ class CTeamControlPoint : public CBaseAnimating
 
   void SetCappersRequiredForTeam( int iGameTeam, int iCappers );
 
-  void CaptureBlocked( CBaseMultiplayerPlayer *pPlayer );
+  void CaptureBlocked( CBaseMultiplayerPlayer *pPlayer, CBaseMultiplayerPlayer *pVictim );
 
   int PointValue( void );
 

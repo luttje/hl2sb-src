@@ -75,11 +75,7 @@ bool CHealthKit::MyTouch( CBasePlayer *pPlayer )
     CPASAttenuationFilter filter( pPlayer, "HealthKit.Touch" );
     EmitSound( filter, pPlayer->entindex(), "HealthKit.Touch" );
 
-#ifndef HL2SB
     if ( g_pGameRules->ItemShouldRespawn( this ) )
-#else
-    if ( g_pGameRules->ItemShouldRespawn( this ) == GR_ITEM_RESPAWN_YES )
-#endif
     {
       Respawn();
     }
@@ -132,11 +128,7 @@ class CHealthVial : public CItem
       CPASAttenuationFilter filter( pPlayer, "HealthVial.Touch" );
       EmitSound( filter, pPlayer->entindex(), "HealthVial.Touch" );
 
-#ifndef HL2SB
       if ( g_pGameRules->ItemShouldRespawn( this ) )
-#else
-      if ( g_pGameRules->ItemShouldRespawn( this ) == GR_ITEM_RESPAWN_YES )
-#endif
       {
         Respawn();
       }

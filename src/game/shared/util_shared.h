@@ -447,11 +447,11 @@ inline float DistanceToRay( const Vector &pos, const Vector &rayStart, const Vec
    public:                                                            \
     interfaceName( bool bAutoAdd = true );                            \
     virtual ~interfaceName();                                         \
-    static void Add( interfaceName *pElement )                        \
+    static void AddToAutoList( interfaceName *pElement )              \
     {                                                                 \
       m_##interfaceName##AutoList.AddToTail( pElement );              \
     }                                                                 \
-    static void Remove( interfaceName *pElement )                     \
+    static void RemoveFromAutoList( interfaceName *pElement )         \
     {                                                                 \
       m_##interfaceName##AutoList.FindAndFastRemove( pElement );      \
     }                                                                 \
@@ -472,13 +472,28 @@ inline float DistanceToRay( const Vector &pos, const Vector &rayStart, const Vec
   {                                                                               \
     if ( bAutoAdd )                                                               \
     {                                                                             \
-      Add( this );                                                                \
+      AddToAutoList( this );                                                      \
     }                                                                             \
   }                                                                               \
   interfaceName::~interfaceName()                                                 \
   {                                                                               \
-    Remove( this );                                                               \
+    RemoveFromAutoList( this );                                                   \
   }
+
+//--------------------------------------------------------------------------------------------------------------
+// This would do the same thing without requiring casts all over the place. Yes, it's a template, but
+// DECLARE_AUTO_LIST requires a CUtlVector<T> anyway. TODO ask about replacing the macros with this.
+// template<class T>
+// class AutoList {
+// public:
+//	typedef CUtlVector<T*> AutoListType;
+//	static AutoListType& All() { return m_autolist; }
+// protected:
+//	AutoList() { m_autolist.AddToTail(static_cast<T*>(this)); }
+//	virtual ~AutoList() { m_autolist.FindAndFastRemove(static_cast<T*>(this)); }
+// private:
+//	static AutoListType m_autolist;
+//};
 
 //--------------------------------------------------------------------------------------------------------------
 /**
@@ -593,7 +608,15 @@ class CountdownTimer
  private:
   float m_duration;
   float m_timestamp;
-  float Now( void ) const;  // work-around since client header doesn't like inlined gpGlobals->curtime
+  virtual float Now( void ) const;  // work-around since client header doesn't like inlined gpGlobals->curtime
+};
+
+class RealTimeCountdownTimer : public CountdownTimer
+{
+  virtual float Now( void ) const OVERRIDE
+  {
+    return Plat_FloatTime();
+  }
 };
 
 char *ReadAndAllocStringValue( KeyValues *pSub, const char *pName, const char *pFilename = NULL );

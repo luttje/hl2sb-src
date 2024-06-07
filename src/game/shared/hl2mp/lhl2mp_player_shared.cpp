@@ -1,15 +1,12 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
 // $NoKeywords: $
 //
 //=============================================================================//
-#define lhl2mp_player_shared_cpp
-
 #include "cbase.h"
-
-#include "hl2mp_player_shared.h"
 
 #include "luamanager.h"
 #include "lhl2mp_player_shared.h"
@@ -21,6 +18,8 @@
 #endif
 #include "mathlib/lvector.h"
 
+#include "hl2mp_player_shared.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -30,7 +29,8 @@
 
 LUA_API lua_CHL2MP_Player *lua_tohl2mpplayer( lua_State *L, int idx )
 {
-  CBaseHandle *hPlayer = dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
+  CBaseHandle *hPlayer =
+      dynamic_cast< CBaseHandle * >( ( CBaseHandle * )lua_touserdata( L, idx ) );
   if ( hPlayer == NULL )
     return NULL;
   return dynamic_cast< lua_CHL2MP_Player * >( hPlayer->Get() );
@@ -42,7 +42,8 @@ LUA_API lua_CHL2MP_Player *lua_tohl2mpplayer( lua_State *L, int idx )
 
 LUA_API void lua_pushhl2mpplayer( lua_State *L, CHL2MP_Player *pPlayer )
 {
-  CBaseHandle *hPlayer = ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
+  CBaseHandle *hPlayer =
+      ( CBaseHandle * )lua_newuserdata( L, sizeof( CBaseHandle ) );
   hPlayer->Set( pPlayer );
   luaL_getmetatable( L, "CHL2MP_Player" );
   lua_setmetatable( L, -2 );
@@ -67,7 +68,8 @@ static int CHL2MP_Player_BecomeRagdollOnClient( lua_State *L )
 #ifdef CLIENT_DLL
   lua_pushanimating( L, luaL_checkhl2mpplayer( L, 1 )->BecomeRagdollOnClient() );
 #else
-  lua_pushboolean( L, luaL_checkhl2mpplayer( L, 1 )->BecomeRagdollOnClient( luaL_checkvector( L, 2 ) ) );
+  lua_pushboolean( L, luaL_checkhl2mpplayer( L, 1 )->BecomeRagdollOnClient(
+                          luaL_checkvector( L, 2 ) ) );
 #endif
   return 1;
 }
@@ -83,7 +85,8 @@ static int CHL2MP_Player_CalcView( lua_State *L )
   Vector eyeOrigin;
   QAngle eyeAngles;
   float zNear, zFar, fov;
-  luaL_checkhl2mpplayer( L, 1 )->CalcView( eyeOrigin, eyeAngles, zNear, zFar, fov );
+  luaL_checkhl2mpplayer( L, 1 )->CalcView( eyeOrigin, eyeAngles, zNear, zFar,
+                                           fov );
   lua_pushvector( L, eyeOrigin );
   lua_pushangle( L, eyeAngles );
   lua_pushnumber( L, zNear );
@@ -100,13 +103,18 @@ static int CHL2MP_Player_CanSprint( lua_State *L )
 
 static int CHL2MP_Player_DoAnimationEvent( lua_State *L )
 {
-  luaL_checkhl2mpplayer( L, 1 )->DoAnimationEvent( ( PlayerAnimEvent_t )luaL_checkint( L, 2 ), luaL_optinteger( L, 3, 0 ) );
+  // m_pSDKPlayer->DoAnimationEvent(PLAYERANIMEVENT_JUMP);
+  // Became:
+  // MoveHelper()->PlayerSetAnimation(PLAYER_JUMP);
+
+  // luaL_checkhl2mpplayer(L, 1)->DoAnimationEvent((PlayerAnimEvent_t)luaL_checkint(L, 2), luaL_optinteger(L, 3, 0));
   return 0;
 }
 
 static int CHL2MP_Player___index( lua_State *L )
 {
   CHL2MP_Player *pPlayer = lua_tohl2mpplayer( L, 1 );
+
   if ( pPlayer == NULL )
   { /* avoid extra test when d is not 0 */
     lua_Debug ar1;
@@ -114,35 +122,46 @@ static int CHL2MP_Player___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
+
     return lua_error( L );
   }
+
   const char *field = luaL_checkstring( L, 2 );
+
 #ifdef CLIENT_DLL
   if ( Q_strcmp( field, "m_fNextThinkPushAway" ) == 0 )
-    lua_pushnumber( L, pPlayer->m_fNextThinkPushAway );
+  {
+    // TODO: This doesn't exist in SourceSDK2013?
+    // lua_pushnumber(L, pPlayer->m_fNextThinkPushAway);
+  }
   else
   {
 #endif
-    if ( pPlayer->m_nTableReference != LUA_NOREF )
+    if ( luasrc_isrefvalid( L, pPlayer->m_nTableReference ) )
     {
       lua_getref( L, pPlayer->m_nTableReference );
       lua_getfield( L, -1, field );
+
       if ( lua_isnil( L, -1 ) )
       {
         lua_pop( L, 2 );
         lua_getmetatable( L, 1 );
         lua_getfield( L, -1, field );
+
         if ( lua_isnil( L, -1 ) )
         {
           lua_pop( L, 2 );
           luaL_getmetatable( L, "CBasePlayer" );
           lua_getfield( L, -1, field );
+
           if ( lua_isnil( L, -1 ) )
           {
             lua_pop( L, 2 );
             luaL_getmetatable( L, "CBaseAnimating" );
             lua_getfield( L, -1, field );
+
             if ( lua_isnil( L, -1 ) )
             {
               lua_pop( L, 2 );
@@ -157,16 +176,19 @@ static int CHL2MP_Player___index( lua_State *L )
     {
       lua_getmetatable( L, 1 );
       lua_getfield( L, -1, field );
+
       if ( lua_isnil( L, -1 ) )
       {
         lua_pop( L, 2 );
         luaL_getmetatable( L, "CBasePlayer" );
         lua_getfield( L, -1, field );
+
         if ( lua_isnil( L, -1 ) )
         {
           lua_pop( L, 2 );
           luaL_getmetatable( L, "CBaseAnimating" );
           lua_getfield( L, -1, field );
+
           if ( lua_isnil( L, -1 ) )
           {
             lua_pop( L, 2 );
@@ -179,12 +201,14 @@ static int CHL2MP_Player___index( lua_State *L )
 #ifdef CLIENT_DLL
   }
 #endif
+
   return 1;
 }
 
 static int CHL2MP_Player___newindex( lua_State *L )
 {
   CHL2MP_Player *pPlayer = lua_tohl2mpplayer( L, 1 );
+
   if ( pPlayer == NULL )
   { /* avoid extra test when d is not 0 */
     lua_Debug ar1;
@@ -192,21 +216,28 @@ static int CHL2MP_Player___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a NULL entity",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
+
   const char *field = luaL_checkstring( L, 2 );
+
 #ifdef CLIENT_DLL
   if ( Q_strcmp( field, "m_fNextThinkPushAway" ) == 0 )
-    pPlayer->m_fNextThinkPushAway = luaL_checknumber( L, 3 );
+  {
+    // TODO: This doesn't exist in SourceSDK2013?
+    // pPlayer->m_fNextThinkPushAway = luaL_checknumber(L, 3);
+  }
   else
   {
 #endif
-    if ( pPlayer->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, pPlayer->m_nTableReference ) )
     {
       lua_newtable( L );
       pPlayer->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
     }
+
     lua_getref( L, pPlayer->m_nTableReference );
     lua_pushvalue( L, 3 );
     lua_setfield( L, -2, field );
@@ -214,6 +245,7 @@ static int CHL2MP_Player___newindex( lua_State *L )
 #ifdef CLIENT_DLL
   }
 #endif
+
   return 0;
 }
 
@@ -229,7 +261,8 @@ static int CHL2MP_Player___tostring( lua_State *L )
   if ( pPlayer == NULL )
     lua_pushstring( L, "NULL" );
   else
-    lua_pushfstring( L, "CHL2MP_Player: %d \"%s\"", pPlayer->GetUserID(), pPlayer->GetPlayerName() );
+    lua_pushfstring( L, "CHL2MP_Player: %d \"%s\"", pPlayer->GetUserID(),
+                     pPlayer->GetPlayerName() );
   return 1;
 }
 
@@ -252,8 +285,7 @@ static int luasrc_ToHL2MPPlayer( lua_State *L )
 }
 
 static const luaL_Reg CHL2MP_Player_funcs[] = {
-    { "ToHL2MPPlayer", luasrc_ToHL2MPPlayer },
-    { NULL, NULL } };
+    { "ToHL2MPPlayer", luasrc_ToHL2MPPlayer }, { NULL, NULL } };
 
 /*
 ** Open CHL2MP_Player object

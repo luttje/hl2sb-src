@@ -30,18 +30,18 @@ SendPropString( SENDINFO( m_iScriptedClassname ) ),
 #endif
     END_NETWORK_TABLE()
 
-        BEGIN_PREDICTION_DATA( CBaseScripted )
-            END_PREDICTION_DATA()
+        BEGIN_PREDICTION_DATA( CBaseScripted ) END_PREDICTION_DATA()
 
 #ifdef CLIENT_DLL
-                static C_BaseEntity *CCBaseScriptedFactory( void )
+            static C_BaseEntity *CCBaseScriptedFactory( void )
 {
   return static_cast< C_BaseEntity * >( new CBaseScripted );
 };
 #endif
 
 #ifndef CLIENT_DLL
-static CUtlDict< CEntityFactory< CBaseScripted > *, unsigned short > m_EntityFactoryDatabase;
+static CUtlDict< CEntityFactory< CBaseScripted > *, unsigned short >
+    m_EntityFactoryDatabase;
 #endif
 
 void RegisterScriptedEntity( const char *className )
@@ -66,7 +66,8 @@ void RegisterScriptedEntity( const char *className )
     return;
   }
 
-  CEntityFactory< CBaseScripted > *pFactory = new CEntityFactory< CBaseScripted >( className );
+  CEntityFactory< CBaseScripted > *pFactory =
+      new CEntityFactory< CBaseScripted >( className );
 
   lookup = m_EntityFactoryDatabase.Insert( className, pFactory );
   Assert( lookup != m_EntityFactoryDatabase.InvalidIndex() );
@@ -80,7 +81,9 @@ void ResetEntityFactoryDatabase( void )
   GetClassMap().RemoveAllScripted();
 #endif
 #else
-  for ( int i = m_EntityFactoryDatabase.First(); i != m_EntityFactoryDatabase.InvalidIndex(); i = m_EntityFactoryDatabase.Next( i ) )
+  for ( int i = m_EntityFactoryDatabase.First();
+        i != m_EntityFactoryDatabase.InvalidIndex();
+        i = m_EntityFactoryDatabase.Next( i ) )
   {
     delete m_EntityFactoryDatabase[i];
   }
@@ -134,7 +137,7 @@ void CBaseScripted::InitScriptedEntity( void )
 #if 0
 #ifndef CLIENT_DLL
 	// Let the instance reinitialize itself for the client.
-	if ( m_nTableReference != LUA_NOREF )
+	if (luasrc_isrefvalid(L, m_nTableReference))
 		return;
 #endif
 #endif
@@ -154,13 +157,14 @@ void CBaseScripted::InitScriptedEntity( void )
   else
     Q_strncpy( className, GetClassname(), sizeof( className ) );
 #else
-  Q_strncpy( m_iScriptedClassname.GetForModify(), GetClassname(), sizeof( className ) );
+  Q_strncpy( m_iScriptedClassname.GetForModify(), GetClassname(),
+             sizeof( className ) );
   Q_strncpy( className, GetClassname(), sizeof( className ) );
 #endif
   Q_strlower( className );
   SetClassname( className );
 
-  if ( m_nTableReference == LUA_NOREF )
+  if ( !luasrc_isrefvalid( L, m_nTableReference ) )
   {
     LoadScriptedEntity();
     m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );

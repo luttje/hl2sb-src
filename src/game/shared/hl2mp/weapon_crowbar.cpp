@@ -28,11 +28,6 @@
 #define CROWBAR_RANGE 75.0f
 #define CROWBAR_REFIRE 0.4f
 
-#ifdef HL2SB
-ConVar sk_plr_dmg_crowbar( "sk_plr_dmg_crowbar", "0", FCVAR_REPLICATED );
-ConVar sk_npc_dmg_crowbar( "sk_npc_dmg_crowbar", "0", FCVAR_REPLICATED );
-#endif
-
 //-----------------------------------------------------------------------------
 // CWeaponCrowbar
 //-----------------------------------------------------------------------------
@@ -48,23 +43,25 @@ END_PREDICTION_DATA()
 LINK_ENTITY_TO_CLASS( weapon_crowbar, CWeaponCrowbar );
 PRECACHE_WEAPON_REGISTER( weapon_crowbar );
 
-#ifndef CLIENT_DLL
+acttable_t CWeaponCrowbar::m_acttable[] = {
+    { ACT_MP_STAND_IDLE, ACT_HL2MP_IDLE_MELEE, false },
+    { ACT_MP_CROUCH_IDLE, ACT_HL2MP_IDLE_CROUCH_MELEE, false },
 
-acttable_t CWeaponCrowbar::m_acttable[] =
-    {
-        { ACT_RANGE_ATTACK1, ACT_RANGE_ATTACK_SLAM, true },
-        { ACT_HL2MP_IDLE, ACT_HL2MP_IDLE_MELEE, false },
-        { ACT_HL2MP_RUN, ACT_HL2MP_RUN_MELEE, false },
-        { ACT_HL2MP_IDLE_CROUCH, ACT_HL2MP_IDLE_CROUCH_MELEE, false },
-        { ACT_HL2MP_WALK_CROUCH, ACT_HL2MP_WALK_CROUCH_MELEE, false },
-        { ACT_HL2MP_GESTURE_RANGE_ATTACK, ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE, false },
-        { ACT_HL2MP_GESTURE_RELOAD, ACT_HL2MP_GESTURE_RELOAD_MELEE, false },
-        { ACT_HL2MP_JUMP, ACT_HL2MP_JUMP_MELEE, false },
+    { ACT_MP_RUN, ACT_HL2MP_RUN_MELEE, false },
+    { ACT_MP_CROUCHWALK, ACT_HL2MP_WALK_CROUCH_MELEE, false },
+
+    { ACT_MP_ATTACK_STAND_PRIMARYFIRE, ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE,
+      false },
+    { ACT_MP_ATTACK_CROUCH_PRIMARYFIRE, ACT_HL2MP_GESTURE_RANGE_ATTACK_MELEE,
+      false },
+
+    { ACT_MP_RELOAD_STAND, ACT_HL2MP_GESTURE_RELOAD_MELEE, false },
+    { ACT_MP_RELOAD_CROUCH, ACT_HL2MP_GESTURE_RELOAD_MELEE, false },
+
+    { ACT_MP_JUMP, ACT_HL2MP_JUMP_MELEE, false },
 };
 
 IMPLEMENT_ACTTABLE( CWeaponCrowbar );
-
-#endif
 
 //-----------------------------------------------------------------------------
 // Constructor
@@ -106,7 +103,8 @@ void CWeaponCrowbar::AddViewKick( void )
 //-----------------------------------------------------------------------------
 // Animation event handlers
 //-----------------------------------------------------------------------------
-void CWeaponCrowbar::HandleAnimEventMeleeHit( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
+void CWeaponCrowbar::HandleAnimEventMeleeHit( animevent_t *pEvent,
+                                              CBaseCombatCharacter *pOperator )
 {
   // Trace up or down based on where the enemy is...
   // But only if we're basically facing that direction
@@ -115,8 +113,10 @@ void CWeaponCrowbar::HandleAnimEventMeleeHit( animevent_t *pEvent, CBaseCombatCh
 
   Vector vecEnd;
   VectorMA( pOperator->Weapon_ShootPosition(), 50, vecDirection, vecEnd );
-  CBaseEntity *pHurt = pOperator->CheckTraceHullAttack( pOperator->Weapon_ShootPosition(), vecEnd,
-                                                        Vector( -16, -16, -16 ), Vector( 36, 36, 36 ), GetDamageForActivity( GetActivity() ), DMG_CLUB, 0.75 );
+  CBaseEntity *pHurt = pOperator->CheckTraceHullAttack(
+      pOperator->Weapon_ShootPosition(), vecEnd, Vector( -16, -16, -16 ),
+      Vector( 36, 36, 36 ), GetDamageForActivity( GetActivity() ), DMG_CLUB,
+      0.75 );
 
   // did I hit someone?
   if ( pHurt )
@@ -126,7 +126,9 @@ void CWeaponCrowbar::HandleAnimEventMeleeHit( animevent_t *pEvent, CBaseCombatCh
 
     // Fake a trace impact, so the effects work out like a player's crowbaw
     trace_t traceHit;
-    UTIL_TraceLine( pOperator->Weapon_ShootPosition(), pHurt->GetAbsOrigin(), MASK_SHOT_HULL, pOperator, COLLISION_GROUP_NONE, &traceHit );
+    UTIL_TraceLine( pOperator->Weapon_ShootPosition(), pHurt->GetAbsOrigin(),
+                    MASK_SHOT_HULL, pOperator, COLLISION_GROUP_NONE,
+                    &traceHit );
     ImpactEffect( traceHit );
   }
   else
@@ -138,7 +140,8 @@ void CWeaponCrowbar::HandleAnimEventMeleeHit( animevent_t *pEvent, CBaseCombatCh
 //-----------------------------------------------------------------------------
 // Animation event
 //-----------------------------------------------------------------------------
-void CWeaponCrowbar::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
+void CWeaponCrowbar::Operator_HandleAnimEvent( animevent_t *pEvent,
+                                               CBaseCombatCharacter *pOperator )
 {
   switch ( pEvent->event )
   {
@@ -153,13 +156,15 @@ void CWeaponCrowbar::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatC
 }
 
 //-----------------------------------------------------------------------------
-// Attempt to lead the target (needed because citizens can't hit manhacks with the crowbar!)
+// Attempt to lead the target (needed because citizens can't hit manhacks with
+// the crowbar!)
 //-----------------------------------------------------------------------------
 ConVar sk_crowbar_lead_time( "sk_crowbar_lead_time", "0.9" );
 
 int CWeaponCrowbar::WeaponMeleeAttack1Condition( float flDot, float flDist )
 {
-  // Attempt to lead the target (needed because citizens can't hit manhacks with the crowbar!)
+  // Attempt to lead the target (needed because citizens can't hit manhacks
+  // with the crowbar!)
   CAI_BaseNPC *pNPC = GetOwner()->MyNPCPointer();
   CBaseEntity *pEnemy = pNPC->GetEnemy();
   if ( !pEnemy )
@@ -193,7 +198,8 @@ int CWeaponCrowbar::WeaponMeleeAttack1Condition( float flDot, float flDist )
     return COND_TOO_FAR_TO_ATTACK;
   }
 
-  float flExtrapolatedDot = DotProduct2D( vecDelta.AsVector2D(), vecForward.AsVector2D() );
+  float flExtrapolatedDot =
+      DotProduct2D( vecDelta.AsVector2D(), vecForward.AsVector2D() );
   if ( ( flDot < 0.7 ) && ( flExtrapolatedDot < 0.7 ) )
   {
     return COND_NOT_FACING_ATTACK;

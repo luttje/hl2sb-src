@@ -399,7 +399,7 @@ class CFPS : public IFPSPanel
     if ( fpsPanel )
     {
       fpsPanel->SetParent( ( vgui::Panel * )NULL );
-      delete fpsPanel;
+      fpsPanel->MarkForDeletion();
       fpsPanel = NULL;
     }
   }
@@ -818,7 +818,7 @@ class CBlockingFileIO : public IShowBlockingPanel
     if ( ioPanel )
     {
       ioPanel->SetParent( ( vgui::Panel * )NULL );
-      delete ioPanel;
+      ioPanel->MarkForDeletion();
       ioPanel = NULL;
     }
   }

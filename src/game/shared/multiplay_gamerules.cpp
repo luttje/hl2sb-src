@@ -85,7 +85,8 @@ ConVar mp_show_voice_icons( "mp_show_voice_icons", "1", FCVAR_REPLICATED, "Show 
 
 #ifdef GAME_DLL
 
-ConVar tv_delaymapchange( "tv_delaymapchange", "0", 0, "Delays map change until broadcast is complete" );
+ConVar tv_delaymapchange( "tv_delaymapchange", "0", FCVAR_NONE, "Delays map change until broadcast is complete" );
+ConVar tv_delaymapchange_protect( "tv_delaymapchange_protect", "1", FCVAR_NONE, "Protect against doing a manual map change if HLTV is broadcasting and has not caught up with a major game event such as round_end" );
 
 ConVar mp_restartgame( "mp_restartgame", "0", FCVAR_GAMEDLL, "If non-zero, game will restart in the specified number of seconds" );
 ConVar mp_restartgame_immediate( "mp_restartgame_immediate", "0", FCVAR_GAMEDLL, "If non-zero, game will restart immediately" );
@@ -278,7 +279,7 @@ CMultiplayRules::CMultiplayRules()
 
     if ( cfgfile && cfgfile[0] )
     {
-      char szCommand[256];
+      char szCommand[MAX_PATH];
 
       Log( "Executing dedicated server config file %s\n", cfgfile );
       Q_snprintf( szCommand, sizeof( szCommand ), "exec %s\n", cfgfile );
@@ -292,7 +293,7 @@ CMultiplayRules::CMultiplayRules()
 
     if ( cfgfile && cfgfile[0] )
     {
-      char szCommand[256];
+      char szCommand[MAX_PATH];
 
       Log( "Executing listen server config file %s\n", cfgfile );
       Q_snprintf( szCommand, sizeof( szCommand ), "exec %s\n", cfgfile );
@@ -320,9 +321,7 @@ bool CMultiplayRules::Init()
   return BaseClass::Init();
 }
 
-#ifdef CLIENT_DLL
-
-#else
+#ifndef CLIENT_DLL
 
 extern bool g_fGameOver;
 
@@ -354,55 +353,14 @@ void CMultiplayRules::RefreshSkillData( bool forceUpdate )
 //=============================================================================
 #endif
 }
-#ifdef LUA_SDK
-//=========================================================
-//=========================================================
-void CMultiplayRules::Think( void )
-{
-#ifndef CLIENT_DLL
-  BaseClass::Think();
-
-  ///// Check game rules /////
-
-  if ( g_fGameOver )  // someone else quit the game already
-  {
-    // Tony; wait for intermission to end
-    if ( m_flIntermissionEndTime && ( m_flIntermissionEndTime < gpGlobals->curtime ) )
-      ChangeLevel();  // intermission is over
-    return;
-  }
-
-  float flTimeLimit = mp_timelimit.GetFloat() * 60;
-  float flFragLimit = fraglimit.GetFloat();
-
-  if ( flTimeLimit != 0 && gpGlobals->curtime >= flTimeLimit )
-  {
-    GoToIntermission();
-    return;
-  }
-
-  if ( flFragLimit )
-  {
-    // check if any player is over the frag limit
-    for ( int i = 1; i <= gpGlobals->maxClients; i++ )
-    {
-      CBasePlayer *pPlayer = UTIL_PlayerByIndex( i );
-
-      if ( pPlayer && pPlayer->FragCount() >= flFragLimit )
-      {
-        GoToIntermission();
-        return;
-      }
-    }
-  }
 #endif
-}
-#else
-#ifndef CLIENT_DLL
+
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
 //=========================================================
 //=========================================================
 void CMultiplayRules::Think( void )
 {
+#ifndef CLIENT_DLL
   BaseClass::Think();
 
   ///// Check game rules /////
@@ -436,8 +394,11 @@ void CMultiplayRules::Think( void )
       }
     }
   }
+#endif
 }
+#endif
 
+#ifndef CLIENT_DLL
 //=========================================================
 //=========================================================
 void CMultiplayRules::FrameUpdatePostEntityThink()
@@ -1198,7 +1159,7 @@ static void StripWhitespaceChars( char *szBuffer )
 
 void CMultiplayRules::GetNextLevelName( char *pszNextMap, int bufsize, bool bRandom /* = false */ )
 {
-  char mapcfile[256];
+  char mapcfile[MAX_PATH];
   DetermineMapCycleFilename( mapcfile, sizeof( mapcfile ), false );
 
   // Check the time of the mapcycle file and re-populate the list of level names if the file has been modified
@@ -1216,10 +1177,7 @@ void CMultiplayRules::GetNextLevelName( char *pszNextMap, int bufsize, bool bRan
     // If map cycle file has changed or this is the first time through ...
     if ( m_nMapCycleTimeStamp != nMapCycleTimeStamp )
     {
-      // Reset map index and map cycle timestamp
-      m_nMapCycleTimeStamp = nMapCycleTimeStamp;
-      m_nMapCycleindex = 0;
-
+      // Reload
       LoadMapCycleFile();
     }
   }
@@ -1243,7 +1201,7 @@ void CMultiplayRules::GetNextLevelName( char *pszNextMap, int bufsize, bool bRan
 
 void CMultiplayRules::DetermineMapCycleFilename( char *pszResult, int nSizeResult, bool bForceSpew )
 {
-  static char szLastResult[256];
+  static char szLastResult[MAX_PATH];
 
   const char *pszVar = mapcyclefile.GetString();
   if ( *pszVar == '\0' )
@@ -1257,7 +1215,7 @@ void CMultiplayRules::DetermineMapCycleFilename( char *pszResult, int nSizeResul
     return;
   }
 
-  char szRecommendedName[256];
+  char szRecommendedName[MAX_PATH];
   V_sprintf_safe( szRecommendedName, "cfg/%s", pszVar );
 
   // First, look for a mapcycle file in the cfg directory, which is preferred
@@ -1308,7 +1266,12 @@ void CMultiplayRules::DetermineMapCycleFilename( char *pszResult, int nSizeResul
   }
 }
 
-void CMultiplayRules::LoapMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList )
+void CMultiplayRules::LoadMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList )
+{
+  CMultiplayRules::RawLoadMapCycleFileIntoVector( pszMapCycleFile, mapList );
+}
+
+void CMultiplayRules::RawLoadMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList )
 {
   CUtlBuffer buf;
   if ( !filesystem->ReadFile( pszMapCycleFile, "GAME", buf ) )
@@ -1326,13 +1289,6 @@ void CMultiplayRules::LoapMapCycleFileIntoVector( const char *pszMapCycleFile, C
     if ( !Q_strncmp( mapList[i], "//", 2 ) || mapList[i][0] == '\0' )
     {
       bIgnore = true;
-    }
-    else if ( !engine->IsMapValid( mapList[i] ) )
-    {
-      bIgnore = true;
-
-      // If the engine doesn't consider it a valid map remove it from the lists
-      Warning( "Invalid map '%s' included in map cycle file. Ignored.\n", mapList[i] );
     }
 
     if ( bIgnore )
@@ -1355,6 +1311,27 @@ void CMultiplayRules::FreeMapCycleFileVector( CUtlVector< char * > &mapList )
   mapList.RemoveAll();
 }
 
+bool CMultiplayRules::IsManualMapChangeOkay( const char **pszReason )
+{
+  if ( HLTVDirector()->IsActive() && ( HLTVDirector()->GetDelay() >= HLTV_MIN_DIRECTOR_DELAY ) )
+  {
+    if ( tv_delaymapchange.GetBool() && tv_delaymapchange_protect.GetBool() )
+    {
+      float flLastEvent = GetLastMajorEventTime();
+      if ( flLastEvent > -1 )
+      {
+        if ( flLastEvent > ( gpGlobals->curtime - ( HLTVDirector()->GetDelay() + 3 ) ) )  // +3 second delay to prevent instant change after a major event
+        {
+          *pszReason = "\n***WARNING*** Map change blocked. HLTV is broadcasting and has not caught up to the last major game event yet.\nYou can disable this check by setting the value of the server convar \"tv_delaymapchange_protect\" to 0.\n";
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 bool CMultiplayRules::IsMapInMapCycle( const char *pszName )
 {
   for ( int i = 0; i < m_MapList.Count(); i++ )
@@ -1372,7 +1349,7 @@ void CMultiplayRules::ChangeLevel( void )
 {
   char szNextMap[MAX_MAP_NAME];
 
-  if ( nextlevel.GetString() && *nextlevel.GetString() && engine->IsMapValid( nextlevel.GetString() ) )
+  if ( nextlevel.GetString() && *nextlevel.GetString() )
   {
     Q_strncpy( szNextMap, nextlevel.GetString(), sizeof( szNextMap ) );
   }
@@ -1387,13 +1364,19 @@ void CMultiplayRules::ChangeLevel( void )
 
 void CMultiplayRules::LoadMapCycleFile( void )
 {
-  char mapcfile[256];
+  int nOldCycleIndex = m_nMapCycleindex;
+  m_nMapCycleindex = 0;
+
+  char mapcfile[MAX_PATH];
   DetermineMapCycleFilename( mapcfile, sizeof( mapcfile ), false );
 
   FreeMapCycleFileVector( m_MapList );
 
+  const int nMapCycleTimeStamp = filesystem->GetPathTime( mapcfile, "GAME" );
+  m_nMapCycleTimeStamp = nMapCycleTimeStamp;
+
   // Repopulate map list from mapcycle file
-  LoapMapCycleFileIntoVector( mapcfile, m_MapList );
+  LoadMapCycleFileIntoVector( mapcfile, m_MapList );
 
   // Load server's mapcycle into network string table for client-side voting
   if ( g_pStringTableServerMapCycle )
@@ -1500,14 +1483,27 @@ void CMultiplayRules::LoadMapCycleFile( void )
   }
 #endif
 
-  // If the current map selection is in the list, set m_nMapCycleindex to the map that follows it.
-  for ( int i = 0; i < m_MapList.Count(); i++ )
+  // If the current map is in the same location in the new map cycle, keep that index. This gives better behavior
+  // when reloading a map cycle that has the current map in it multiple times.
+  int nOldPreviousMap = ( nOldCycleIndex == 0 ) ? ( m_MapList.Count() - 1 ) : ( nOldCycleIndex - 1 );
+  if ( nOldCycleIndex >= 0 && nOldCycleIndex < m_MapList.Count() &&
+       nOldPreviousMap >= 0 && nOldPreviousMap < m_MapList.Count() &&
+       V_strcmp( STRING( gpGlobals->mapname ), m_MapList[nOldPreviousMap] ) == 0 )
   {
-    if ( V_strcmp( STRING( gpGlobals->mapname ), m_MapList[i] ) == 0 )
+    // The old index is still valid, and falls after our current map in the new cycle, use it
+    m_nMapCycleindex = nOldCycleIndex;
+  }
+  else
+  {
+    // Otherwise, if the current map selection is in the list, set m_nMapCycleindex to the map that follows it.
+    for ( int i = 0; i < m_MapList.Count(); i++ )
     {
-      m_nMapCycleindex = i;
-      IncrementMapCycleIndex();
-      break;
+      if ( V_strcmp( STRING( gpGlobals->mapname ), m_MapList[i] ) == 0 )
+      {
+        m_nMapCycleindex = i;
+        IncrementMapCycleIndex();
+        break;
+      }
     }
   }
 }
@@ -1588,7 +1584,7 @@ void CMultiplayRules::SkipNextMapInCycle()
 
   Msg( "Skipping: %s\tNext map: %s\n", szSkippedMap, szNextMap );
 
-  if ( nextlevel.GetString() && *nextlevel.GetString() && engine->IsMapValid( nextlevel.GetString() ) )
+  if ( nextlevel.GetString() && *nextlevel.GetString() )
   {
     Msg( "Warning! \"nextlevel\" is set to \"%s\" and will override the next map to be played.\n", nextlevel.GetString() );
   }
@@ -1655,10 +1651,6 @@ void CMultiplayRules::ClientCommandKeyValues( edict_t *pEntity, KeyValues *pKeyV
 
         pPlayer->OnAchievementEarned( nAchievementID );
       }
-    }
-    else if ( FStrEq( pszCommand, "SendServerMapCycle" ) )
-    {
-      LoadMapCycleFile();
     }
   }
 }

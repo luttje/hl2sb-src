@@ -68,23 +68,24 @@ class CHalfLife2Survival : public CHalfLife2
 
 #ifdef CLIENT_DLL
 
-  DECLARE_CLIENTCLASS_NOBASE();  // This makes datatables able to access our private vars.
+  DECLARE_CLIENTCLASS_NOBASE();  // This makes datatables able to access our
+                                 // private vars.
 
 #else
 
-  DECLARE_SERVERCLASS_NOBASE();  // This makes datatables able to access our private vars.
+  DECLARE_SERVERCLASS_NOBASE();  // This makes datatables able to access our
+                                 // private vars.
 
   CHalfLife2Survival();
-  virtual ~CHalfLife2Survival() {}
+  virtual ~CHalfLife2Survival()
+  {
+  }
+#endif
 
-#endif
-#ifdef LUA_SDK
-  virtual void Think( void );
-#else
-#ifndef CLIENT_DLL
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
   virtual void Think( void );
 #endif
-#endif
+
 #ifndef CLIENT_DLL
   virtual void PlayerSpawn( CBasePlayer *pPlayer );
   virtual bool IsAllowedToSpawn( CBaseEntity *pEntity );
@@ -114,10 +115,12 @@ BEGIN_NETWORK_TABLE_NOBASE( CHalfLife2Survival, DT_HL2SurvivalGameRules )
 END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS( hl2_survival_gamerules, CHalfLife2SurvivalProxy );
-IMPLEMENT_NETWORKCLASS_ALIASED( HalfLife2SurvivalProxy, DT_HalfLife2SurvivalProxy )
+IMPLEMENT_NETWORKCLASS_ALIASED( HalfLife2SurvivalProxy,
+                                DT_HalfLife2SurvivalProxy )
 
 #ifdef CLIENT_DLL
-void RecvProxy_HL2SurvivalGameRules( const RecvProp *pProp, void **pOut, void *pData, int objectID )
+void RecvProxy_HL2SurvivalGameRules( const RecvProp *pProp, void **pOut,
+                                     void *pData, int objectID )
 {
   CHalfLife2Survival *pRules = HL2SurvivalGameRules();
   Assert( pRules );
@@ -125,10 +128,14 @@ void RecvProxy_HL2SurvivalGameRules( const RecvProp *pProp, void **pOut, void *p
 }
 
 BEGIN_RECV_TABLE( CHalfLife2SurvivalProxy, DT_HalfLife2SurvivalProxy )
-RecvPropDataTable( "hl2_survival_gamerules_data", 0, 0, &REFERENCE_RECV_TABLE( DT_HL2SurvivalGameRules ), RecvProxy_HL2SurvivalGameRules )
-    END_RECV_TABLE()
+RecvPropDataTable( "hl2_survival_gamerules_data", 0, 0,
+                   &REFERENCE_RECV_TABLE( DT_HL2SurvivalGameRules ),
+                   RecvProxy_HL2SurvivalGameRules ) END_RECV_TABLE()
 #else
-void *SendProxy_HL2SurvivalGameRules( const SendProp *pProp, const void *pStructBase, const void *pData, CSendProxyRecipients *pRecipients, int objectID )
+void *SendProxy_HL2SurvivalGameRules( const SendProp *pProp,
+                                      const void *pStructBase, const void *pData,
+                                      CSendProxyRecipients *pRecipients,
+                                      int objectID )
 {
   CHalfLife2Survival *pRules = HL2SurvivalGameRules();
   Assert( pRules );
@@ -137,34 +144,25 @@ void *SendProxy_HL2SurvivalGameRules( const SendProp *pProp, const void *pStruct
 }
 
 BEGIN_SEND_TABLE( CHalfLife2SurvivalProxy, DT_HalfLife2SurvivalProxy )
-SendPropDataTable( "hl2_survival_gamerules_data", 0, &REFERENCE_SEND_TABLE( DT_HL2SurvivalGameRules ), SendProxy_HL2SurvivalGameRules )
-    END_SEND_TABLE()
+SendPropDataTable( "hl2_survival_gamerules_data", 0,
+                   &REFERENCE_SEND_TABLE( DT_HL2SurvivalGameRules ),
+                   SendProxy_HL2SurvivalGameRules ) END_SEND_TABLE()
 #endif
 
 #ifndef CLIENT_DLL
-
-        CHalfLife2Survival::CHalfLife2Survival()
+    CHalfLife2Survival::CHalfLife2Survival()
 {
   m_bActive = false;
 }
-
 #endif
-#ifdef LUA_SDK
+
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
 void CHalfLife2Survival::Think( void )
 {
-#ifndef CLIENT_DLL
-
-#endif
-}
-#else
-#ifndef CLIENT_DLL
-        void CHalfLife2Survival::Think( void )
-{
 }
 #endif
-#endif
-#ifndef CLIENT_DLL
 
+#ifndef CLIENT_DLL
 bool CHalfLife2Survival::IsAllowedToSpawn( CBaseEntity *pEntity )
 {
   if ( !m_bActive )
@@ -177,7 +175,8 @@ bool CHalfLife2Survival::IsAllowedToSpawn( CBaseEntity *pEntity )
   if ( Q_stristr( pPickups, "everything" ) )
     return true;
 
-  if ( Q_stristr( pPickups, pEntity->GetClassname() ) || Q_stristr( pPickups, STRING( pEntity->GetEntityName() ) ) )
+  if ( Q_stristr( pPickups, pEntity->GetClassname() ) ||
+       Q_stristr( pPickups, STRING( pEntity->GetEntityName() ) ) )
     return true;
 
   return false;
@@ -200,7 +199,9 @@ void CHalfLife2Survival::PlayerSpawn( CBasePlayer *pPlayer )
 
   for ( int i = 0; i < m_SurvivalSettings.m_Ammo.Count(); ++i )
   {
-    pPlayer->CBasePlayer::GiveAmmo( m_SurvivalSettings.m_Ammo[i].m_iAmount, m_SurvivalSettings.m_Ammo[i].m_szAmmoName );
+    pPlayer->CBasePlayer::GiveAmmo(
+        m_SurvivalSettings.m_Ammo[i].m_iAmount,
+        m_SurvivalSettings.m_Ammo[i].m_szAmmoName );
   }
 }
 
@@ -257,7 +258,8 @@ void CHalfLife2Survival::ParseSurvivalAmmo( KeyValues *pSubKey )
 void CHalfLife2Survival::ReadSurvivalScriptFile( void )
 {
   char szFullName[512];
-  Q_snprintf( szFullName, sizeof( szFullName ), "maps/%s_survival.txt", STRING( gpGlobals->mapname ) );
+  Q_snprintf( szFullName, sizeof( szFullName ), "maps/%s_survival.txt",
+              STRING( gpGlobals->mapname ) );
 
   KeyValues *pkvFile = new KeyValues( "Survival" );
   if ( pkvFile->LoadFromFile( filesystem, szFullName, "MOD" ) )
@@ -266,11 +268,13 @@ void CHalfLife2Survival::ReadSurvivalScriptFile( void )
     ParseSurvivalAmmo( pkvFile->FindKey( "ammo" ) );
 
     CUtlVector< CBaseEntity * > entities;
-    UTIL_LoadAndSpawnEntitiesFromScript( entities, szFullName, "Survival", true );
+    UTIL_LoadAndSpawnEntitiesFromScript( entities, szFullName, "Survival",
+                                         true );
 
-    // It's important to turn on survival mode after we create all the entities
-    // in the script, so that we don't remove them if they violate survival rules.
-    // i.e. we want the player to start with a shotgun, but prevent all future shotguns from spawning.
+    // It's important to turn on survival mode after we create all the
+    // entities in the script, so that we don't remove them if they violate
+    // survival rules. i.e. we want the player to start with a shotgun, but
+    // prevent all future shotguns from spawning.
     m_bActive = true;
   }
   else

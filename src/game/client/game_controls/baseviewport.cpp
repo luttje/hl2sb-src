@@ -56,6 +56,10 @@
 #include "replay/ienginereplay.h"
 #endif
 
+#ifdef LUA_SDK
+#include "luamanager.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -65,7 +69,17 @@ vgui::Panel *g_lastPanel = NULL;    // used for mouseover buttons, keeps track o
 vgui::Button *g_lastButton = NULL;  // used for mouseover buttons, keeps track of the last active button
 using namespace vgui;
 
-ConVar hud_autoreloadscript( "hud_autoreloadscript", "0", FCVAR_NONE, "Automatically reloads the animation script each time one is ran" );
+void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue );
+
+ConVar hud_autoreloadscript( "hud_autoreloadscript", "0", FCVAR_NONE, "Automatically reloads the animation script each time one is ran", hud_autoreloadscript_callback );
+
+void hud_autoreloadscript_callback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+  if ( g_pClientMode && g_pClientMode->GetViewportAnimationController() )
+  {
+    g_pClientMode->GetViewportAnimationController()->SetAutoReloadScript( hud_autoreloadscript.GetBool() );
+  }
+}
 
 static ConVar cl_leveloverviewmarker( "cl_leveloverviewmarker", "0", FCVAR_CHEAT );
 
@@ -581,10 +595,11 @@ void CBaseViewport::OnThink()
       m_pActivePanel = NULL;
   }
 
+  // TF does this in OnTick in TFViewport.  This remains to preserve old
+  // behavior in other games
+#if !defined( TF_CLIENT_DLL )
   m_pAnimController->UpdateAnimations( gpGlobals->curtime );
-
-  // check the auto-reload cvar
-  m_pAnimController->SetAutoReloadScript( hud_autoreloadscript.GetBool() );
+#endif
 
   int count = m_Panels.Count();
 
@@ -643,7 +658,7 @@ void CBaseViewport::ActivateClientUI()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: called when the engine hides the base client VGUI panel (i.e when the GameUI is comming up )
+// Purpose: called when the engine hides the base client VGUI panel (i.e when the GameUI is coming up )
 //-----------------------------------------------------------------------------
 void CBaseViewport::HideClientUI()
 {

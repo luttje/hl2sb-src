@@ -39,7 +39,8 @@
 extern ConVar sk_plr_dmg_crossbow;
 extern ConVar sk_npc_dmg_crossbow;
 
-void TE_StickyBolt( IRecipientFilter &filter, float delay, Vector vecDirection, const Vector *origin );
+void TE_StickyBolt( IRecipientFilter &filter, float delay, Vector vecDirection,
+                    const Vector *origin );
 
 //-----------------------------------------------------------------------------
 // Crossbow Bolt
@@ -64,7 +65,9 @@ class CCrossbowBolt : public CBaseCombatCharacter
   void BoltTouch( CBaseEntity *pOther );
   bool CreateVPhysics( void );
   unsigned int PhysicsSolidMaskForEntity() const;
-  static CCrossbowBolt *BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, int iDamage, CBasePlayer *pentOwner = NULL );
+  static CCrossbowBolt *BoltCreate( const Vector &vecOrigin,
+                                    const QAngle &angAngles, int iDamage,
+                                    CBasePlayer *pentOwner = NULL );
 
  protected:
   bool CreateSprites( void );
@@ -81,8 +84,7 @@ LINK_ENTITY_TO_CLASS( crossbow_bolt, CCrossbowBolt );
 
 BEGIN_DATADESC( CCrossbowBolt )
 // Function Pointers
-DEFINE_FUNCTION( BubbleThink ),
-    DEFINE_FUNCTION( BoltTouch ),
+DEFINE_FUNCTION( BubbleThink ), DEFINE_FUNCTION( BoltTouch ),
 
     // These are recreated on reload, they don't need storage
     DEFINE_FIELD( m_pGlowSprite, FIELD_EHANDLE ),
@@ -90,10 +92,13 @@ DEFINE_FUNCTION( BubbleThink ),
 
     END_DATADESC()
 
-        IMPLEMENT_SERVERCLASS_ST( CCrossbowBolt, DT_CrossbowBolt )
-            END_SEND_TABLE()
+        IMPLEMENT_SERVERCLASS_ST( CCrossbowBolt,
+                                  DT_CrossbowBolt ) END_SEND_TABLE()
 
-                CCrossbowBolt *CCrossbowBolt::BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, int iDamage, CBasePlayer *pentOwner )
+            CCrossbowBolt *CCrossbowBolt::BoltCreate( const Vector &vecOrigin,
+                                                      const QAngle &angAngles,
+                                                      int iDamage,
+                                                      CBasePlayer *pentOwner )
 {
   // Create a new entity with CCrossbowBolt private data
   CCrossbowBolt *pBolt = ( CCrossbowBolt * )CreateEntityByName( "crossbow_bolt" );
@@ -134,7 +139,8 @@ bool CCrossbowBolt::CreateVPhysics( void )
 //-----------------------------------------------------------------------------
 unsigned int CCrossbowBolt::PhysicsSolidMaskForEntity() const
 {
-  return ( BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX ) & ~CONTENTS_GRATE;
+  return ( BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX ) &
+         ~CONTENTS_GRATE;
 }
 
 //-----------------------------------------------------------------------------
@@ -144,12 +150,14 @@ unsigned int CCrossbowBolt::PhysicsSolidMaskForEntity() const
 bool CCrossbowBolt::CreateSprites( void )
 {
   // Start up the eye glow
-  m_pGlowSprite = CSprite::SpriteCreate( "sprites/light_glow02_noz.vmt", GetLocalOrigin(), false );
+  m_pGlowSprite = CSprite::SpriteCreate( "sprites/light_glow02_noz.vmt",
+                                         GetLocalOrigin(), false );
 
   if ( m_pGlowSprite != NULL )
   {
     m_pGlowSprite->FollowEntity( this );
-    m_pGlowSprite->SetTransparency( kRenderGlow, 255, 255, 255, 128, kRenderFxNoDissipation );
+    m_pGlowSprite->SetTransparency( kRenderGlow, 255, 255, 255, 128,
+                                    kRenderFxNoDissipation );
     m_pGlowSprite->SetScale( 0.2f );
     m_pGlowSprite->TurnOff();
   }
@@ -212,18 +220,23 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
     ClearMultiDamage();
     VectorNormalize( vecNormalizedVel );
 
-    if ( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() && pOther->IsNPC() )
+    if ( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() &&
+         pOther->IsNPC() )
     {
-      CTakeDamageInfo dmgInfo( this, GetOwnerEntity(), m_iDamage, DMG_NEVERGIB );
+      CTakeDamageInfo dmgInfo( this, GetOwnerEntity(), m_iDamage,
+                               DMG_NEVERGIB );
       dmgInfo.AdjustPlayerDamageInflictedForSkillLevel();
-      CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
+      CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos,
+                                 0.7f );
       dmgInfo.SetDamagePosition( tr.endpos );
       pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
     }
     else
     {
-      CTakeDamageInfo dmgInfo( this, GetOwnerEntity(), m_iDamage, DMG_BULLET | DMG_NEVERGIB );
-      CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
+      CTakeDamageInfo dmgInfo( this, GetOwnerEntity(), m_iDamage,
+                               DMG_BULLET | DMG_NEVERGIB );
+      CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos,
+                                 0.7f );
       dmgInfo.SetDamagePosition( tr.endpos );
       pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
     }
@@ -244,14 +257,18 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
     AngleVectors( GetAbsAngles(), &vForward );
     VectorNormalize( vForward );
 
-    UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + vForward * 128, MASK_OPAQUE, pOther, COLLISION_GROUP_NONE, &tr2 );
+    UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + vForward * 128,
+                    MASK_OPAQUE, pOther, COLLISION_GROUP_NONE, &tr2 );
 
     if ( tr2.fraction != 1.0f )
     {
-      //			NDebugOverlay::Box( tr2.endpos, Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 255, 0, 0, 10 );
-      //			NDebugOverlay::Box( GetAbsOrigin(), Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 0, 255, 0, 10 );
+      //			NDebugOverlay::Box( tr2.endpos, Vector( -16,
+      //-16, -16 ), Vector( 16, 16, 16 ), 0, 255, 0, 0, 10 );
+      //			NDebugOverlay::Box( GetAbsOrigin(), Vector( -16,
+      //-16, -16 ), Vector( 16, 16, 16 ), 0, 0, 255, 0, 10 );
 
-      if ( tr2.m_pEnt == NULL || ( tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) )
+      if ( tr2.m_pEnt == NULL ||
+           ( tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) )
       {
         CEffectData data;
 
@@ -274,11 +291,13 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
     tr = BaseClass::GetTouchTrace();
 
     // See if we struck the world
-    if ( pOther->GetMoveType() == MOVETYPE_NONE && !( tr.surface.flags & SURF_SKY ) )
+    if ( pOther->GetMoveType() == MOVETYPE_NONE &&
+         !( tr.surface.flags & SURF_SKY ) )
     {
       EmitSound( "Weapon_Crossbow.BoltHitWorld" );
 
-      // if what we hit is static architecture, can stay around for a while.
+      // if what we hit is static architecture, can stay around for a
+      // while.
       Vector vecDir = GetAbsVelocity();
       float speed = VectorNormalize( vecDir );
 
@@ -305,7 +324,8 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
         SetThink( &CCrossbowBolt::SUB_Remove );
         SetNextThink( gpGlobals->curtime + 2.0f );
 
-        // FIXME: We actually want to stick (with hierarchy) to what we've hit
+        // FIXME: We actually want to stick (with hierarchy) to what
+        // we've hit
         SetMoveType( MOVETYPE_NONE );
 
         Vector vForward;
@@ -375,7 +395,8 @@ void CCrossbowBolt::BubbleThink( void )
   if ( GetWaterLevel() == 0 )
     return;
 
-  UTIL_BubbleTrail( GetAbsOrigin() - GetAbsVelocity() * 0.1f, GetAbsOrigin(), 5 );
+  UTIL_BubbleTrail( GetAbsOrigin() - GetAbsVelocity() * 0.1f, GetAbsOrigin(),
+                    5 );
 }
 
 #endif
@@ -406,7 +427,8 @@ class CWeaponCrossbow : public CBaseHL2MPCombatWeapon
   virtual bool SendWeaponAnim( int iActivity );
 
 #ifndef CLIENT_DLL
-  virtual void Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator );
+  virtual void Operator_HandleAnimEvent( animevent_t *pEvent,
+                                         CBaseCombatCharacter *pOperator );
 #endif
 
   DECLARE_NETWORKCLASS();
@@ -432,9 +454,7 @@ class CWeaponCrossbow : public CBaseHL2MPCombatWeapon
   void SetChargerState( ChargerState_t state );
   void DoLoadEffect( void );
 
-#ifndef CLIENT_DLL
   DECLARE_ACTTABLE();
-#endif
 
  private:
   // Charger effects
@@ -454,11 +474,9 @@ IMPLEMENT_NETWORKCLASS_ALIASED( WeaponCrossbow, DT_WeaponCrossbow )
 
 BEGIN_NETWORK_TABLE( CWeaponCrossbow, DT_WeaponCrossbow )
 #ifdef CLIENT_DLL
-RecvPropBool( RECVINFO( m_bInZoom ) ),
-    RecvPropBool( RECVINFO( m_bMustReload ) ),
+RecvPropBool( RECVINFO( m_bInZoom ) ), RecvPropBool( RECVINFO( m_bMustReload ) ),
 #else
-SendPropBool( SENDINFO( m_bInZoom ) ),
-    SendPropBool( SENDINFO( m_bMustReload ) ),
+SendPropBool( SENDINFO( m_bInZoom ) ), SendPropBool( SENDINFO( m_bMustReload ) ),
 #endif
     END_NETWORK_TABLE()
 
@@ -473,22 +491,25 @@ SendPropBool( SENDINFO( m_bInZoom ) ),
 
 PRECACHE_WEAPON_REGISTER( weapon_crossbow );
 
-#ifndef CLIENT_DLL
+acttable_t CWeaponCrossbow::m_acttable[] = {
+    { ACT_MP_STAND_IDLE, ACT_HL2MP_IDLE_CROSSBOW, false },
+    { ACT_MP_CROUCH_IDLE, ACT_HL2MP_IDLE_CROUCH_CROSSBOW, false },
 
-acttable_t CWeaponCrossbow::m_acttable[] =
-    {
-        { ACT_HL2MP_IDLE, ACT_HL2MP_IDLE_CROSSBOW, false },
-        { ACT_HL2MP_RUN, ACT_HL2MP_RUN_CROSSBOW, false },
-        { ACT_HL2MP_IDLE_CROUCH, ACT_HL2MP_IDLE_CROUCH_CROSSBOW, false },
-        { ACT_HL2MP_WALK_CROUCH, ACT_HL2MP_WALK_CROUCH_CROSSBOW, false },
-        { ACT_HL2MP_GESTURE_RANGE_ATTACK, ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW, false },
-        { ACT_HL2MP_GESTURE_RELOAD, ACT_HL2MP_GESTURE_RELOAD_CROSSBOW, false },
-        { ACT_HL2MP_JUMP, ACT_HL2MP_JUMP_CROSSBOW, false },
+    { ACT_MP_RUN, ACT_HL2MP_RUN_CROSSBOW, false },
+    { ACT_MP_CROUCHWALK, ACT_HL2MP_WALK_CROUCH_CROSSBOW, false },
+
+    { ACT_MP_ATTACK_STAND_PRIMARYFIRE, ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW,
+      false },
+    { ACT_MP_ATTACK_CROUCH_PRIMARYFIRE, ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW,
+      false },
+
+    { ACT_MP_RELOAD_STAND, ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW, false },
+    { ACT_MP_RELOAD_CROUCH, ACT_HL2MP_GESTURE_RANGE_ATTACK_CROSSBOW, false },
+
+    { ACT_MP_JUMP, ACT_HL2MP_JUMP_CROSSBOW, false },
 };
 
 IMPLEMENT_ACTTABLE( CWeaponCrossbow );
-
-#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
@@ -541,7 +562,8 @@ void CWeaponCrossbow::PrimaryAttack( void )
   // Signal a reload
   m_bMustReload = true;
 
-  SetWeaponIdleTime( gpGlobals->curtime + SequenceDuration( ACT_VM_PRIMARYATTACK ) );
+  SetWeaponIdleTime( gpGlobals->curtime +
+                     SequenceDuration( ACT_VM_PRIMARYATTACK ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -637,7 +659,8 @@ void CWeaponCrossbow::FireBolt( void )
   QAngle angAiming;
   VectorAngles( vecAiming, angAiming );
 
-  CCrossbowBolt *pBolt = CCrossbowBolt::BoltCreate( vecSrc, angAiming, GetHL2MPWpnData().m_iPlayerDamage, pOwner );
+  CCrossbowBolt *pBolt = CCrossbowBolt::BoltCreate(
+      vecSrc, angAiming, GetHL2MPWpnData().m_iPlayerDamage, pOwner );
 
   if ( pOwner->GetWaterLevel() == 3 )
   {
@@ -679,7 +702,9 @@ bool CWeaponCrossbow::Deploy( void )
 {
   if ( m_iClip1 <= 0 )
   {
-    return DefaultDeploy( ( char * )GetViewModel(), ( char * )GetWorldModel(), ACT_CROSSBOW_DRAW_UNLOADED, ( char * )GetAnimPrefix() );
+    return DefaultDeploy( ( char * )GetViewModel(), ( char * )GetWorldModel(),
+                          ACT_CROSSBOW_DRAW_UNLOADED,
+                          ( char * )GetAnimPrefix() );
   }
 
   SetSkin( BOLT_SKIN_GLOW );
@@ -746,12 +771,15 @@ void CWeaponCrossbow::CreateChargerEffects( void )
   if ( m_hChargerSprite != NULL )
     return;
 
-  m_hChargerSprite = CSprite::SpriteCreate( CROSSBOW_GLOW_SPRITE, GetAbsOrigin(), false );
+  m_hChargerSprite =
+      CSprite::SpriteCreate( CROSSBOW_GLOW_SPRITE, GetAbsOrigin(), false );
 
   if ( m_hChargerSprite )
   {
-    m_hChargerSprite->SetAttachment( pOwner->GetViewModel(), BOLT_TIP_ATTACHMENT );
-    m_hChargerSprite->SetTransparency( kRenderTransAdd, 255, 128, 0, 255, kRenderFxNoDissipation );
+    m_hChargerSprite->SetAttachment( pOwner->GetViewModel(),
+                                     BOLT_TIP_ATTACHMENT );
+    m_hChargerSprite->SetTransparency( kRenderTransAdd, 255, 128, 0, 255,
+                                       kRenderFxNoDissipation );
     m_hChargerSprite->SetBrightness( 0 );
     m_hChargerSprite->SetScale( 0.1f );
     m_hChargerSprite->TurnOff();
@@ -790,30 +818,38 @@ void CWeaponCrossbow::DoLoadEffect( void )
   if ( pOwner == NULL )
     return;
 
-  CBaseViewModel *pViewModel = pOwner->GetViewModel();
-
-  if ( pViewModel == NULL )
-    return;
-
+  // Tony; change this up a bit; on the server, dispatch an effect but don't
+  // send it to the client who fires on the client, create an effect either in
+  // the view model, or on the world model if first person.
   CEffectData data;
 
-#ifdef CLIENT_DLL
-  data.m_hEntity = pViewModel->GetRefEHandle();
-#else
-  data.m_nEntIndex = pViewModel->entindex();
-#endif
   data.m_nAttachmentIndex = 1;
+  data.m_vOrigin = pOwner->GetAbsOrigin();
 
-  DispatchEffect( "CrossbowLoad", data );
+  CPASFilter filter( data.m_vOrigin );
+
+#ifdef GAME_DLL
+  filter.RemoveRecipient( pOwner );
+  data.m_nEntIndex = entindex();
+#else
+  CBaseViewModel *pViewModel = pOwner->GetViewModel();
+  if ( ShouldDrawUsingViewModel() && pViewModel != NULL )
+    data.m_hEntity = pViewModel->GetRefEHandle();
+  else
+    data.m_hEntity = GetRefEHandle();
+#endif
+
+  DispatchEffect( "CrossbowLoad", data, filter );
 
 #ifndef CLIENT_DLL
-
-  CSprite *pBlast = CSprite::SpriteCreate( CROSSBOW_GLOW_SPRITE2, GetAbsOrigin(), false );
+  CSprite *pBlast =
+      CSprite::SpriteCreate( CROSSBOW_GLOW_SPRITE2, GetAbsOrigin(), false );
 
   if ( pBlast )
   {
-    pBlast->SetAttachment( pOwner->GetViewModel(), 1 );
-    pBlast->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, kRenderFxNone );
+    pBlast->SetAttachment( this, 1 );
+    pBlast->SetTransparency( kRenderTransAdd, 255, 255, 255, 255,
+                             kRenderFxNone );
     pBlast->SetBrightness( 128 );
     pBlast->SetScale( 0.2f );
     pBlast->FadeOutFromSpawn();
@@ -910,7 +946,8 @@ void CWeaponCrossbow::SetChargerState( ChargerState_t state )
 // Input  : *pEvent -
 //			*pOperator -
 //-----------------------------------------------------------------------------
-void CWeaponCrossbow::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
+void CWeaponCrossbow::Operator_HandleAnimEvent(
+    animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 {
   switch ( pEvent->event )
   {
@@ -935,8 +972,8 @@ void CWeaponCrossbow::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombat
 #endif
 
 //-----------------------------------------------------------------------------
-// Purpose: Set the desired activity for the weapon and its viewmodel counterpart
-// Input  : iActivity - activity to play
+// Purpose: Set the desired activity for the weapon and its viewmodel
+// counterpart Input  : iActivity - activity to play
 //-----------------------------------------------------------------------------
 bool CWeaponCrossbow::SendWeaponAnim( int iActivity )
 {

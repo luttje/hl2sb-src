@@ -342,6 +342,15 @@ class CSoundEmitterSystem : public CBaseGameSystem
 #endif
   }
 
+  void Flush()
+  {
+    Assert( soundemitterbase );
+#if !defined( CLIENT_DLL )
+    FinishLog();
+#endif
+    soundemitterbase->Flush();
+  }
+
   void InternalPrecacheWaves( int soundIndex )
   {
     CSoundParametersInternal *internal = soundemitterbase->InternalGetParametersForSound( soundIndex );
@@ -997,10 +1006,7 @@ void S_SoundEmitterSystemFlush( void )
 
   // save the current soundscape
   // kill the system
-  g_SoundEmitterSystem.Shutdown();
-
-  // restart the system
-  g_SoundEmitterSystem.Init();
+  g_SoundEmitterSystem.Flush();
 
 #if !defined( CLIENT_DLL )
   // Redo precache all wave files... (this should work now that we have dynamic string tables)

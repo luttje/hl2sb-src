@@ -1,11 +1,9 @@
-//========== Copyleft © 2011, Team Sandbox, Some rights reserved. ===========//
+//========== Copyleft ï¿½ 2011, Team Sandbox, Some rights reserved. ===========//
 //
 // Purpose:
 //
 // $NoKeywords: $
 //===========================================================================//
-
-#define lsrcinit_cpp
 
 #include "cbase.h"
 #include "lua.hpp"
@@ -33,7 +31,7 @@ static const luaL_Reg luasrclibs[] = {
     { LUA_PASFILTERLIBNAME, luaopen_CPASFilter },
     { LUA_RECIPIENTFILTERLIBNAME, luaopen_CRecipientFilter },
     { LUA_TAKEDAMAGEINFOLIBNAME, luaopen_CTakeDamageInfo },
-    { LUA_CVARLIBNAME, luaopen_cvar },
+    { LUA_CVARLIBNAME, luaopen_cvars },
     { LUA_DBGLIBNAME, luaopen_dbg },
     { LUA_DEBUGOVERLAYLIBNAME, luaopen_debugoverlay },
     { LUA_ENGINELIBNAME, luaopen_engine },

@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -22,7 +23,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-LCheckButton::LCheckButton( Panel *parent, const char *panelName, const char *text, lua_State *L )
+LCheckButton::LCheckButton( Panel *parent, const char *panelName,
+                            const char *text, lua_State *L )
     : CheckButton( parent, panelName, text )
 {
 #if defined( LUA_SDK )
@@ -59,7 +61,8 @@ void LCheckButton::OnCheckButtonChecked()
 
 LUA_API lua_CheckButton *lua_tocheckbutton( lua_State *L, int idx )
 {
-  PHandle *phPanel = dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
+  PHandle *phPanel =
+      dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
   if ( phPanel == NULL )
     return NULL;
   return dynamic_cast< lua_CheckButton * >( phPanel->Get() );
@@ -126,10 +129,11 @@ static int CheckButton_GetPanelClassName( lua_State *L )
 
 static int CheckButton_GetRefTable( lua_State *L )
 {
-  LCheckButton *plCheckButton = dynamic_cast< LCheckButton * >( luaL_checkcheckbutton( L, 1 ) );
+  LCheckButton *plCheckButton =
+      dynamic_cast< LCheckButton * >( luaL_checkcheckbutton( L, 1 ) );
   if ( plCheckButton )
   {
-    if ( plCheckButton->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plCheckButton->m_nTableReference ) )
     {
       lua_newtable( L );
       plCheckButton->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -143,7 +147,8 @@ static int CheckButton_GetRefTable( lua_State *L )
 
 static int CheckButton_KB_AddBoundKey( lua_State *L )
 {
-  luaL_checkcheckbutton( L, 1 )->KB_AddBoundKey( luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkcheckbutton( L, 1 )->KB_AddBoundKey(
+      luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -155,7 +160,8 @@ static int CheckButton_KB_ChainToMap( lua_State *L )
 
 static int CheckButton_SetCheckButtonCheckable( lua_State *L )
 {
-  luaL_checkcheckbutton( L, 1 )->SetCheckButtonCheckable( luaL_checkboolean( L, 2 ) );
+  luaL_checkcheckbutton( L, 1 )->SetCheckButtonCheckable(
+      luaL_checkboolean( L, 2 ) );
   return 0;
 }
 
@@ -175,11 +181,12 @@ static int CheckButton___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LCheckButton *plCheckButton = dynamic_cast< LCheckButton * >( pCheckButton );
-  if ( plCheckButton && plCheckButton->m_nTableReference != LUA_NOREF )
+  if ( plCheckButton && luasrc_isrefvalid( L, plCheckButton->m_nTableReference ) )
   {
     lua_getref( L, plCheckButton->m_nTableReference );
     lua_pushvalue( L, 2 );
@@ -239,13 +246,14 @@ static int CheckButton___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LCheckButton *plCheckButton = dynamic_cast< LCheckButton * >( pCheckButton );
   if ( plCheckButton )
   {
-    if ( plCheckButton->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plCheckButton->m_nTableReference ) )
     {
       lua_newtable( L );
       plCheckButton->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -263,14 +271,16 @@ static int CheckButton___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
 }
 
 static int CheckButton___gc( lua_State *L )
 {
-  LCheckButton *plCheckButton = dynamic_cast< LCheckButton * >( lua_tocheckbutton( L, 1 ) );
+  LCheckButton *plCheckButton =
+      dynamic_cast< LCheckButton * >( lua_tocheckbutton( L, 1 ) );
   if ( plCheckButton )
   {
     --plCheckButton->m_nRefCount;
@@ -324,14 +334,15 @@ static const luaL_Reg CheckButtonmeta[] = {
 
 static int luasrc_CheckButton( lua_State *L )
 {
-  CheckButton *pCheckButton = new LCheckButton( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ), luaL_optstring( L, 2, NULL ), luaL_optstring( L, 3, NULL ), L );
+  CheckButton *pCheckButton = new LCheckButton(
+      luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ),
+      luaL_optstring( L, 2, NULL ), luaL_optstring( L, 3, NULL ), L );
   lua_pushcheckbutton( L, pCheckButton );
   return 1;
 }
 
 static const luaL_Reg CheckButton_funcs[] = {
-    { "CheckButton", luasrc_CheckButton },
-    { NULL, NULL } };
+    { "CheckButton", luasrc_CheckButton }, { NULL, NULL } };
 
 /*
 ** Open CheckButton object

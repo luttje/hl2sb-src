@@ -1,4 +1,4 @@
-//========== Copyleft © 2011, Team Sandbox, Some rights reserved. ===========//
+//========== Copyleft ï¿½ 2011, Team Sandbox, Some rights reserved. ===========//
 //
 // Purpose: Handles the creation of Lua Cache Files for multiplayer.
 //
@@ -43,7 +43,8 @@ LUA_API IZip *luasrc_GetLcfFile( void )
 // Input  : *relativename -
 //			*fullpath -
 //-----------------------------------------------------------------------------
-LUA_API void luasrc_AddFileToLcf( const char *relativename, const char *fullpath )
+LUA_API void luasrc_AddFileToLcf( const char *relativename,
+                                  const char *fullpath )
 {
   s_lcfFile->AddFileToZip( relativename, fullpath );
 }
@@ -52,7 +53,8 @@ LUA_API void luasrc_AddFileToLcf( const char *relativename, const char *fullpath
 
 LUA_API void luasrc_ExtractLcf()
 {
-  INetworkStringTable *downloadables = networkstringtable->FindTable( "downloadables" );
+  INetworkStringTable *downloadables =
+      networkstringtable->FindTable( "downloadables" );
   const char *pFilename = NULL;
   for ( int i = 0; i < downloadables->GetNumStrings(); i++ )
   {
@@ -64,7 +66,8 @@ LUA_API void luasrc_ExtractLcf()
     {
       char current[512] = { 0 };
       char cachePath[MAX_PATH];
-      bool bGetCurrentDirectory = V_GetCurrentDirectory( current, sizeof( current ) );
+      bool bGetCurrentDirectory =
+          V_GetCurrentDirectory( current, sizeof( current ) );
       if ( bGetCurrentDirectory )
       {
 #ifdef CLIENT_DLL
@@ -74,12 +77,14 @@ LUA_API void luasrc_ExtractLcf()
         engine->GetGameDir( gamePath, 256 );
 #endif
         Q_strncpy( cachePath, gamePath, sizeof( cachePath ) );
-        Q_strncat( cachePath, "\\" LUA_PATH_CACHE, sizeof( cachePath ), COPY_ALL_CHARACTERS );
+        Q_strncat( cachePath, "\\" LUA_PATH_CACHE, sizeof( cachePath ),
+                   COPY_ALL_CHARACTERS );
         V_SetCurrentDirectory( cachePath );
       }
 
       char fullpath[MAX_PATH];
-      filesystem->RelativePathToFullPath( pFilename, "MOD", fullpath, sizeof( fullpath ) );
+      filesystem->RelativePathToFullPath( pFilename, "MOD", fullpath,
+                                          sizeof( fullpath ) );
       HZIP hz = OpenZip( fullpath, 0, ZIP_FILENAME );
       ZIPENTRY ze;
       GetZipItem( hz, -1, &ze );
@@ -92,14 +97,18 @@ LUA_API void luasrc_ExtractLcf()
         {
           char fullpath[MAX_PATH];
           char path[MAX_PATH];
-          Q_snprintf( path, sizeof( path ), LUA_PATH_CACHE "\\%s", ze.name );
+          Q_snprintf( path, sizeof( path ), LUA_PATH_CACHE "\\%s",
+                      ze.name );
           Q_StripFilename( path );
           filesystem->CreateDirHierarchy( path, "MOD" );
-          Q_snprintf( fullpath, sizeof( fullpath ), "%s%s", cachePath, path + Q_strlen( LUA_PATH_CACHE ) );
-          // DevMsg( "LCF: setting current directory to %s...\n", fullpath );
+          Q_snprintf( fullpath, sizeof( fullpath ), "%s%s", cachePath,
+                      path + Q_strlen( LUA_PATH_CACHE ) );
+          // DevMsg( "LCF: setting current directory to %s...\n",
+          // fullpath );
           V_SetCurrentDirectory( fullpath );
           // DevMsg( "LCF: unpacking %s...\n", ze.name );
-          UnzipItem( hz, i, ( void * )V_UnqualifiedFileName( ze.name ), 0, ZIP_FILENAME );
+          UnzipItem( hz, i, ( void * )V_UnqualifiedFileName( ze.name ), 0,
+                     ZIP_FILENAME );
         }
       }
       CloseZip( hz );
@@ -158,9 +167,11 @@ static int luasrc_sendfile( lua_State *L )
   Q_StrRight( ar2.source, iLength - 1, source, sizeof( source ) );
   Q_StripFilename( source );
   char filename[MAX_PATH];
-  Q_snprintf( filename, sizeof( filename ), "%s\\%s", source, luaL_checkstring( L, 1 ) );
+  Q_snprintf( filename, sizeof( filename ), "%s\\%s", source,
+              luaL_checkstring( L, 1 ) );
   char relativePath[MAX_PATH];
-  if ( filesystem->FullPathToRelativePathEx( filename, "MOD", relativePath, MAX_PATH ) )
+  if ( filesystem->FullPathToRelativePathEx( filename, "MOD", relativePath,
+                                             MAX_PATH ) )
   {
     const char *zipPath = NULL;
     if ( Q_strnicmp( relativePath, "addons/", 7 ) )
@@ -184,9 +195,8 @@ static int luasrc_sendfile( lua_State *L )
   return 0;
 }
 
-static const luaL_Reg lcf_funcs[] = {
-    { "sendfile", luasrc_sendfile },
-    { NULL, NULL } };
+static const luaL_Reg lcf_funcs[] = { { "sendfile", luasrc_sendfile },
+                                      { NULL, NULL } };
 
 #endif
 
@@ -242,7 +252,8 @@ extern void lcf_recursivedeletefile( const char *current )
         char relative[512];
         if ( current[0] )
         {
-          Q_snprintf( relative, sizeof( relative ), "%s/%s", current, fn );
+          Q_snprintf( relative, sizeof( relative ), "%s/%s", current,
+                      fn );
         }
         else
         {
@@ -295,7 +306,8 @@ extern void lcf_preparecachefile( void )
   }
   // force create this directory incase it doesn't exist
   filesystem->CreateDirHierarchy( "cache", "MOD" );
-  FileHandle_t fh = g_pFullFileSystem->Open( "cache\\cache_temp.lcf", "wb", "MOD" );
+  FileHandle_t fh =
+      g_pFullFileSystem->Open( "cache\\cache_temp.lcf", "wb", "MOD" );
   if ( FILESYSTEM_INVALID_HANDLE != fh )
   {
     pZip->SaveToDisk( fh );
@@ -310,7 +322,8 @@ extern void lcf_preparecachefile( void )
   buffer = new byte[size + 1];
   if ( !buffer )
   {
-    Warning( "lcf_preparecachefile:  Couldn't allocate buffer of size %i\n", size + 1 );
+    Warning( "lcf_preparecachefile:  Couldn't allocate buffer of size %i\n",
+             size + 1 );
     g_pFullFileSystem->Close( fh );
     return;
   }
@@ -342,13 +355,16 @@ extern void lcf_preparecachefile( void )
     g_pFullFileSystem->RenameFile( "cache\\cache_temp.lcf", filename, "MOD" );
   }
 
-  INetworkStringTable *downloadables = networkstringtable->FindTable( "downloadables" );
+  INetworkStringTable *downloadables =
+      networkstringtable->FindTable( "downloadables" );
   downloadables->AddString( true, filename, -1 );
   IZip::ReleaseZip( pZip );
   s_lcfFile = 0;
 }
 
-CON_COMMAND( dumpluacachefile, "Dump the contents of the Lua cache file database to the console." )
+CON_COMMAND(
+    dumpluacachefile,
+    "Dump the contents of the Lua cache file database to the console." )
 {
   int c = m_LcfDatabase.Count();
   for ( int i = 0; i < c; i++ )

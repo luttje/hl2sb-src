@@ -153,6 +153,11 @@ class CBaseDoor : public CBaseToggle
   }
   bool m_bLoopMoveSound;  // Move sound loops until stopped
 
+  virtual bool ShouldBlockNav() const OVERRIDE
+  {
+    return false;
+  }
+
  private:
   void ChainUse( void );                   ///< Chains +use on through to m_ChainTarget
   void ChainTouch( CBaseEntity *pOther );  ///< Chains touch on through to m_ChainTarget

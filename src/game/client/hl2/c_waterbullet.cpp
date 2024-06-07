@@ -85,7 +85,6 @@ class C_WaterBullet : public C_BaseAnimating
 
         sParticle->m_flRoll = random->RandomInt( 0, 360 );
         sParticle->m_flRollDelta = random->RandomInt( -4, 4 );
-        ;
 
         unsigned char color = random->RandomInt( 200, 255 );
 

@@ -14,7 +14,7 @@
 #ifdef CLIENT_DLL
 extern IVModelInfoClient *modelinfo;
 #else
-extern IVModelInfo* modelinfo;
+extern IVModelInfo *modelinfo;
 #endif
 
 #if defined( CLIENT_DLL )
@@ -33,28 +33,33 @@ extern IVModelInfo* modelinfo;
 
 #include "weapon_hl2mpbase.h"
 
-// ----------------------------------------------------------------------------- //
-// Global functions.
-// ----------------------------------------------------------------------------- //
+#if defined( CLIENT_DLL )
+#define CHL2MP_Player C_HL2MP_Player
+#endif
+
+// -----------------------------------------------------------------------------
+// // Global functions.
+// -----------------------------------------------------------------------------
+// //
 
 bool IsAmmoType( int iAmmoType, const char *pAmmoName )
 {
   return GetAmmoDef()->Index( pAmmoName ) == iAmmoType;
 }
 
-static const char *s_WeaponAliasInfo[] =
-    {
-        "none",  //	WEAPON_NONE = 0,
+static const char *s_WeaponAliasInfo[] = {
+    "none",  //	WEAPON_NONE = 0,
 
-        // Melee
-        "shotgun",  // WEAPON_AMERKNIFE,
+    // Melee
+    "shotgun",  // WEAPON_AMERKNIFE,
 
-        NULL,  // end of list marker
+    NULL,  // end of list marker
 };
 
-// ----------------------------------------------------------------------------- //
-// CWeaponHL2MPBase tables.
-// ----------------------------------------------------------------------------- //
+// -----------------------------------------------------------------------------
+// // CWeaponHL2MPBase tables.
+// -----------------------------------------------------------------------------
+// //
 
 IMPLEMENT_NETWORKCLASS_ALIASED( WeaponHL2MPBase, DT_WeaponHL2MPBase )
 
@@ -84,13 +89,15 @@ END_DATADESC()
 
 #endif
 
-// ----------------------------------------------------------------------------- //
-// CWeaponHL2MPBase implementation.
-// ----------------------------------------------------------------------------- //
+// -----------------------------------------------------------------------------
+// // CWeaponHL2MPBase implementation.
+// -----------------------------------------------------------------------------
+// //
 CWeaponHL2MPBase::CWeaponHL2MPBase()
 {
   SetPredictionEligible( true );
-  AddSolidFlags( FSOLID_TRIGGER );  // Nothing collides with these but it gets touches.
+  AddSolidFlags(
+      FSOLID_TRIGGER );  // Nothing collides with these but it gets touches.
 
   m_flNextResetCheckTime = 0.0f;
 }
@@ -100,11 +107,25 @@ bool CWeaponHL2MPBase::IsPredicted() const
   return true;
 }
 
-void CWeaponHL2MPBase::WeaponSound( WeaponSound_t sound_type, float soundtime /* = 0.0f */ )
+// Tony; override for animation purposes.
+bool CWeaponHL2MPBase::Reload( void )
+{
+  bool fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
+  if ( fRet )
+  {
+    //		WeaponSound( RELOAD );
+    ToHL2MPPlayer( GetOwner() )->DoAnimationEvent( PLAYERANIMEVENT_RELOAD );
+  }
+  return fRet;
+}
+
+void CWeaponHL2MPBase::WeaponSound( WeaponSound_t sound_type,
+                                    float soundtime /* = 0.0f */ )
 {
 #ifdef CLIENT_DLL
 
-  // If we have some sounds from the weapon classname.txt file, play a random one of them
+  // If we have some sounds from the weapon classname.txt file, play a random
+  // one of them
   const char *shootsound = GetWpnData().aShootSounds[sound_type];
   if ( !shootsound || !shootsound[0] )
     return;
@@ -113,7 +134,8 @@ void CWeaponHL2MPBase::WeaponSound( WeaponSound_t sound_type, float soundtime /*
   if ( !te->CanPredict() )
     return;
 
-  CBaseEntity::EmitSound( filter, GetPlayerOwner()->entindex(), shootsound, &GetPlayerOwner()->GetAbsOrigin() );
+  CBaseEntity::EmitSound( filter, GetPlayerOwner()->entindex(), shootsound,
+                          &GetPlayerOwner()->GetAbsOrigin() );
 #else
   BaseClass::WeaponSound( sound_type, soundtime );
 #endif
@@ -213,7 +235,8 @@ void CWeaponHL2MPBase::FallInit( void )
   }
   else
   {
-    if ( !VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags() | FSOLID_TRIGGER, false ) )
+    if ( !VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags() | FSOLID_TRIGGER,
+                              false ) )
     {
       SetMoveType( MOVETYPE_NONE );
       SetSolid( SOLID_BBOX );
@@ -235,14 +258,16 @@ void CWeaponHL2MPBase::FallInit( void )
         {
           constraint_fixedparams_t fixed;
           fixed.Defaults();
-          fixed.InitWithCurrentObjectState( pReferenceObject, pAttachedObject );
+          fixed.InitWithCurrentObjectState( pReferenceObject,
+                                            pAttachedObject );
 
           fixed.constraint.forceLimit = lbs2kg( 10000 );
           fixed.constraint.torqueLimit = lbs2kg( 10000 );
 
           IPhysicsConstraint *pConstraint = GetConstraint();
 
-          pConstraint = physenv->CreateFixedConstraint( pReferenceObject, pAttachedObject, NULL, fixed );
+          pConstraint = physenv->CreateFixedConstraint(
+              pReferenceObject, pAttachedObject, NULL, fixed );
 
           pConstraint->SetGameData( ( void * )this );
         }
@@ -269,7 +294,7 @@ const CHL2MPSWeaponInfo &CWeaponHL2MPBase::GetHL2MPWpnData() const
   pHL2MPInfo = dynamic_cast< const CHL2MPSWeaponInfo * >( pWeaponInfo );
   Assert( pHL2MPInfo );
 #else
-  pHL2MPInfo = static_cast< const CHL2MPSWeaponInfo* >( pWeaponInfo );
+  pHL2MPInfo = static_cast< const CHL2MPSWeaponInfo * >( pWeaponInfo );
 #endif
 
   return *pHL2MPInfo;
@@ -289,12 +314,15 @@ void CWeaponHL2MPBase::FireBullets( const FireBulletsInfo_t &info )
 
 #define NUM_MUZZLE_FLASH_TYPES 4
 
-bool CWeaponHL2MPBase::OnFireEvent( C_BaseViewModel *pViewModel, const Vector &origin, const QAngle &angles, int event, const char *options )
+bool CWeaponHL2MPBase::OnFireEvent( C_BaseViewModel *pViewModel,
+                                    const Vector &origin, const QAngle &angles,
+                                    int event, const char *options )
 {
   return BaseClass::OnFireEvent( pViewModel, origin, angles, event, options );
 }
 
-void UTIL_ClipPunchAngleOffset( QAngle &in, const QAngle &punch, const QAngle &clip )
+void UTIL_ClipPunchAngleOffset( QAngle &in, const QAngle &punch,
+                                const QAngle &clip )
 {
   QAngle final = in + punch;
 

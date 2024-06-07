@@ -141,6 +141,7 @@
 
 #if defined( TF_CLIENT_DLL )
 #include "econ/tool_items/custom_texture_cache.h"
+
 #endif
 
 #ifdef WORKSHOP_IMPORT_ENABLED
@@ -161,20 +162,8 @@ extern vgui::IInputInternal *g_InputInternal;
 //=============================================================================
 
 #ifdef LUA_SDK
-#include "luamanager.h"
 #include "luacachefile.h"
-#include "mountaddons.h"
-#endif
-
-#ifdef HL2SB
-#include "mountsteamcontent.h"
-#ifdef _WIN32
-// HACKHACK: this is dumb, and unsafe. Things that should be uninitialized at the
-// engine-level can kiss their deconstructors goodbye. See Shutdown for an
-// explanation.
-DLL_IMPORT BOOL STDCALL TerminateProcess( HANDLE hProcess, unsigned int uExitCode );
-DLL_IMPORT HANDLE STDCALL GetCurrentProcess( void );
-#endif
+#include "luamanager.h"
 #endif
 
 #ifdef PORTAL
@@ -296,8 +285,9 @@ INetworkStringTable *g_pStringTableServerMapCycleMvM = NULL;
 #endif
 
 static CGlobalVarsBase dummyvars( true );
-// So stuff that might reference gpGlobals during DLL initialization won't have a NULL pointer.
-// Once the engine calls Init on this DLL, this pointer gets assigned to the shared data in the engine
+// So stuff that might reference gpGlobals during DLL initialization won't have
+// a NULL pointer. Once the engine calls Init on this DLL, this pointer gets
+// assigned to the shared data in the engine
 CGlobalVarsBase *gpGlobals = &dummyvars;
 class CHudChat;
 class CViewRender;
@@ -315,12 +305,16 @@ C_BaseEntityClassList::~C_BaseEntityClassList()
 {
 }
 
-// Any entities that want an OnDataChanged during simulation register for it here.
+// Any entities that want an OnDataChanged during simulation register for it
+// here.
 class CDataChangedEvent
 {
  public:
-  CDataChangedEvent() {}
-  CDataChangedEvent( IClientNetworkable *ent, DataUpdateType_t updateType, int *pStoredEvent )
+  CDataChangedEvent()
+  {
+  }
+  CDataChangedEvent( IClientNetworkable *ent, DataUpdateType_t updateType,
+                     int *pStoredEvent )
   {
     m_pEntity = ent;
     m_UpdateType = updateType;
@@ -342,18 +336,25 @@ class IMoveHelper;
 
 void DispatchHudText( const char *pszName );
 
-static ConVar s_CV_ShowParticleCounts( "showparticlecounts", "0", 0, "Display number of particles drawn per frame" );
-static ConVar s_cl_team( "cl_team", "default", FCVAR_USERINFO | FCVAR_ARCHIVE, "Default team when joining a game" );
-static ConVar s_cl_class( "cl_class", "default", FCVAR_USERINFO | FCVAR_ARCHIVE, "Default class when joining a game" );
+static ConVar s_CV_ShowParticleCounts(
+    "showparticlecounts", "0", 0,
+    "Display number of particles drawn per frame" );
+static ConVar s_cl_team( "cl_team", "default", FCVAR_USERINFO | FCVAR_ARCHIVE,
+                         "Default team when joining a game" );
+static ConVar s_cl_class( "cl_class", "default", FCVAR_USERINFO | FCVAR_ARCHIVE,
+                          "Default class when joining a game" );
 
 #ifdef HL1MP_CLIENT_DLL
-static ConVar s_cl_load_hl1_content( "cl_load_hl1_content", "0", FCVAR_ARCHIVE, "Mount the content from Half-Life: Source if possible" );
+static ConVar s_cl_load_hl1_content(
+    "cl_load_hl1_content", "0", FCVAR_ARCHIVE,
+    "Mount the content from Half-Life: Source if possible" );
 #endif
 
 // Physics system
 bool g_bLevelInitialized;
 bool g_bTextMode = false;
-class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface = ( class IClientPurchaseInterfaceV2 * )( &g_bTextMode + 156 );
+class IClientPurchaseInterfaceV2 *g_pClientPurchaseInterface =
+    ( class IClientPurchaseInterfaceV2 * )( &g_bTextMode + 156 );
 
 static ConVar *g_pcv_ThreadMode = NULL;
 
@@ -430,7 +431,8 @@ class CGameClientExports : public IGameClientExports
   {
     if ( g_pAchievementsAndStatsInterface )
     {
-      return g_pAchievementsAndStatsInterface->GetAchievementsPanelMinWidth();
+      return g_pAchievementsAndStatsInterface
+          ->GetAchievementsPanelMinWidth();
     }
 
     return 0;
@@ -446,15 +448,18 @@ class CGameClientExports : public IGameClientExports
   }
 };
 
-EXPOSE_SINGLE_INTERFACE( CGameClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION );
+EXPOSE_SINGLE_INTERFACE( CGameClientExports, IGameClientExports,
+                         GAMECLIENTEXPORTS_INTERFACE_VERSION );
 
 class CClientDLLSharedAppSystems : public IClientDLLSharedAppSystems
 {
  public:
   CClientDLLSharedAppSystems()
   {
-    AddAppSystem( "soundemittersystem" DLL_EXT_STRING, SOUNDEMITTERSYSTEM_INTERFACE_VERSION );
-    AddAppSystem( "scenefilecache" DLL_EXT_STRING, SCENE_FILE_CACHE_INTERFACE_VERSION );
+    AddAppSystem( "soundemittersystem" DLL_EXT_STRING,
+                  SOUNDEMITTERSYSTEM_INTERFACE_VERSION );
+    AddAppSystem( "scenefilecache" DLL_EXT_STRING,
+                  SCENE_FILE_CACHE_INTERFACE_VERSION );
   }
 
   virtual int Count()
@@ -482,7 +487,8 @@ class CClientDLLSharedAppSystems : public IClientDLLSharedAppSystems
   CUtlVector< AppSystemInfo_t > m_Systems;
 };
 
-EXPOSE_SINGLE_INTERFACE( CClientDLLSharedAppSystems, IClientDLLSharedAppSystems, CLIENT_DLL_SHARED_APPSYSTEMS );
+EXPOSE_SINGLE_INTERFACE( CClientDLLSharedAppSystems, IClientDLLSharedAppSystems,
+                         CLIENT_DLL_SHARED_APPSYSTEMS );
 
 //-----------------------------------------------------------------------------
 // Helper interface for voice.
@@ -535,7 +541,9 @@ static CHLVoiceStatusHelper g_VoiceStatusHelper;
 // Code to display which entities are having their bones setup each frame.
 //-----------------------------------------------------------------------------
 
-ConVar cl_ShowBoneSetupEnts( "cl_ShowBoneSetupEnts", "0", 0, "Show which entities are having their bones setup each frame." );
+ConVar cl_ShowBoneSetupEnts(
+    "cl_ShowBoneSetupEnts", "0", 0,
+    "Show which entities are having their bones setup each frame." );
 
 class CBoneSetupEnt
 {
@@ -566,7 +574,8 @@ void TrackBoneSetupEnt( C_BaseAnimating *pEnt )
   unsigned short i = g_BoneSetupEnts.Find( ent );
   if ( i == g_BoneSetupEnts.InvalidIndex() )
   {
-    Q_strncpy( ent.m_ModelName, modelinfo->GetModelName( pEnt->GetModel() ), sizeof( ent.m_ModelName ) );
+    Q_strncpy( ent.m_ModelName, modelinfo->GetModelName( pEnt->GetModel() ),
+               sizeof( ent.m_ModelName ) );
     ent.m_Count = 1;
     g_BoneSetupEnts.Insert( ent );
   }
@@ -588,10 +597,12 @@ void DisplayBoneSetupEnts()
 
   unsigned short i;
   int nElements = 0;
-  for ( i = g_BoneSetupEnts.FirstInorder(); i != g_BoneSetupEnts.LastInorder(); i = g_BoneSetupEnts.NextInorder( i ) )
+  for ( i = g_BoneSetupEnts.FirstInorder(); i != g_BoneSetupEnts.LastInorder();
+        i = g_BoneSetupEnts.NextInorder( i ) )
     ++nElements;
 
-  engine->Con_NPrintf( 0, "%d bone setup ents (name/count/entindex) ------------", nElements );
+  engine->Con_NPrintf(
+      0, "%d bone setup ents (name/count/entindex) ------------", nElements );
 
   con_nprint_s printInfo;
   printInfo.time_to_live = -1;
@@ -599,14 +610,16 @@ void DisplayBoneSetupEnts()
   printInfo.color[0] = printInfo.color[1] = printInfo.color[2] = 1;
 
   printInfo.index = 2;
-  for ( i = g_BoneSetupEnts.FirstInorder(); i != g_BoneSetupEnts.LastInorder(); i = g_BoneSetupEnts.NextInorder( i ) )
+  for ( i = g_BoneSetupEnts.FirstInorder(); i != g_BoneSetupEnts.LastInorder();
+        i = g_BoneSetupEnts.NextInorder( i ) )
   {
     CBoneSetupEnt *pEnt = &g_BoneSetupEnts[i];
 
     if ( pEnt->m_Count >= 3 )
     {
       printInfo.color[0] = 1;
-      printInfo.color[1] = printInfo.color[2] = 0;
+      printInfo.color[1] = 0;
+      printInfo.color[2] = 0;
     }
     else if ( pEnt->m_Count == 2 )
     {
@@ -616,9 +629,12 @@ void DisplayBoneSetupEnts()
     }
     else
     {
-      printInfo.color[0] = printInfo.color[0] = printInfo.color[0] = 1;
+      printInfo.color[0] = 1;
+      printInfo.color[1] = 1;
+      printInfo.color[2] = 1;
     }
-    engine->Con_NXPrintf( &printInfo, "%25s / %3d / %3d", pEnt->m_ModelName, pEnt->m_Count, pEnt->m_Index );
+    engine->Con_NXPrintf( &printInfo, "%25s / %3d / %3d", pEnt->m_ModelName,
+                          pEnt->m_Count, pEnt->m_Index );
     printInfo.index++;
   }
 
@@ -634,7 +650,9 @@ class CHLClient : public IBaseClientDLL
  public:
   CHLClient();
 
-  virtual int Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physicsFactory, CGlobalVarsBase *pGlobals );
+  virtual int Init( CreateInterfaceFn appSystemFactory,
+                    CreateInterfaceFn physicsFactory,
+                    CGlobalVarsBase *pGlobals );
 
   virtual void PostInit();
   virtual void Shutdown( void );
@@ -662,17 +680,21 @@ class CHLClient : public IBaseClientDLL
   virtual bool IN_IsKeyDown( const char *name, bool &isdown );
   virtual void IN_OnMouseWheeled( int nDelta );
   // Raw signal
-  virtual int IN_KeyEvent( int eventcode, ButtonCode_t keynum, const char *pszCurrentBinding );
+  virtual int IN_KeyEvent( int eventcode, ButtonCode_t keynum,
+                           const char *pszCurrentBinding );
   virtual void IN_SetSampleTime( float frametime );
   // Create movement command
-  virtual void CreateMove( int sequence_number, float input_sample_frametime, bool active );
+  virtual void CreateMove( int sequence_number, float input_sample_frametime,
+                           bool active );
   virtual void ExtraMouseSample( float frametime, bool active );
-  virtual bool WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool isnewcommand );
+  virtual bool WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to,
+                                          bool isnewcommand );
   virtual void EncodeUserCmdToBuffer( bf_write &buf, int slot );
   virtual void DecodeUserCmdFromBuffer( bf_read &buf, int slot );
 
   virtual void View_Render( vrect_t *rect );
-  virtual void RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw );
+  virtual void RenderView( const CViewSetup &view, int nClearFlags,
+                           int whatToDraw );
   virtual void View_Fade( ScreenFade_t *pSF );
 
   virtual void SetCrosshairAngle( const QAngle &angle );
@@ -692,8 +714,10 @@ class CHLClient : public IBaseClientDLL
 
   // Save/restore system hooks
   virtual CSaveRestoreData *SaveInit( int size );
-  virtual void SaveWriteFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
-  virtual void SaveReadFields( CSaveRestoreData *, const char *, void *, datamap_t *, typedescription_t *, int );
+  virtual void SaveWriteFields( CSaveRestoreData *, const char *, void *,
+                                datamap_t *, typedescription_t *, int );
+  virtual void SaveReadFields( CSaveRestoreData *, const char *, void *,
+                               datamap_t *, typedescription_t *, int );
   virtual void PreSave( CSaveRestoreData * );
   virtual void Save( CSaveRestoreData * );
   virtual void WriteSaveHeaders( CSaveRestoreData * );
@@ -702,7 +726,8 @@ class CHLClient : public IBaseClientDLL
   virtual void DispatchOnRestore();
   virtual void WriteSaveGameScreenshot( const char *pFilename );
 
-  // Given a list of "S(wavname) S(wavname2)" tokens, look up the localized text and emit
+  // Given a list of "S(wavname) S(wavname2)" tokens, look up the localized
+  // text and emit
   //  the appropriate close caption if running with closecaption = 1
   virtual void EmitSentenceCloseCaption( char const *tokenstream );
   virtual void EmitCloseCaption( char const *captionname, float duration );
@@ -723,23 +748,28 @@ class CHLClient : public IBaseClientDLL
   virtual int GetScreenHeight();
 
   // save game screenshot writing
-  virtual void WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height, bool bCreatePowerOf2Padded /*=false*/, bool bWriteVTF /*=false*/ );
+  virtual void WriteSaveGameScreenshotOfSize(
+      const char *pFilename, int width, int height,
+      bool bCreatePowerOf2Padded /*=false*/, bool bWriteVTF /*=false*/ );
 
   // Gets the location of the player viewpoint
   virtual bool GetPlayerView( CViewSetup &playerView );
 
   // Matchmaking
-  virtual void SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts, CUtlVector< XUSER_PROPERTY > &properties );
+  virtual void SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts,
+                                    CUtlVector< XUSER_PROPERTY > &properties );
   virtual uint GetPresenceID( const char *pIDName );
   virtual const char *GetPropertyIdString( const uint id );
-  virtual void GetPropertyDisplayString( uint id, uint value, char *pOutput, int nBytes );
+  virtual void GetPropertyDisplayString( uint id, uint value, char *pOutput,
+                                         int nBytes );
   virtual void StartStatsReporting( HANDLE handle, bool bArbitrated );
 
   virtual void InvalidateMdlCache();
 
   virtual void ReloadFilesInList( IFileList *pFilesToReload );
 
-  // Let the client handle UI toggle - if this function returns false, the UI will toggle, otherwise it will not.
+  // Let the client handle UI toggle - if this function returns false, the UI
+  // will toggle, otherwise it will not.
   virtual bool HandleUiToggle();
 
   // Allow the console to be shown?
@@ -754,9 +784,11 @@ class CHLClient : public IBaseClientDLL
   // Notify the client that a file has been received from the game server
   virtual void FileReceived( const char *fileName, unsigned int transferID );
 
-  virtual const char *TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName );
+  virtual const char *TranslateEffectForVisionFilter(
+      const char *pchEffectType, const char *pchEffectName );
 
-  virtual void ClientAdjustStartSoundParams( struct StartSoundParams_t &params );
+  virtual void ClientAdjustStartSoundParams(
+      struct StartSoundParams_t &params );
 
   // Returns true if the disconnect command has been handled by the client
   virtual bool DisconnectAttempt( void );
@@ -776,7 +808,8 @@ class CHLClient : public IBaseClientDLL
 CHLClient gHLClient;
 IBaseClientDLL *clientdll = &gHLClient;
 
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL, CLIENT_DLL_INTERFACE_VERSION, gHLClient );
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CHLClient, IBaseClientDLL,
+                                   CLIENT_DLL_INTERFACE_VERSION, gHLClient );
 
 //-----------------------------------------------------------------------------
 // Precaches a material
@@ -834,10 +867,12 @@ int GetParticleSystemIndex( const char *pParticleSystemName )
 {
   if ( pParticleSystemName )
   {
-    int nIndex = g_pStringTableParticleEffectNames->FindStringIndex( pParticleSystemName );
+    int nIndex = g_pStringTableParticleEffectNames->FindStringIndex(
+        pParticleSystemName );
     if ( nIndex != INVALID_STRING_INDEX )
       return nIndex;
-    DevWarning( "Client: Missing precache for particle system \"%s\"!\n", pParticleSystemName );
+    DevWarning( "Client: Missing precache for particle system \"%s\"!\n",
+                pParticleSystemName );
   }
 
   // This is the invalid string index
@@ -855,7 +890,8 @@ const char *GetParticleSystemNameFromIndex( int nIndex )
 }
 
 //-----------------------------------------------------------------------------
-// Returns true if host_thread_mode is set to non-zero (and engine is running in threaded mode)
+// Returns true if host_thread_mode is set to non-zero (and engine is running in
+// threaded mode)
 //-----------------------------------------------------------------------------
 bool IsEngineThreaded()
 {
@@ -872,7 +908,8 @@ bool IsEngineThreaded()
 
 CHLClient::CHLClient()
 {
-  // Kinda bogus, but the logic in the engine is too convoluted to put it there
+  // Kinda bogus, but the logic in the engine is too convoluted to put it
+  // there
   g_bLevelInitialized = false;
 }
 
@@ -885,7 +922,9 @@ ISourceVirtualReality *g_pSourceVR = NULL;
 // Input  : engineFactory -
 // Output : int
 //-----------------------------------------------------------------------------
-int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physicsFactory, CGlobalVarsBase *pGlobals )
+int CHLClient::Init( CreateInterfaceFn appSystemFactory,
+                     CreateInterfaceFn physicsFactory,
+                     CGlobalVarsBase *pGlobals )
 {
   InitCRTMemDebug();
   MathLib_Init( 2.2f, 2.2f, 0.0f, 2.0f );
@@ -906,64 +945,92 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 #endif
 
   // We aren't happy unless we get all of our interfaces.
-  // please don't collapse this into one monolithic boolean expression (impossible to debug)
-  if ( ( engine = ( IVEngineClient * )appSystemFactory( VENGINE_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
+  // please don't collapse this into one monolithic boolean expression
+  // (impossible to debug)
+  if ( ( engine = ( IVEngineClient * )appSystemFactory(
+             VENGINE_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( modelrender = ( IVModelRender * )appSystemFactory( VENGINE_HUDMODEL_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( modelrender = ( IVModelRender * )appSystemFactory(
+             VENGINE_HUDMODEL_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( effects = ( IVEfx * )appSystemFactory( VENGINE_EFFECTS_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( effects = ( IVEfx * )appSystemFactory( VENGINE_EFFECTS_INTERFACE_VERSION,
+                                                NULL ) ) == NULL )
     return false;
-  if ( ( enginetrace = ( IEngineTrace * )appSystemFactory( INTERFACEVERSION_ENGINETRACE_CLIENT, NULL ) ) == NULL )
+  if ( ( enginetrace = ( IEngineTrace * )appSystemFactory(
+             INTERFACEVERSION_ENGINETRACE_CLIENT, NULL ) ) == NULL )
     return false;
-  if ( ( render = ( IVRenderView * )appSystemFactory( VENGINE_RENDERVIEW_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( render = ( IVRenderView * )appSystemFactory(
+             VENGINE_RENDERVIEW_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( debugoverlay = ( IVDebugOverlay * )appSystemFactory( VDEBUG_OVERLAY_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( debugoverlay = ( IVDebugOverlay * )appSystemFactory(
+             VDEBUG_OVERLAY_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( datacache = ( IDataCache * )appSystemFactory( DATACACHE_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( datacache = ( IDataCache * )appSystemFactory( DATACACHE_INTERFACE_VERSION,
+                                                       NULL ) ) == NULL )
     return false;
   if ( !mdlcache )
     return false;
-  if ( ( modelinfo = ( IVModelInfoClient * )appSystemFactory( VMODELINFO_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( modelinfo = ( IVModelInfoClient * )appSystemFactory(
+             VMODELINFO_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( enginevgui = ( IEngineVGui * )appSystemFactory( VENGINE_VGUI_VERSION, NULL ) ) == NULL )
+  if ( ( enginevgui = ( IEngineVGui * )appSystemFactory( VENGINE_VGUI_VERSION,
+                                                         NULL ) ) == NULL )
     return false;
-  if ( ( networkstringtable = ( INetworkStringTableContainer * )appSystemFactory( INTERFACENAME_NETWORKSTRINGTABLECLIENT, NULL ) ) == NULL )
+  if ( ( networkstringtable = ( INetworkStringTableContainer * )appSystemFactory(
+             INTERFACENAME_NETWORKSTRINGTABLECLIENT, NULL ) ) == NULL )
     return false;
-  if ( ( partition = ( ISpatialPartition * )appSystemFactory( INTERFACEVERSION_SPATIALPARTITION, NULL ) ) == NULL )
+  if ( ( partition = ( ISpatialPartition * )appSystemFactory(
+             INTERFACEVERSION_SPATIALPARTITION, NULL ) ) == NULL )
     return false;
-  if ( ( shadowmgr = ( IShadowMgr * )appSystemFactory( ENGINE_SHADOWMGR_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( shadowmgr = ( IShadowMgr * )appSystemFactory(
+             ENGINE_SHADOWMGR_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( staticpropmgr = ( IStaticPropMgrClient * )appSystemFactory( INTERFACEVERSION_STATICPROPMGR_CLIENT, NULL ) ) == NULL )
+  if ( ( staticpropmgr = ( IStaticPropMgrClient * )appSystemFactory(
+             INTERFACEVERSION_STATICPROPMGR_CLIENT, NULL ) ) == NULL )
     return false;
-  if ( ( enginesound = ( IEngineSound * )appSystemFactory( IENGINESOUND_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( enginesound = ( IEngineSound * )appSystemFactory(
+             IENGINESOUND_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( filesystem = ( IFileSystem * )appSystemFactory( FILESYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( filesystem = ( IFileSystem * )appSystemFactory(
+             FILESYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( random = ( IUniformRandomStream * )appSystemFactory( VENGINE_CLIENT_RANDOM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( random = ( IUniformRandomStream * )appSystemFactory(
+             VENGINE_CLIENT_RANDOM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( gameuifuncs = ( IGameUIFuncs * )appSystemFactory( VENGINE_GAMEUIFUNCS_VERSION, NULL ) ) == NULL )
+  if ( ( gameuifuncs = ( IGameUIFuncs * )appSystemFactory(
+             VENGINE_GAMEUIFUNCS_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( gameeventmanager = ( IGameEventManager2 * )appSystemFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL ) ) == NULL )
+  if ( ( gameeventmanager = ( IGameEventManager2 * )appSystemFactory(
+             INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL ) ) == NULL )
     return false;
-  if ( ( soundemitterbase = ( ISoundEmitterSystemBase * )appSystemFactory( SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( soundemitterbase = ( ISoundEmitterSystemBase * )appSystemFactory(
+             SOUNDEMITTERSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( inputsystem = ( IInputSystem * )appSystemFactory( INPUTSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( inputsystem = ( IInputSystem * )appSystemFactory(
+             INPUTSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( ( scenefilecache = ( ISceneFileCache * )appSystemFactory( SCENE_FILE_CACHE_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( scenefilecache = ( ISceneFileCache * )appSystemFactory(
+             SCENE_FILE_CACHE_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( IsX360() && ( xboxsystem = ( IXboxSystem * )appSystemFactory( XBOXSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( IsX360() && ( xboxsystem = ( IXboxSystem * )appSystemFactory(
+                         XBOXSYSTEM_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( IsX360() && ( matchmaking = ( IMatchmaking * )appSystemFactory( VENGINE_MATCHMAKING_VERSION, NULL ) ) == NULL )
+  if ( IsX360() && ( matchmaking = ( IMatchmaking * )appSystemFactory(
+                         VENGINE_MATCHMAKING_VERSION, NULL ) ) == NULL )
     return false;
 #ifndef _XBOX
-  if ( ( gamestatsuploader = ( IUploadGameStats * )appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL ) ) == NULL )
+  if ( ( gamestatsuploader = ( IUploadGameStats * )appSystemFactory(
+             INTERFACEVERSION_UPLOADGAMESTATS, NULL ) ) == NULL )
     return false;
 #endif
 
 #if defined( REPLAY_ENABLED )
-  if ( IsPC() && ( g_pEngineReplay = ( IEngineReplay * )appSystemFactory( ENGINE_REPLAY_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( IsPC() && ( g_pEngineReplay = ( IEngineReplay * )appSystemFactory(
+                       ENGINE_REPLAY_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
-  if ( IsPC() && ( g_pEngineClientReplay = ( IEngineClientReplay * )appSystemFactory( ENGINE_REPLAY_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( IsPC() &&
+       ( g_pEngineClientReplay = ( IEngineClientReplay * )appSystemFactory(
+             ENGINE_REPLAY_CLIENT_INTERFACE_VERSION, NULL ) ) == NULL )
     return false;
 #endif
 
@@ -979,26 +1046,20 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 #endif
 
   // it's ok if this is NULL. That just means the sourcevr.dll wasn't found
-  g_pSourceVR = ( ISourceVirtualReality * )appSystemFactory( SOURCE_VIRTUAL_REALITY_INTERFACE_VERSION, NULL );
+  g_pSourceVR = ( ISourceVirtualReality * )appSystemFactory(
+      SOURCE_VIRTUAL_REALITY_INTERFACE_VERSION, NULL );
 
   factorylist_t factories;
   factories.appSystemFactory = appSystemFactory;
   factories.physicsFactory = physicsFactory;
   FactoryList_Store( factories );
 
-  // Yes, both the client and game .dlls will try to Connect, the soundemittersystem.dll will handle this gracefully
+  // Yes, both the client and game .dlls will try to Connect, the
+  // soundemittersystem.dll will handle this gracefully
   if ( !soundemitterbase->Connect( appSystemFactory ) )
   {
     return false;
   }
-
-#if defined( HL2SB )
-  // Andrew; then mount everything the user wants to use.
-  MountUserContent();
-
-  // Finally, load all of the player's addons.
-  MountAddons();
-#endif
 
   if ( CommandLine()->FindParm( "-textmode" ) )
     g_bTextMode = true;
@@ -1007,7 +1068,8 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
     g_MakingDevShots = true;
 
   // Not fatal if the material system stub isn't around.
-  materials_stub = ( IMaterialSystemStub * )appSystemFactory( MATERIAL_SYSTEM_STUB_INTERFACE_VERSION, NULL );
+  materials_stub = ( IMaterialSystemStub * )appSystemFactory(
+      MATERIAL_SYSTEM_STUB_INTERFACE_VERSION, NULL );
 
   if ( !g_pMaterialSystemHardwareConfig )
     return false;
@@ -1031,7 +1093,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
   vgui::VGui_InitMatSysInterfacesList( "ClientDLL", &appSystemFactory, 1 );
 
-#if defined( LUA_SDK )
+#ifdef LUA_SDK
   // Initialize the GameUI state
   luasrc_init_gameui();
 
@@ -1040,7 +1102,8 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 
   // Add the client systems.
 
-  // Client Leaf System has to be initialized first, since DetailObjectSystem uses it
+  // Client Leaf System has to be initialized first, since DetailObjectSystem
+  // uses it
   IGameSystem::Add( GameStringSystem() );
   IGameSystem::Add( SoundEmitterSystem() );
   IGameSystem::Add( ToolFrameworkClientSystem() );
@@ -1049,7 +1112,9 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
   IGameSystem::Add( ViewportClientSystem() );
   IGameSystem::Add( ClientEffectPrecacheSystem() );
   IGameSystem::Add( g_pClientShadowMgr );
-  IGameSystem::Add( g_pColorCorrectionMgr );  // NOTE: This must happen prior to ClientThinkList (color correction is updated there)
+  IGameSystem::Add( g_pColorCorrectionMgr );  // NOTE: This must happen prior to
+                                              // ClientThinkList (color
+                                              // correction is updated there)
   IGameSystem::Add( ClientThinkList() );
   IGameSystem::Add( ClientSoundscapeSystem() );
   IGameSystem::Add( PerfVisualBenchmark() );
@@ -1114,9 +1179,12 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
   if ( !PhysicsDLLInit( physicsFactory ) )
     return false;
 
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetEntitySaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetPhysSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->AddBlockHandler( GetViewEffectsRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetEntitySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetPhysSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->AddBlockHandler(
+      GetViewEffectsRestoreBlockHandler() );
 
   ClientWorldFactoryInit();
 
@@ -1138,7 +1206,8 @@ bool CHLClient::ReplayInit( CreateInterfaceFn fnReplayFactory )
 #if defined( REPLAY_ENABLED )
   if ( !IsPC() )
     return false;
-  if ( ( g_pReplay = ( IReplaySystem * )fnReplayFactory( REPLAY_INTERFACE_VERSION, NULL ) ) == NULL )
+  if ( ( g_pReplay = ( IReplaySystem * )fnReplayFactory( REPLAY_INTERFACE_VERSION,
+                                                         NULL ) ) == NULL )
     return false;
   if ( ( g_pClientReplayContext = g_pReplay->CL_GetContext() ) == NULL )
     return false;
@@ -1154,13 +1223,17 @@ bool CHLClient::ReplayPostInit()
 #if defined( REPLAY_ENABLED )
   if ( ( g_pReplayManager = g_pClientReplayContext->GetReplayManager() ) == NULL )
     return false;
-  if ( ( g_pReplayScreenshotManager = g_pClientReplayContext->GetScreenshotManager() ) == NULL )
+  if ( ( g_pReplayScreenshotManager =
+             g_pClientReplayContext->GetScreenshotManager() ) == NULL )
     return false;
-  if ( ( g_pReplayPerformanceManager = g_pClientReplayContext->GetPerformanceManager() ) == NULL )
+  if ( ( g_pReplayPerformanceManager =
+             g_pClientReplayContext->GetPerformanceManager() ) == NULL )
     return false;
-  if ( ( g_pReplayPerformanceController = g_pClientReplayContext->GetPerformanceController() ) == NULL )
+  if ( ( g_pReplayPerformanceController =
+             g_pClientReplayContext->GetPerformanceController() ) == NULL )
     return false;
-  if ( ( g_pReplayMovieManager = g_pClientReplayContext->GetMovieManager() ) == NULL )
+  if ( ( g_pReplayMovieManager = g_pClientReplayContext->GetMovieManager() ) ==
+       NULL )
     return false;
   return true;
 #else
@@ -1169,7 +1242,8 @@ bool CHLClient::ReplayPostInit()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Called after client & server DLL are loaded and all systems initialized
+// Purpose: Called after client & server DLL are loaded and all systems
+// initialized
 //-----------------------------------------------------------------------------
 void CHLClient::PostInit()
 {
@@ -1183,10 +1257,12 @@ void CHLClient::PostInit()
   g_ClientVirtualReality.StartupComplete();
 
 #ifdef HL1MP_CLIENT_DLL
-  if ( s_cl_load_hl1_content.GetBool() && steamapicontext && steamapicontext->SteamApps() )
+  if ( s_cl_load_hl1_content.GetBool() && steamapicontext &&
+       steamapicontext->SteamApps() )
   {
     char szPath[MAX_PATH * 2];
-    int ccFolder = steamapicontext->SteamApps()->GetAppInstallDir( 280, szPath, sizeof( szPath ) );
+    int ccFolder = steamapicontext->SteamApps()->GetAppInstallDir(
+        280, szPath, sizeof( szPath ) );
     if ( ccFolder > 0 )
     {
       V_AppendSlash( szPath, sizeof( szPath ) );
@@ -1222,9 +1298,12 @@ void CHLClient::Shutdown( void )
   C_BaseAnimating::ShutdownBoneSetupThreadPool();
   ClientWorldFactoryShutdown();
 
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetViewEffectsRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetPhysSaveRestoreBlockHandler() );
-  g_pGameSaveRestoreBlockSet->RemoveBlockHandler( GetEntitySaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetViewEffectsRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetPhysSaveRestoreBlockHandler() );
+  g_pGameSaveRestoreBlockSet->RemoveBlockHandler(
+      GetEntitySaveRestoreBlockHandler() );
 
   ClientVoiceMgr_Shutdown();
 
@@ -1259,12 +1338,8 @@ void CHLClient::Shutdown( void )
   ShutdownFbx();
 #endif
 
-#ifdef HL2SB
-  // Andrew; fixes the "CNet Encrypt:0" issue in 2007-based mods.
-  SteamAPI_Shutdown();
-#endif
-
-  // This call disconnects the VGui libraries which we rely on later in the shutdown path, so don't do it
+  // This call disconnects the VGui libraries which we rely on later in the
+  // shutdown path, so don't do it
   //	DisconnectTier3Libraries( );
   DisconnectTier2Libraries();
   ConVar_Unregister();
@@ -1335,7 +1410,8 @@ void CHLClient::HudUpdate( bool bActive )
   C_BaseTempEntity::CheckDynamicTempEnts();
 
 #ifdef SIXENSE
-  // If we're not connected, update sixense so we can move the mouse cursor when in the menus
+  // If we're not connected, update sixense so we can move the mouse cursor
+  // when in the menus
   if ( !engine->IsConnected() || engine->IsPaused() )
   {
     g_pSixenseInput->SixenseFrame( 0, NULL );
@@ -1445,7 +1521,8 @@ bool CHLClient::IN_IsKeyDown( const char *name, bool &isdown )
 void CHLClient::IN_OnMouseWheeled( int nDelta )
 {
 #if defined( REPLAY_ENABLED )
-  CReplayPerformanceEditorPanel *pPerfEditor = ReplayUI_GetPerformanceEditor();
+  CReplayPerformanceEditorPanel *pPerfEditor =
+      ReplayUI_GetPerformanceEditor();
   if ( pPerfEditor )
   {
     pPerfEditor->OnInGameMouseWheelEvent( nDelta );
@@ -1460,7 +1537,8 @@ void CHLClient::IN_OnMouseWheeled( int nDelta )
 //			*pszCurrentBinding -
 // Output : int
 //-----------------------------------------------------------------------------
-int CHLClient::IN_KeyEvent( int eventcode, ButtonCode_t keynum, const char *pszCurrentBinding )
+int CHLClient::IN_KeyEvent( int eventcode, ButtonCode_t keynum,
+                            const char *pszCurrentBinding )
 {
   return input->KeyEvent( eventcode, keynum, pszCurrentBinding );
 }
@@ -1486,12 +1564,13 @@ void CHLClient::IN_SetSampleTime( float frametime )
 #endif
 }
 //-----------------------------------------------------------------------------
-// Purpose: Fills in usercmd_s structure based on current view angles and key/controller inputs
-// Input  : frametime - timestamp for last frame
+// Purpose: Fills in usercmd_s structure based on current view angles and
+// key/controller inputs Input  : frametime - timestamp for last frame
 //			*cmd - the command to fill in
 //			active - whether the user is fully connected to a server
 //-----------------------------------------------------------------------------
-void CHLClient::CreateMove( int sequence_number, float input_sample_frametime, bool active )
+void CHLClient::CreateMove( int sequence_number, float input_sample_frametime,
+                            bool active )
 {
   Assert( C_BaseEntity::IsAbsRecomputationsEnabled() );
   Assert( C_BaseEntity::IsAbsQueriesValid() );
@@ -1508,7 +1587,8 @@ void CHLClient::CreateMove( int sequence_number, float input_sample_frametime, b
 //			from -
 //			to -
 //-----------------------------------------------------------------------------
-bool CHLClient::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to, bool isnewcommand )
+bool CHLClient::WriteUsercmdDeltaToBuffer( bf_write *buf, int from, int to,
+                                           bool isnewcommand )
 {
   return input->WriteUsercmdDeltaToBuffer( buf, from, to, isnewcommand );
 }
@@ -1542,7 +1622,8 @@ void CHLClient::View_Render( vrect_t *rect )
 {
   VPROF( "View_Render" );
 
-  // UNDONE: This gets hit at startup sometimes, investigate - will cause NaNs in calcs inside Render()
+  // UNDONE: This gets hit at startup sometimes, investigate - will cause NaNs
+  // in calcs inside Render()
   if ( rect->width == 0 || rect->height == 0 )
     return;
 
@@ -1562,7 +1643,8 @@ bool CHLClient::GetPlayerView( CViewSetup &playerView )
 //-----------------------------------------------------------------------------
 // Matchmaking
 //-----------------------------------------------------------------------------
-void CHLClient::SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts, CUtlVector< XUSER_PROPERTY > &properties )
+void CHLClient::SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts,
+                                     CUtlVector< XUSER_PROPERTY > &properties )
 {
   presence->SetupGameProperties( contexts, properties );
 }
@@ -1577,7 +1659,8 @@ const char *CHLClient::GetPropertyIdString( const uint id )
   return presence->GetPropertyIdString( id );
 }
 
-void CHLClient::GetPropertyDisplayString( uint id, uint value, char *pOutput, int nBytes )
+void CHLClient::GetPropertyDisplayString( uint id, uint value, char *pOutput,
+                                          int nBytes )
 {
   presence->GetPropertyDisplayString( id, value, pOutput, nBytes );
 }
@@ -1593,7 +1676,8 @@ void CHLClient::StartStatsReporting( HANDLE handle, bool bArbitrated )
 void CHLClient::InvalidateMdlCache()
 {
   C_BaseAnimating *pAnimating;
-  for ( C_BaseEntity *pEntity = ClientEntityList().FirstBaseEntity(); pEntity; pEntity = ClientEntityList().NextBaseEntity( pEntity ) )
+  for ( C_BaseEntity *pEntity = ClientEntityList().FirstBaseEntity(); pEntity;
+        pEntity = ClientEntityList().NextBaseEntity( pEntity ) )
   {
     pAnimating = dynamic_cast< C_BaseAnimating * >( pEntity );
     if ( pAnimating )
@@ -1623,7 +1707,7 @@ void CHLClient::LevelInitPreEntity( char const *pMapName )
     return;
   g_bLevelInitialized = true;
 
-#if defined( LUA_SDK )
+#ifdef LUA_SDK
   lcf_recursivedeletefile( LUA_PATH_CACHE );
 
   // Add the Lua environment.
@@ -1791,8 +1875,8 @@ void CHLClient::LevelShutdown( void )
 
   modemanager->LevelShutdown();
 
-  // Remove temporary entities before removing entities from the client entity list so that the te_* may
-  // clean up before hand.
+  // Remove temporary entities before removing entities from the client entity
+  // list so that the te_* may clean up before hand.
   tempents->LevelShutdown();
 
   // Now release/delete the entities
@@ -1822,7 +1906,8 @@ void CHLClient::LevelShutdown( void )
 
 #ifndef TF_CLIENT_DLL
   // don't want to do this for TF2 because we have particle systems in our
-  // character loadout screen that can be viewed when we're not connected to a server
+  // character loadout screen that can be viewed when we're not connected to a
+  // server
   g_pParticleSystemMgr->UncacheAllParticleSystems();
 #endif
   UncacheAllMaterials();
@@ -1831,7 +1916,8 @@ void CHLClient::LevelShutdown( void )
   ReleaseRenderTargets();
 #endif
 
-  // string tables are cleared on disconnect from a server, so reset our global pointers to NULL
+  // string tables are cleared on disconnect from a server, so reset our
+  // global pointers to NULL
   ResetStringTablePointers();
 
 #if defined( REPLAY_ENABLED )
@@ -1905,7 +1991,10 @@ void CHLClient::VoiceStatus( int entindex, qboolean bTalking )
 //-----------------------------------------------------------------------------
 // Called when the string table for materials changes
 //-----------------------------------------------------------------------------
-void OnMaterialStringTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData )
+void OnMaterialStringTableChanged( void *object,
+                                   INetworkStringTable *stringTable,
+                                   int stringNumber, const char *newString,
+                                   void const *newData )
 {
   // Make sure this puppy is precached
   gHLClient.PrecacheMaterial( newString );
@@ -1915,7 +2004,10 @@ void OnMaterialStringTableChanged( void *object, INetworkStringTable *stringTabl
 //-----------------------------------------------------------------------------
 // Called when the string table for particle systems changes
 //-----------------------------------------------------------------------------
-void OnParticleSystemStringTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData )
+void OnParticleSystemStringTableChanged( void *object,
+                                         INetworkStringTable *stringTable,
+                                         int stringNumber, const char *newString,
+                                         void const *newData )
 {
   // Make sure this puppy is precached
   g_pParticleSystemMgr->PrecacheParticleSystem( newString );
@@ -1925,23 +2017,28 @@ void OnParticleSystemStringTableChanged( void *object, INetworkStringTable *stri
 //-----------------------------------------------------------------------------
 // Called when the string table for VGUI changes
 //-----------------------------------------------------------------------------
-void OnVguiScreenTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData )
+void OnVguiScreenTableChanged( void *object, INetworkStringTable *stringTable,
+                               int stringNumber, const char *newString,
+                               void const *newData )
 {
   // Make sure this puppy is precached
-  vgui::Panel *pPanel = PanelMetaClassMgr()->CreatePanelMetaClass( newString, 100, NULL, NULL );
+  vgui::Panel *pPanel =
+      PanelMetaClassMgr()->CreatePanelMetaClass( newString, 100, NULL, NULL );
   if ( pPanel )
     PanelMetaClassMgr()->DestroyPanelMetaClass( pPanel );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Preload the string on the client (if single player it should already be in the cache from the server!!!)
-// Input  : *object -
+// Purpose: Preload the string on the client (if single player it should already
+// be in the cache from the server!!!) Input  : *object -
 //			*stringTable -
 //			stringNumber -
 //			*newString -
 //			*newData -
 //-----------------------------------------------------------------------------
-void OnSceneStringTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData )
+void OnSceneStringTableChanged( void *object, INetworkStringTable *stringTable,
+                                int stringNumber, const char *newString,
+                                void const *newData )
 {
 }
 
@@ -1958,7 +2055,8 @@ void CHLClient::InstallStringTableCallback( const char *tableName )
     g_StringTableVguiScreen = networkstringtable->FindTable( tableName );
 
     // When the material list changes, we need to know immediately
-    g_StringTableVguiScreen->SetStringChangedCallback( NULL, OnVguiScreenTableChanged );
+    g_StringTableVguiScreen->SetStringChangedCallback(
+        NULL, OnVguiScreenTableChanged );
   }
   else if ( !Q_strcasecmp( tableName, "Materials" ) )
   {
@@ -1966,7 +2064,8 @@ void CHLClient::InstallStringTableCallback( const char *tableName )
     g_pStringTableMaterials = networkstringtable->FindTable( tableName );
 
     // When the material list changes, we need to know immediately
-    g_pStringTableMaterials->SetStringChangedCallback( NULL, OnMaterialStringTableChanged );
+    g_pStringTableMaterials->SetStringChangedCallback(
+        NULL, OnMaterialStringTableChanged );
   }
   else if ( !Q_strcasecmp( tableName, "EffectDispatch" ) )
   {
@@ -1978,15 +2077,20 @@ void CHLClient::InstallStringTableCallback( const char *tableName )
   }
   else if ( !Q_strcasecmp( tableName, "Scenes" ) )
   {
-    g_pStringTableClientSideChoreoScenes = networkstringtable->FindTable( tableName );
-    g_pStringTableClientSideChoreoScenes->SetStringChangedCallback( NULL, OnSceneStringTableChanged );
+    g_pStringTableClientSideChoreoScenes =
+        networkstringtable->FindTable( tableName );
+    g_pStringTableClientSideChoreoScenes->SetStringChangedCallback(
+        NULL, OnSceneStringTableChanged );
   }
   else if ( !Q_strcasecmp( tableName, "ParticleEffectNames" ) )
   {
-    g_pStringTableParticleEffectNames = networkstringtable->FindTable( tableName );
-    networkstringtable->SetAllowClientSideAddString( g_pStringTableParticleEffectNames, true );
+    g_pStringTableParticleEffectNames =
+        networkstringtable->FindTable( tableName );
+    networkstringtable->SetAllowClientSideAddString(
+        g_pStringTableParticleEffectNames, true );
     // When the particle system list changes, we need to know immediately
-    g_pStringTableParticleEffectNames->SetStringChangedCallback( NULL, OnParticleSystemStringTableChanged );
+    g_pStringTableParticleEffectNames->SetStringChangedCallback(
+        NULL, OnParticleSystemStringTableChanged );
   }
   else if ( !Q_strcasecmp( tableName, "ServerMapCycle" ) )
   {
@@ -1999,7 +2103,8 @@ void CHLClient::InstallStringTableCallback( const char *tableName )
   }
   else if ( !Q_strcasecmp( tableName, "ServerMapCycleMvM" ) )
   {
-    g_pStringTableServerMapCycleMvM = networkstringtable->FindTable( tableName );
+    g_pStringTableServerMapCycleMvM =
+        networkstringtable->FindTable( tableName );
   }
 #endif
 
@@ -2022,7 +2127,8 @@ void CHLClient::PrecacheMaterial( const char *pMaterialName )
     *pFound = 0;
   }
 
-  IMaterial *pMaterial = materials->FindMaterial( pTempBuf, TEXTURE_GROUP_PRECACHED );
+  IMaterial *pMaterial =
+      materials->FindMaterial( pTempBuf, TEXTURE_GROUP_PRECACHED );
   if ( !IsErrorMaterial( pMaterial ) )
   {
     pMaterial->IncrementReferenceCount();
@@ -2032,7 +2138,10 @@ void CHLClient::PrecacheMaterial( const char *pMaterialName )
   {
     if ( IsOSX() )
     {
-      printf( "\n ##### CHLClient::PrecacheMaterial could not find material %s (%s)", pMaterialName, pTempBuf );
+      printf(
+          "\n ##### CHLClient::PrecacheMaterial could not find material "
+          "%s (%s)",
+          pMaterialName, pTempBuf );
     }
   }
 }
@@ -2067,7 +2176,8 @@ void SimulateEntities()
 
   // TODO: make an ISimulateable interface so C_BaseNetworkables can simulate?
   {
-    VPROF_( "C_BaseEntity::Simulate", 1, VPROF_BUDGETGROUP_CLIENT_SIM, false, BUDGETFLAG_CLIENT );
+    VPROF_( "C_BaseEntity::Simulate", 1, VPROF_BUDGETGROUP_CLIENT_SIM, false,
+            BUDGETFLAG_CLIENT );
     C_BaseEntityIterator iterator;
     C_BaseEntity *pEnt;
     while ( ( pEnt = iterator.Next() ) != NULL )
@@ -2077,7 +2187,8 @@ void SimulateEntities()
   }
 }
 
-bool AddDataChangeEvent( IClientNetworkable *ent, DataUpdateType_t updateType, int *pStoredEvent )
+bool AddDataChangeEvent( IClientNetworkable *ent, DataUpdateType_t updateType,
+                         int *pStoredEvent )
 {
   VPROF( "AddDataChangeEvent" );
 
@@ -2095,7 +2206,8 @@ bool AddDataChangeEvent( IClientNetworkable *ent, DataUpdateType_t updateType, i
   }
   else
   {
-    *pStoredEvent = g_DataChangedEvents.AddToTail( CDataChangedEvent( ent, updateType, pStoredEvent ) );
+    *pStoredEvent = g_DataChangedEvents.AddToTail(
+        CDataChangedEvent( ent, updateType, pStoredEvent ) );
     return true;
   }
 }
@@ -2108,7 +2220,8 @@ void ClearDataChangedEvent( int iStoredEvent )
 
 void ProcessOnDataChangedEvents()
 {
-  VPROF_( "ProcessOnDataChangedEvents", 1, VPROF_BUDGETGROUP_CLIENT_SIM, false, BUDGETFLAG_CLIENT );
+  VPROF_( "ProcessOnDataChangedEvents", 1, VPROF_BUDGETGROUP_CLIENT_SIM, false,
+          BUDGETFLAG_CLIENT );
   FOR_EACH_LL( g_DataChangedEvents, i )
   {
     CDataChangedEvent *pEvent = &g_DataChangedEvents[i];
@@ -2129,19 +2242,22 @@ void UpdateClientRenderableInPVSStatus()
   // Vis for this view should already be setup at this point.
 
   // For each client-only entity, notify it if it's newly coming into the PVS.
-  CUtlLinkedList< CClientEntityList::CPVSNotifyInfo, unsigned short > &theList = ClientEntityList().GetPVSNotifiers();
+  CUtlLinkedList< CClientEntityList::CPVSNotifyInfo, unsigned short > &theList =
+      ClientEntityList().GetPVSNotifiers();
   FOR_EACH_LL( theList, i )
   {
     CClientEntityList::CPVSNotifyInfo *pInfo = &theList[i];
 
     if ( pInfo->m_InPVSStatus & INPVS_YES )
     {
-      // Ok, this entity already thinks it's in the PVS. No need to notify it.
-      // We need to set the INPVS_YES_THISFRAME flag if it's in this frame at all, so we
-      // don't tell the entity it's not in the PVS anymore at the end of the frame.
+      // Ok, this entity already thinks it's in the PVS. No need to notify
+      // it. We need to set the INPVS_YES_THISFRAME flag if it's in this
+      // frame at all, so we don't tell the entity it's not in the PVS
+      // anymore at the end of the frame.
       if ( !( pInfo->m_InPVSStatus & INPVS_THISFRAME ) )
       {
-        if ( g_pClientLeafSystem->IsRenderableInPVS( pInfo->m_pRenderable ) )
+        if ( g_pClientLeafSystem->IsRenderableInPVS(
+                 pInfo->m_pRenderable ) )
         {
           pInfo->m_InPVSStatus |= INPVS_THISFRAME;
         }
@@ -2149,10 +2265,12 @@ void UpdateClientRenderableInPVSStatus()
     }
     else
     {
-      // This entity doesn't think it's in the PVS yet. If it is now in the PVS, let it know.
+      // This entity doesn't think it's in the PVS yet. If it is now in
+      // the PVS, let it know.
       if ( g_pClientLeafSystem->IsRenderableInPVS( pInfo->m_pRenderable ) )
       {
-        pInfo->m_InPVSStatus |= ( INPVS_YES | INPVS_THISFRAME | INPVS_NEEDSNOTIFY );
+        pInfo->m_InPVSStatus |=
+            ( INPVS_YES | INPVS_THISFRAME | INPVS_NEEDSNOTIFY );
       }
     }
   }
@@ -2162,14 +2280,17 @@ void UpdatePVSNotifiers()
 {
   MDLCACHE_CRITICAL_SECTION();
 
-  // At this point, all the entities that were rendered in the previous frame have INPVS_THISFRAME set
-  // so we can tell the entities that aren't in the PVS anymore so.
-  CUtlLinkedList< CClientEntityList::CPVSNotifyInfo, unsigned short > &theList = ClientEntityList().GetPVSNotifiers();
+  // At this point, all the entities that were rendered in the previous frame
+  // have INPVS_THISFRAME set so we can tell the entities that aren't in the
+  // PVS anymore so.
+  CUtlLinkedList< CClientEntityList::CPVSNotifyInfo, unsigned short > &theList =
+      ClientEntityList().GetPVSNotifiers();
   FOR_EACH_LL( theList, i )
   {
     CClientEntityList::CPVSNotifyInfo *pInfo = &theList[i];
 
-    // If this entity thinks it's in the PVS, but it wasn't in the PVS this frame, tell it so.
+    // If this entity thinks it's in the PVS, but it wasn't in the PVS this
+    // frame, tell it so.
     if ( pInfo->m_InPVSStatus & INPVS_YES )
     {
       if ( pInfo->m_InPVSStatus & INPVS_THISFRAME )
@@ -2197,7 +2318,11 @@ void OnRenderStart()
   MDLCACHE_COARSE_LOCK();
 
 #ifdef PORTAL
-  g_pPortalRender->UpdatePortalPixelVisibility();  // updating this one or two lines before querying again just isn't cutting it. Update as soon as it's cheap to do so.
+  g_pPortalRender
+      ->UpdatePortalPixelVisibility();  // updating this one or two lines
+                                        // before querying again just isn't
+                                        // cutting it. Update as soon as it's
+                                        // cheap to do so.
 #endif
 
   partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, true );
@@ -2222,15 +2347,20 @@ void OnRenderStart()
 
     // Enable access to all model bones except view models.
     // This is necessary for aim-ent computation to occur properly
-    C_BaseAnimating::PushAllowBoneAccess( true, false, "OnRenderStart->CViewRender::SetUpView" );  // pops in CViewRender::SetUpView
+    C_BaseAnimating::PushAllowBoneAccess(
+        true, false,
+        "OnRenderStart->CViewRender::SetUpView" );  // pops in
+                                                    // CViewRender::SetUpView
 
     // FIXME: This needs to be done before the player moves; it forces
-    // aiments the player may be attached to to forcibly update their position
+    // aiments the player may be attached to to forcibly update their
+    // position
     C_BaseEntity::MarkAimEntsDirty();
   }
 
-  // Make sure the camera simulation happens before OnRenderStart, where it's used.
-  // NOTE: the only thing that happens in CAM_Think is thirdperson related code.
+  // Make sure the camera simulation happens before OnRenderStart, where it's
+  // used. NOTE: the only thing that happens in CAM_Think is thirdperson
+  // related code.
   input->CAM_Think();
 
   // This will place the player + the view models + all parent
@@ -2240,7 +2370,8 @@ void OnRenderStart()
 
   RopeManager()->OnRenderStart();
 
-  // This will place all entities in the correct position in world space and in the KD-tree
+  // This will place all entities in the correct position in world space and
+  // in the KD-tree
   C_BaseAnimating::UpdateClientSideAnimations();
 
   partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
@@ -2248,14 +2379,16 @@ void OnRenderStart()
   // Process OnDataChanged events.
   ProcessOnDataChangedEvents();
 
-  // Reset the overlay alpha. Entities can change the state of this in their think functions.
+  // Reset the overlay alpha. Entities can change the state of this in their
+  // think functions.
   g_SmokeFogOverlayAlpha = 0;
 
   // This must occur prior to SimulatEntities,
-  // which is where the client thinks for c_colorcorrection + c_colorcorrectionvolumes
-  // update the color correction weights.
+  // which is where the client thinks for c_colorcorrection +
+  // c_colorcorrectionvolumes update the color correction weights.
   // FIXME: The place where IGameSystem::Update is called should be in here
-  // so we don't have to explicitly call ResetColorCorrectionWeights + SimulateEntities, etc.
+  // so we don't have to explicitly call ResetColorCorrectionWeights +
+  // SimulateEntities, etc.
   g_pColorCorrectionMgr->ResetColorCorrectionWeights();
 
   // Simulate all the entities.
@@ -2265,7 +2398,8 @@ void OnRenderStart()
   C_BaseAnimating::ThreadedBoneSetup();
 
   {
-    VPROF_( "Client TempEnts", 0, VPROF_BUDGETGROUP_CLIENT_SIM, false, BUDGETFLAG_CLIENT );
+    VPROF_( "Client TempEnts", 0, VPROF_BUDGETGROUP_CLIENT_SIM, false,
+            BUDGETFLAG_CLIENT );
     // This creates things like temp entities.
     engine->FireEvents();
 
@@ -2279,18 +2413,19 @@ void OnRenderStart()
     SetBeamCreationAllowed( false );
   }
 
-  // Update particle effects (eventually, the effects should use Simulate() instead of having
-  // their own update system).
+  // Update particle effects (eventually, the effects should use Simulate()
+  // instead of having their own update system).
   {
     // Enable FP exceptions here when FP_EXCEPTIONS_ENABLED is defined,
     // to help track down bad math.
     FPExceptionEnabler enableExceptions;
-    VPROF_BUDGET( "ParticleMgr()->Simulate", VPROF_BUDGETGROUP_PARTICLE_SIMULATION );
+    VPROF_BUDGET( "ParticleMgr()->Simulate",
+                  VPROF_BUDGETGROUP_PARTICLE_SIMULATION );
     ParticleMgr()->Simulate( gpGlobals->frametime );
   }
 
-  // Now that the view model's position is setup and aiments are marked dirty, update
-  // their positions so they're in the leaf system correctly.
+  // Now that the view model's position is setup and aiments are marked dirty,
+  // update their positions so they're in the leaf system correctly.
   C_BaseEntity::CalcAimEntPositions();
 
   // For entities marked for recording, post bone messages to IToolSystems
@@ -2305,7 +2440,8 @@ void OnRenderStart()
   CReplayRagdollCache::Instance().Think();
 #endif
 
-  // Finally, link all the entities into the leaf system right before rendering.
+  // Finally, link all the entities into the leaf system right before
+  // rendering.
   C_BaseEntity::AddVisibleEntities();
 }
 
@@ -2362,7 +2498,8 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
     {
       ProcessCacheUsedMaterials();
 
-      // reenable abs recomputation since now all entities have been updated
+      // reenable abs recomputation since now all entities have been
+      // updated
       C_BaseEntity::EnableAbsRecomputations( true );
       C_BaseEntity::SetAbsQueriesValid( true );
       partition->SuppressLists( PARTITION_ALL_CLIENT_EDICTS, false );
@@ -2372,13 +2509,17 @@ void CHLClient::FrameStageNotify( ClientFrameStage_t curStage )
     break;
     case FRAME_NET_UPDATE_POSTDATAUPDATE_START:
     {
-      VPROF( "CHLClient::FrameStageNotify FRAME_NET_UPDATE_POSTDATAUPDATE_START" );
+      VPROF(
+          "CHLClient::FrameStageNotify "
+          "FRAME_NET_UPDATE_POSTDATAUPDATE_START" );
       PREDICTION_STARTTRACKVALUE( "postdataupdate" );
     }
     break;
     case FRAME_NET_UPDATE_POSTDATAUPDATE_END:
     {
-      VPROF( "CHLClient::FrameStageNotify FRAME_NET_UPDATE_POSTDATAUPDATE_END" );
+      VPROF(
+          "CHLClient::FrameStageNotify "
+          "FRAME_NET_UPDATE_POSTDATAUPDATE_END" );
       PREDICTION_ENDTRACKVALUE();
       // Let prediction copy off pristine data
       prediction->PostEntityPacketReceived();
@@ -2407,13 +2548,17 @@ CSaveRestoreData *CHLClient::SaveInit( int size )
   return ::SaveInit( size );
 }
 
-void CHLClient::SaveWriteFields( CSaveRestoreData *pSaveData, const char *pname, void *pBaseData, datamap_t *pMap, typedescription_t *pFields, int fieldCount )
+void CHLClient::SaveWriteFields( CSaveRestoreData *pSaveData, const char *pname,
+                                 void *pBaseData, datamap_t *pMap,
+                                 typedescription_t *pFields, int fieldCount )
 {
   CSave saveHelper( pSaveData );
   saveHelper.WriteFields( pname, pBaseData, pMap, pFields, fieldCount );
 }
 
-void CHLClient::SaveReadFields( CSaveRestoreData *pSaveData, const char *pname, void *pBaseData, datamap_t *pMap, typedescription_t *pFields, int fieldCount )
+void CHLClient::SaveReadFields( CSaveRestoreData *pSaveData, const char *pname,
+                                void *pBaseData, datamap_t *pMap,
+                                typedescription_t *pFields, int fieldCount )
 {
   CRestore restoreHelper( pSaveData );
   restoreHelper.ReadFields( pname, pBaseData, pMap, pFields, fieldCount );
@@ -2479,7 +2624,8 @@ void CHLClient::WriteSaveGameScreenshot( const char *pFilename )
   view->WriteSaveGameScreenshot( pFilename );
 }
 
-// Given a list of "S(wavname) S(wavname2)" tokens, look up the localized text and emit
+// Given a list of "S(wavname) S(wavname2)" tokens, look up the localized text
+// and emit
 //  the appropriate close caption if running with closecaption = 1
 void CHLClient::EmitSentenceCloseCaption( char const *tokenstream )
 {
@@ -2568,14 +2714,17 @@ int CHLClient::GetScreenHeight()
 
 // NEW INTERFACES
 // save game screenshot writing
-void CHLClient::WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height, bool bCreatePowerOf2Padded /*=false*/,
-                                               bool bWriteVTF /*=false*/ )
+void CHLClient::WriteSaveGameScreenshotOfSize(
+    const char *pFilename, int width, int height,
+    bool bCreatePowerOf2Padded /*=false*/, bool bWriteVTF /*=false*/ )
 {
-  view->WriteSaveGameScreenshotOfSize( pFilename, width, height, bCreatePowerOf2Padded, bWriteVTF );
+  view->WriteSaveGameScreenshotOfSize( pFilename, width, height,
+                                       bCreatePowerOf2Padded, bWriteVTF );
 }
 
 // See RenderViewInfo_t
-void CHLClient::RenderView( const CViewSetup &setup, int nClearFlags, int whatToDraw )
+void CHLClient::RenderView( const CViewSetup &setup, int nClearFlags,
+                            int whatToDraw )
 {
   VPROF( "RenderView" );
   view->RenderView( setup, nClearFlags, whatToDraw );
@@ -2584,7 +2733,8 @@ void CHLClient::RenderView( const CViewSetup &setup, int nClearFlags, int whatTo
 void ReloadSoundEntriesInList( IFileList *pFilesToReload );
 
 //-----------------------------------------------------------------------------
-// For sv_pure mode. The filesystem figures out which files the client needs to reload to be "pure" ala the server's preferences.
+// For sv_pure mode. The filesystem figures out which files the client needs to
+// reload to be "pure" ala the server's preferences.
 //-----------------------------------------------------------------------------
 void CHLClient::ReloadFilesInList( IFileList *pFilesToReload )
 {
@@ -2642,48 +2792,47 @@ void CHLClient::ClientAdjustStartSoundParams( StartSoundParams_t &params )
   CBaseEntity *pEntity = ClientEntityList().GetEnt( params.soundsource );
 
   // A player speaking
-  if ( params.entchannel == CHAN_VOICE && GameRules() && pEntity && pEntity->IsPlayer() )
+  if ( params.entchannel == CHAN_VOICE && GameRules() && pEntity &&
+       pEntity->IsPlayer() )
   {
-    // Use high-pitched voices for other players if the local player has an item that allows them to hear it (Pyro Goggles)
-    if ( !GameRules()->IsLocalPlayer( params.soundsource ) && IsLocalPlayerUsingVisionFilterFlags( TF_VISION_FILTER_PYRO ) )
+    // Use high-pitched voices for other players if the local player has an
+    // item that allows them to hear it (Pyro Goggles)
+    if ( !GameRules()->IsLocalPlayer( params.soundsource ) &&
+         IsLocalPlayerUsingVisionFilterFlags( TF_VISION_FILTER_PYRO ) )
     {
       params.pitch *= 1.3f;
     }
     // Halloween voice futzery?
     else
     {
-      float flHeadScale = 1.f;
-      CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pEntity, flHeadScale, head_scale );
+      float flVoicePitchScale = 1.f;
+      CALL_ATTRIB_HOOK_FLOAT_ON_OTHER( pEntity, flVoicePitchScale,
+                                       voice_pitch_scale );
 
       int iHalloweenVoiceSpell = 0;
-      CALL_ATTRIB_HOOK_INT_ON_OTHER( pEntity, iHalloweenVoiceSpell, halloween_voice_modulation );
+      CALL_ATTRIB_HOOK_INT_ON_OTHER( pEntity, iHalloweenVoiceSpell,
+                                     halloween_voice_modulation );
       if ( iHalloweenVoiceSpell > 0 )
       {
         params.pitch *= 0.8f;
       }
-      else if ( flHeadScale != 1.f )
+      else if ( flVoicePitchScale != 1.f )
       {
-        // Big head, deep voice
-        if ( flHeadScale > 1.f )
-        {
-          params.pitch *= 0.8f;
-        }
-        else  // Small head, high voice
-        {
-          params.pitch *= 1.3f;
-        }
+        params.pitch *= flVoicePitchScale;
       }
     }
   }
 #endif
 }
 
-const char *CHLClient::TranslateEffectForVisionFilter( const char *pchEffectType, const char *pchEffectName )
+const char *CHLClient::TranslateEffectForVisionFilter(
+    const char *pchEffectType, const char *pchEffectName )
 {
   if ( !GameRules() )
     return pchEffectName;
 
-  return GameRules()->TranslateEffectForVisionFilter( pchEffectType, pchEffectName );
+  return GameRules()->TranslateEffectForVisionFilter( pchEffectType,
+                                                      pchEffectName );
 }
 
 bool CHLClient::DisconnectAttempt( void )
@@ -2699,7 +2848,8 @@ bool CHLClient::DisconnectAttempt( void )
 
 bool CHLClient::IsConnectedUserInfoChangeAllowed( IConVar *pCvar )
 {
-  return GameRules() ? GameRules()->IsConnectedUserInfoChangeAllowed( NULL ) : true;
+  return GameRules() ? GameRules()->IsConnectedUserInfoChangeAllowed( NULL )
+                     : true;
 }
 
 #ifndef NO_STEAM
@@ -2713,7 +2863,10 @@ CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
     {
       if ( pi.friendsID )
       {
-        return CSteamID( pi.friendsID, 1, steamapicontext->SteamUtils()->GetConnectedUniverse(), k_EAccountTypeIndividual );
+        return CSteamID(
+            pi.friendsID, 1,
+            steamapicontext->SteamUtils()->GetConnectedUniverse(),
+            k_EAccountTypeIndividual );
       }
     }
   }

@@ -108,20 +108,13 @@ class CMultiplayRules : public CGameRules
     return BaseClass::ShouldDrawHeadLabels();
   }
 
-#ifndef CLIENT_DLL
-#endif
-#ifdef LUA_SDK
+#if defined( LUA_SDK ) || !defined( CLIENT_DLL )
   // GR_Think
   virtual void Think( void );
-#else
+#endif
+
 #ifndef CLIENT_DLL
   virtual void FrameUpdatePostEntityThink();
-
-  // GR_Think
-  virtual void Think( void );
-#endif
-#endif
-#ifndef CLIENT_DLL
   virtual void RefreshSkillData( bool forceUpdate );
   virtual bool IsAllowedToSpawn( CBaseEntity *pEntity );
   virtual bool FAllowFlashlight( void );
@@ -261,23 +254,32 @@ class CMultiplayRules : public CGameRules
   virtual void GetNextLevelName( char *szNextMap, int bufsize, bool bRandom = false );
 
   static void DetermineMapCycleFilename( char *pszResult, int nSizeResult, bool bForceSpew );
-  static void LoapMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList );
+  virtual void LoadMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList );
   static void FreeMapCycleFileVector( CUtlVector< char * > &mapList );
 
+  // LoadMapCycleFileIntoVector without the fixups inherited versions of gamerules may provide
+  static void RawLoadMapCycleFileIntoVector( const char *pszMapCycleFile, CUtlVector< char * > &mapList );
+
   bool IsMapInMapCycle( const char *pszName );
+
+  virtual bool IsManualMapChangeOkay( const char **pszReason ) OVERRIDE;
 
  protected:
   virtual bool UseSuicidePenalty()
   {
     return true;
   }  // apply point penalty for suicide?
+  virtual float GetLastMajorEventTime( void )
+  {
+    return -1.0f;
+  }
 
  public:
   virtual void ChangeLevel( void );
 
  protected:
   virtual void GoToIntermission( void );
-  void LoadMapCycleFile( void );
+  virtual void LoadMapCycleFile( void );
   void ChangeLevelToMap( const char *pszMap );
 
   float m_flIntermissionEndTime;

@@ -64,6 +64,12 @@ extern ConVar replay_rendersetting_renderglow;
 #include "econ_item_description.h"
 #endif
 
+#ifdef LUA_SDK
+#include "luamanager.h"
+#include "lbaseentity_shared.h"
+#include "lbaseplayer_shared.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -75,15 +81,27 @@ class CHudVote;
 
 static vgui::HContext s_hVGuiContext = DEFAULT_VGUI_CONTEXT;
 
-ConVar cl_drawhud( "cl_drawhud", "1", FCVAR_CHEAT, "Enable the rendering of the hud" );
-ConVar hud_takesshots( "hud_takesshots", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Auto-save a scoreboard screenshot at the end of a map." );
-ConVar hud_freezecamhide( "hud_freezecamhide", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE, "Hide the HUD during freeze-cam" );
-ConVar cl_show_num_particle_systems( "cl_show_num_particle_systems", "0", FCVAR_CLIENTDLL, "Display the number of active particle systems." );
+ConVar cl_drawhud( "cl_drawhud", "1", FCVAR_CHEAT,
+                   "Enable the rendering of the hud" );
+ConVar hud_takesshots( "hud_takesshots", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE,
+                       "Auto-save a scoreboard screenshot at the end of a map." );
+ConVar hud_freezecamhide( "hud_freezecamhide", "0",
+                          FCVAR_CLIENTDLL | FCVAR_ARCHIVE,
+                          "Hide the HUD during freeze-cam" );
+ConVar cl_show_num_particle_systems(
+    "cl_show_num_particle_systems", "0", FCVAR_CLIENTDLL,
+    "Display the number of active particle systems." );
 
 extern ConVar v_viewmodel_fov;
 extern ConVar voice_modenable;
 
 extern bool IsInCommentaryMode( void );
+extern const char *GetWearLocalizationString( float flWear );
+
+CON_COMMAND( cl_reload_localization_files, "Reloads all localization files" )
+{
+  g_pVGuiLocalize->ReloadLocalizationFiles();
+}
 
 #ifdef VOICE_VOX_ENABLE
 void VoxCallback( IConVar *var, const char *oldString, float oldFloat )
@@ -101,11 +119,14 @@ void VoxCallback( IConVar *var, const char *oldString, float oldFloat )
     }
   }
 }
-ConVar voice_vox( "voice_vox", "0", FCVAR_ARCHIVE, "Voice chat uses a vox-style always on", true, 0, true, 1, VoxCallback );
+ConVar voice_vox( "voice_vox", "0", FCVAR_ARCHIVE,
+                  "Voice chat uses a vox-style always on", true, 0, true, 1,
+                  VoxCallback );
 
-// --------------------------------------------------------------------------------- //
-// CVoxManager.
-// --------------------------------------------------------------------------------- //
+// ---------------------------------------------------------------------------------
+// // CVoxManager.
+// ---------------------------------------------------------------------------------
+// //
 class CVoxManager : public CAutoGameSystem
 {
  public:
@@ -132,7 +153,8 @@ class CVoxManager : public CAutoGameSystem
 };
 
 static CVoxManager s_VoxManager;
-// --------------------------------------------------------------------------------- //
+// ---------------------------------------------------------------------------------
+// //
 #endif  // VOICE_VOX_ENABLE
 
 CON_COMMAND( hud_reloadscheme, "Reloads hud layout and animation scripts." )
@@ -141,11 +163,15 @@ CON_COMMAND( hud_reloadscheme, "Reloads hud layout and animation scripts." )
   if ( !mode )
     return;
 
-  mode->ReloadScheme();
+  mode->ReloadScheme( true );
 }
 
 #ifdef _DEBUG
-CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 0: read from NULL\n 1: write to NULL\n 2: DmCrashDump() (xbox360 only)", FCVAR_CHEAT )
+CON_COMMAND_F(
+    crash,
+    "Crash the client. Optional parameter -- type of crash:\n 0: read from "
+    "NULL\n 1: write to NULL\n 2: DmCrashDump() (xbox360 only)",
+    FCVAR_CHEAT )
 {
   int crashtype = 0;
   int dummy;
@@ -168,7 +194,8 @@ CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 
       break;
 #endif
     default:
-      Msg( "Unknown variety of crash. You have now failed to crash. I hope you're happy.\n" );
+      Msg( "Unknown variety of crash. You have now failed to crash. I "
+           "hope you're happy.\n" );
       break;
   }
 }
@@ -223,15 +250,19 @@ static void __MsgFunc_VGUIMenu( bf_read &msg )
     }
 
     // !KLUDGE! Whitelist of URL protocols formats for MOTD
-    if (
-        !V_stricmp( panelname, PANEL_INFO )  // MOTD
-        && keys->GetInt( "type", 0 ) == 2    // URL message type
+    if ( !V_stricmp( panelname, PANEL_INFO )  // MOTD
+         && keys->GetInt( "type", 0 ) == 2    // URL message type
     )
     {
       const char *pszURL = keys->GetString( "msg", "" );
-      if ( Q_strncmp( pszURL, "http://", 7 ) != 0 && Q_strncmp( pszURL, "https://", 8 ) != 0 && Q_stricmp( pszURL, "about:blank" ) != 0 )
+      if ( Q_strncmp( pszURL, "http://", 7 ) != 0 &&
+           Q_strncmp( pszURL, "https://", 8 ) != 0 &&
+           Q_stricmp( pszURL, "about:blank" ) != 0 )
       {
-        Warning( "Blocking MOTD URL '%s'; must begin with 'http://' or 'https://' or be about:blank\n", pszURL );
+        Warning(
+            "Blocking MOTD URL '%s'; must begin with 'http://' or "
+            "'https://' or be about:blank\n",
+            pszURL );
         keys->deleteThis();
         return;
       }
@@ -247,11 +278,13 @@ static void __MsgFunc_VGUIMenu( bf_read &msg )
   {
     if ( hud_takesshots.GetBool() == true )
     {
-      gHUD.SetScreenShotTime( gpGlobals->curtime + 1.0 );  // take a screenshot in 1 second
+      gHUD.SetScreenShotTime( gpGlobals->curtime +
+                              1.0 );  // take a screenshot in 1 second
     }
   }
 
-  // is the server trying to show an MOTD panel? Check that it's allowed right now.
+  // is the server trying to show an MOTD panel? Check that it's allowed right
+  // now.
   ClientModeShared *mode = ( ClientModeShared * )GetClientModeNormal();
   if ( Q_stricmp( panelname, PANEL_INFO ) == 0 && mode )
   {
@@ -275,11 +308,11 @@ ClientModeShared::ClientModeShared()
 {
 #ifdef LUA_SDK
   m_pScriptedViewport = NULL;
-#endif
-  m_pViewport = NULL;
-#ifdef LUA_SDK
   m_pClientLuaPanel = NULL;
 #endif
+
+  m_pViewport = NULL;
+
   m_pChatElement = NULL;
   m_pWeaponSelection = NULL;
   m_nRootSize[0] = m_nRootSize[1] = -1;
@@ -301,14 +334,22 @@ ClientModeShared::~ClientModeShared()
   // .mdmp or debug attach, you might as well ignore this call stack.
   delete m_pScriptedViewport;
 #endif
+
   delete m_pViewport;
+
 #ifdef LUA_SDK
   delete m_pClientLuaPanel;
 #endif
 }
 
-void ClientModeShared::ReloadScheme( void )
+void ClientModeShared::ReloadScheme( bool flushLowLevel )
 {
+  // Invalidate the global cache first.
+  if ( flushLowLevel )
+  {
+    KeyValuesSystem()->InvalidateCache();
+  }
+
   m_pViewport->ReloadScheme( "resource/ClientScheme.res" );
   ClearKeyValuesCache();
 }
@@ -332,7 +373,8 @@ void ClientModeShared::Init()
   m_pChatElement = ( CBaseHudChat * )GET_HUDELEMENT( CHudChat );
   Assert( m_pChatElement );
 
-  m_pWeaponSelection = ( CBaseHudWeaponSelection * )GET_HUDELEMENT( CHudWeaponSelection );
+  m_pWeaponSelection =
+      ( CBaseHudWeaponSelection * )GET_HUDELEMENT( CHudWeaponSelection );
   Assert( m_pWeaponSelection );
 
   KeyValuesAD pConditions( "conditions" );
@@ -340,14 +382,15 @@ void ClientModeShared::Init()
 
   // Derived ClientMode class must make sure m_Viewport is instantiated
   Assert( m_pViewport );
-  m_pViewport->LoadControlSettings( "scripts/HudLayout.res", NULL, NULL, pConditions );
+  m_pViewport->LoadControlSettings( "scripts/HudLayout.res", NULL, NULL,
+                                    pConditions );
 
 #if defined( REPLAY_ENABLED )
   m_pReplayReminderPanel = GET_HUDELEMENT( CReplayReminderPanel );
   Assert( m_pReplayReminderPanel );
 #endif
 
-  ListenForGameEvent( "player_connect" );
+  ListenForGameEvent( "player_connect_client" );
   ListenForGameEvent( "player_disconnect" );
   ListenForGameEvent( "player_team" );
   ListenForGameEvent( "server_cvar" );
@@ -390,8 +433,10 @@ void ClientModeShared::VGui_Shutdown()
   delete m_pScriptedViewport;
   m_pScriptedViewport = NULL;
 #endif
+
   delete m_pViewport;
   m_pViewport = NULL;
+
 #ifdef LUA_SDK
   delete m_pClientLuaPanel;
   m_pClientLuaPanel = NULL;
@@ -438,7 +483,7 @@ void ClientModeShared::OverrideView( CViewSetup *pSetup )
 
   if ( ::input->CAM_IsThirdPerson() )
   {
-    Vector cam_ofs = g_ThirdPersonManager.GetCameraOffsetAngles();
+    const Vector &cam_ofs = g_ThirdPersonManager.GetCameraOffsetAngles();
     Vector cam_ofs_distance = g_ThirdPersonManager.GetFinalCameraOffset();
 
     cam_ofs_distance *= g_ThirdPersonManager.GetDistanceFraction();
@@ -457,7 +502,8 @@ void ClientModeShared::OverrideView( CViewSetup *pSetup )
     // get the forward vector
     AngleVectors( camAngles, &camForward, &camRight, &camUp );
 
-    VectorMA( pSetup->origin, -cam_ofs_distance[0], camForward, pSetup->origin );
+    VectorMA( pSetup->origin, -cam_ofs_distance[0], camForward,
+              pSetup->origin );
     VectorMA( pSetup->origin, cam_ofs_distance[1], camRight, pSetup->origin );
     VectorMA( pSetup->origin, cam_ofs_distance[2], camUp, pSetup->origin );
 
@@ -515,18 +561,6 @@ bool ClientModeShared::ShouldDrawParticles()
   return true;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Allow weapons to override mouse input (for binoculars)
-//-----------------------------------------------------------------------------
-void ClientModeShared::OverrideMouseInput( float *x, float *y )
-{
-  C_BaseCombatWeapon *pWeapon = GetActiveWeapon();
-  if ( pWeapon )
-  {
-    pWeapon->OverrideMouseInput( x, y );
-  }
-}
-
 #ifdef ARGG
 //-----------------------------------------------------------------------------
 // Purpose: Allow weapons to override mouse input to view angles (for orbiting)
@@ -546,6 +580,18 @@ bool ClientModeShared::OverrideViewAngles( void )
 }
 // end adnan
 #endif
+
+//-----------------------------------------------------------------------------
+// Purpose: Allow weapons to override mouse input (for binoculars)
+//-----------------------------------------------------------------------------
+void ClientModeShared::OverrideMouseInput( float *x, float *y )
+{
+  C_BaseCombatWeapon *pWeapon = GetActiveWeapon();
+  if ( pWeapon )
+  {
+    pWeapon->OverrideMouseInput( x, y );
+  }
+}
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -576,7 +622,8 @@ bool ClientModeShared::ShouldDrawDetailObjects()
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns true if VR mode should black out everything outside the HUD.
-//			This is used for things like sniper scopes and full screen UI
+//			This is used for things like sniper scopes and full
+// screen UI
 //-----------------------------------------------------------------------------
 bool ClientModeShared::ShouldBlackoutAroundHUD()
 {
@@ -601,7 +648,8 @@ bool ClientModeShared::ShouldDrawCrosshair( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Don't draw the current view entity if we are using the fake viewmodel instead
+// Purpose: Don't draw the current view entity if we are using the fake
+// viewmodel instead
 //-----------------------------------------------------------------------------
 bool ClientModeShared::ShouldDrawLocalPlayer( C_BasePlayer *pPlayer )
 {
@@ -613,7 +661,8 @@ bool ClientModeShared::ShouldDrawLocalPlayer( C_BasePlayer *pPlayer )
   RETURN_LUA_BOOLEAN();
 #endif
 
-  if ( ( pPlayer->index == render->GetViewEntity() ) && !C_BasePlayer::ShouldDrawLocalPlayer() )
+  if ( ( pPlayer->index == render->GetViewEntity() ) &&
+       !C_BasePlayer::ShouldDrawLocalPlayer() )
     return false;
 
   return true;
@@ -637,7 +686,8 @@ bool ClientModeShared::ShouldDrawFog( void )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void ClientModeShared::AdjustEngineViewport( int &x, int &y, int &width, int &height )
+void ClientModeShared::AdjustEngineViewport( int &x, int &y, int &width,
+                                             int &height )
 {
 #ifdef LUA_SDK
   BEGIN_LUA_CALL_HOOK( "AdjustEngineViewport" );
@@ -707,16 +757,21 @@ void ClientModeShared::Update()
   {
     int nCount = 0;
 
-    for ( int i = 0; i < g_pParticleSystemMgr->GetParticleSystemCount(); i++ )
+    for ( int i = 0; i < g_pParticleSystemMgr->GetParticleSystemCount();
+          i++ )
     {
-      const char *pParticleSystemName = g_pParticleSystemMgr->GetParticleSystemNameFromIndex( i );
-      CParticleSystemDefinition *pParticleSystem = g_pParticleSystemMgr->FindParticleSystem( pParticleSystemName );
+      const char *pParticleSystemName =
+          g_pParticleSystemMgr->GetParticleSystemNameFromIndex( i );
+      CParticleSystemDefinition *pParticleSystem =
+          g_pParticleSystemMgr->FindParticleSystem( pParticleSystemName );
       if ( !pParticleSystem )
         continue;
 
-      for ( CParticleCollection *pCurCollection = pParticleSystem->FirstCollection();
+      for ( CParticleCollection *pCurCollection =
+                pParticleSystem->FirstCollection();
             pCurCollection != NULL;
-            pCurCollection = pCurCollection->GetNextCollectionUsingSameDef() )
+            pCurCollection =
+                pCurCollection->GetNextCollectionUsingSameDef() )
       {
         ++nCount;
       }
@@ -736,11 +791,17 @@ void ClientModeShared::ProcessInput( bool bActive )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: We've received a keypress from the engine. Return 1 if the engine is allowed to handle it.
+// Purpose: We've received a keypress from the engine. Return 1 if the engine is
+// allowed to handle it.
 //-----------------------------------------------------------------------------
-int ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
+int ClientModeShared::KeyInput( int down, ButtonCode_t keynum,
+                                const char *pszCurrentBinding )
 {
+  if ( engine->Con_IsVisible() )
+    return 1;
+
 #ifdef LUA_SDK
+  // Let the Console always dominate key input, only then let Lua handle it
   if ( g_bLuaInitialized )
   {
     BEGIN_LUA_CALL_HOOK( "KeyInput" );
@@ -753,13 +814,9 @@ int ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
   }
 #endif
 
-  if ( engine->Con_IsVisible() )
-    return 1;
-
   // Should we start typing a message?
-  if ( pszCurrentBinding &&
-       ( Q_strcmp( pszCurrentBinding, "messagemode" ) == 0 ||
-         Q_strcmp( pszCurrentBinding, "say" ) == 0 ) )
+  if ( pszCurrentBinding && ( Q_strcmp( pszCurrentBinding, "messagemode" ) == 0 ||
+                              Q_strcmp( pszCurrentBinding, "say" ) == 0 ) )
   {
     if ( down )
     {
@@ -793,8 +850,7 @@ int ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
   C_BasePlayer *pPlayer = C_BasePlayer::GetLocalPlayer();
 
   // if ingame spectator mode, let spectator input intercept key event here
-  if ( pPlayer &&
-       ( pPlayer->GetObserverMode() > OBS_MODE_DEATHCAM ) &&
+  if ( pPlayer && ( pPlayer->GetObserverMode() > OBS_MODE_DEATHCAM ) &&
        !HandleSpectatorKeyInput( down, keynum, pszCurrentBinding ) )
   {
     return 0;
@@ -818,30 +874,36 @@ int ClientModeShared::KeyInput( int down, ButtonCode_t keynum, const char *pszCu
 //-----------------------------------------------------------------------------
 // Purpose: See if spectator input occurred. Return 0 if the key is swallowed.
 //-----------------------------------------------------------------------------
-int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
+int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum,
+                                               const char *pszCurrentBinding )
 {
   // we are in spectator mode, open spectator menu
-  if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+duck" ) == 0 )
+  if ( down && pszCurrentBinding &&
+       Q_strcmp( pszCurrentBinding, "+duck" ) == 0 )
   {
     m_pViewport->ShowPanel( PANEL_SPECMENU, true );
     return 0;  // we handled it, don't handle twice or send to server
   }
-  else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+attack" ) == 0 )
+  else if ( down && pszCurrentBinding &&
+            Q_strcmp( pszCurrentBinding, "+attack" ) == 0 )
   {
     engine->ClientCmd( "spec_next" );
     return 0;
   }
-  else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+attack2" ) == 0 )
+  else if ( down && pszCurrentBinding &&
+            Q_strcmp( pszCurrentBinding, "+attack2" ) == 0 )
   {
     engine->ClientCmd( "spec_prev" );
     return 0;
   }
-  else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+jump" ) == 0 )
+  else if ( down && pszCurrentBinding &&
+            Q_strcmp( pszCurrentBinding, "+jump" ) == 0 )
   {
     engine->ClientCmd( "spec_mode" );
     return 0;
   }
-  else if ( down && pszCurrentBinding && Q_strcmp( pszCurrentBinding, "+strafe" ) == 0 )
+  else if ( down && pszCurrentBinding &&
+            Q_strcmp( pszCurrentBinding, "+strafe" ) == 0 )
   {
     HLTVCamera()->SetAutoDirector( true );
 #if defined( REPLAY_ENABLED )
@@ -856,7 +918,8 @@ int ClientModeShared::HandleSpectatorKeyInput( int down, ButtonCode_t keynum, co
 //-----------------------------------------------------------------------------
 // Purpose: See if hud elements want key input. Return 0 if the key is swallowed
 //-----------------------------------------------------------------------------
-int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum, const char *pszCurrentBinding )
+int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum,
+                                          const char *pszCurrentBinding )
 {
   if ( m_pWeaponSelection )
   {
@@ -869,7 +932,8 @@ int ClientModeShared::HudElementKeyInput( int down, ButtonCode_t keynum, const c
 #if defined( REPLAY_ENABLED )
   if ( m_pReplayReminderPanel )
   {
-    if ( m_pReplayReminderPanel->HudElementKeyInput( down, keynum, pszCurrentBinding ) )
+    if ( m_pReplayReminderPanel->HudElementKeyInput( down, keynum,
+                                                     pszCurrentBinding ) )
     {
       return 0;
     }
@@ -900,7 +964,8 @@ bool ClientModeShared::DoPostScreenSpaceEffects( const CViewSetup *pSetup )
 //-----------------------------------------------------------------------------
 vgui::Panel *ClientModeShared::GetMessagePanel()
 {
-  if ( m_pChatElement && m_pChatElement->GetInputPanel() && m_pChatElement->GetInputPanel()->IsVisible() )
+  if ( m_pChatElement && m_pChatElement->GetInputPanel() &&
+       m_pChatElement->GetInputPanel()->IsVisible() )
     return m_pChatElement->GetInputPanel();
 
   return NULL;
@@ -981,7 +1046,6 @@ void ClientModeShared::LevelShutdown( void )
 void ClientModeShared::Enable()
 {
   vgui::VPANEL pRoot = VGui_GetClientDLLRootPanel();
-  ;
 
   // Add our viewport to the root panel.
   if ( pRoot != 0 )
@@ -989,7 +1053,9 @@ void ClientModeShared::Enable()
 #ifdef LUA_SDK
     m_pScriptedViewport->SetParent( pRoot );
 #endif
+
     m_pViewport->SetParent( pRoot );
+
 #ifdef LUA_SDK
     m_pClientLuaPanel->SetParent( pRoot );
 #endif
@@ -1021,6 +1087,7 @@ void ClientModeShared::Enable()
 #ifdef LUA_SDK
   m_pClientLuaPanel->SetVisible( true );
 #endif
+
 #ifdef LUA_SDK
   if ( m_pScriptedViewport->IsKeyBoardInputEnabled() )
   {
@@ -1044,7 +1111,6 @@ void ClientModeShared::Enable()
 void ClientModeShared::Disable()
 {
   vgui::VPANEL pRoot = VGui_GetClientDLLRootPanel();
-  ;
 
   // Remove our viewport from the root panel.
   if ( pRoot != 0 )
@@ -1052,7 +1118,9 @@ void ClientModeShared::Disable()
 #ifdef LUA_SDK
     m_pScriptedViewport->SetParent( ( vgui::VPANEL )NULL );
 #endif
+
     m_pViewport->SetParent( ( vgui::VPANEL )NULL );
+
 #ifdef LUA_SDK
     m_pClientLuaPanel->SetParent( ( vgui::VPANEL )NULL );
 #endif
@@ -1088,9 +1156,10 @@ void ClientModeShared::Layout()
 #ifdef LUA_SDK
     m_pClientLuaPanel->SetBounds( 0, 0, wide, tall );
 #endif
+
     if ( changed )
     {
-      ReloadScheme();
+      ReloadScheme( false );
     }
   }
 }
@@ -1122,7 +1191,7 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 
   const char *eventname = event->GetName();
 
-  if ( Q_strcmp( "player_connect", eventname ) == 0 )
+  if ( Q_strcmp( "player_connect_client", eventname ) == 0 )
   {
     if ( !hudChat )
       return;
@@ -1133,11 +1202,16 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
     {
       wchar_t wszLocalized[100];
       wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-      g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "name" ), wszPlayerName, sizeof( wszPlayerName ) );
-      g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_game" ), 1, wszPlayerName );
+      g_pVGuiLocalize->ConvertANSIToUnicode(
+          event->GetString( "name" ), wszPlayerName, sizeof( wszPlayerName ) );
+      g_pVGuiLocalize->ConstructString(
+          wszLocalized, sizeof( wszLocalized ),
+          g_pVGuiLocalize->Find( "#game_player_joined_game" ), 1,
+          wszPlayerName );
 
       char szLocalized[100];
-      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof( szLocalized ) );
+      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized,
+                                             sizeof( szLocalized ) );
 
       hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s", szLocalized );
     }
@@ -1154,31 +1228,42 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
     if ( !IsInCommentaryMode() )
     {
       wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-      g_pVGuiLocalize->ConvertANSIToUnicode( pPlayer->GetPlayerName(), wszPlayerName, sizeof( wszPlayerName ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode(
+          pPlayer->GetPlayerName(), wszPlayerName, sizeof( wszPlayerName ) );
 
       wchar_t wszReason[64];
       const char *pszReason = event->GetString( "reason" );
-      if ( pszReason && ( pszReason[0] == '#' ) && g_pVGuiLocalize->Find( pszReason ) )
+      if ( pszReason && ( pszReason[0] == '#' ) &&
+           g_pVGuiLocalize->Find( pszReason ) )
       {
-        V_wcsncpy( wszReason, g_pVGuiLocalize->Find( pszReason ), sizeof( wszReason ) );
+        V_wcsncpy( wszReason, g_pVGuiLocalize->Find( pszReason ),
+                   sizeof( wszReason ) );
       }
       else
       {
-        g_pVGuiLocalize->ConvertANSIToUnicode( pszReason, wszReason, sizeof( wszReason ) );
+        g_pVGuiLocalize->ConvertANSIToUnicode( pszReason, wszReason,
+                                               sizeof( wszReason ) );
       }
 
       wchar_t wszLocalized[100];
       if ( IsPC() )
       {
-        g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_left_game" ), 2, wszPlayerName, wszReason );
+        g_pVGuiLocalize->ConstructString(
+            wszLocalized, sizeof( wszLocalized ),
+            g_pVGuiLocalize->Find( "#game_player_left_game" ), 2,
+            wszPlayerName, wszReason );
       }
       else
       {
-        g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_left_game" ), 1, wszPlayerName );
+        g_pVGuiLocalize->ConstructString(
+            wszLocalized, sizeof( wszLocalized ),
+            g_pVGuiLocalize->Find( "#game_player_left_game" ), 1,
+            wszPlayerName );
       }
 
       char szLocalized[100];
-      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof( szLocalized ) );
+      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized,
+                                             sizeof( szLocalized ) );
 
       hudChat->Printf( CHAT_FILTER_JOINLEAVE, "%s", szLocalized );
     }
@@ -1205,17 +1290,20 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
     if ( !bSilent )
     {
       wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-      g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszPlayerName, sizeof( wszPlayerName ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode( pszName, wszPlayerName,
+                                             sizeof( wszPlayerName ) );
 
       wchar_t wszTeam[64];
       C_Team *pTeam = GetGlobalTeam( team );
       if ( pTeam )
       {
-        g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(), wszTeam, sizeof( wszTeam ) );
+        g_pVGuiLocalize->ConvertANSIToUnicode( pTeam->Get_Name(),
+                                               wszTeam, sizeof( wszTeam ) );
       }
       else
       {
-        _snwprintf( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d", team );
+        _snwprintf( wszTeam, sizeof( wszTeam ) / sizeof( wchar_t ), L"%d",
+                    team );
       }
 
       if ( !IsInCommentaryMode() )
@@ -1223,15 +1311,22 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
         wchar_t wszLocalized[100];
         if ( bAutoTeamed )
         {
-          g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_autoteam" ), 2, wszPlayerName, wszTeam );
+          g_pVGuiLocalize->ConstructString(
+              wszLocalized, sizeof( wszLocalized ),
+              g_pVGuiLocalize->Find( "#game_player_joined_autoteam" ),
+              2, wszPlayerName, wszTeam );
         }
         else
         {
-          g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_joined_team" ), 2, wszPlayerName, wszTeam );
+          g_pVGuiLocalize->ConstructString(
+              wszLocalized, sizeof( wszLocalized ),
+              g_pVGuiLocalize->Find( "#game_player_joined_team" ), 2,
+              wszPlayerName, wszTeam );
         }
 
         char szLocalized[100];
-        g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof( szLocalized ) );
+        g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized,
+                                               sizeof( szLocalized ) );
 
         hudChat->Printf( CHAT_FILTER_TEAMCHANGE, "%s", szLocalized );
       }
@@ -1253,16 +1348,22 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
       return;
 
     wchar_t wszOldName[MAX_PLAYER_NAME_LENGTH];
-    g_pVGuiLocalize->ConvertANSIToUnicode( pszOldName, wszOldName, sizeof( wszOldName ) );
+    g_pVGuiLocalize->ConvertANSIToUnicode( pszOldName, wszOldName,
+                                           sizeof( wszOldName ) );
 
     wchar_t wszNewName[MAX_PLAYER_NAME_LENGTH];
-    g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "newname" ), wszNewName, sizeof( wszNewName ) );
+    g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "newname" ),
+                                           wszNewName, sizeof( wszNewName ) );
 
     wchar_t wszLocalized[100];
-    g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_player_changed_name" ), 2, wszOldName, wszNewName );
+    g_pVGuiLocalize->ConstructString(
+        wszLocalized, sizeof( wszLocalized ),
+        g_pVGuiLocalize->Find( "#game_player_changed_name" ), 2, wszOldName,
+        wszNewName );
 
     char szLocalized[100];
-    g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof( szLocalized ) );
+    g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized,
+                                           sizeof( szLocalized ) );
 
     hudChat->Printf( CHAT_FILTER_NAMECHANGE, "%s", szLocalized );
   }
@@ -1277,12 +1378,16 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
       bValidTeam = true;
     }
 
-    // If we're in the spectator team then we should be getting whatever messages the person I'm spectating gets.
+    // If we're in the spectator team then we should be getting whatever
+    // messages the person I'm spectating gets.
     if ( bValidTeam == false )
     {
-      CBasePlayer *pSpectatorTarget = UTIL_PlayerByIndex( GetSpectatorTarget() );
+      CBasePlayer *pSpectatorTarget =
+          UTIL_PlayerByIndex( GetSpectatorTarget() );
 
-      if ( pSpectatorTarget && ( GetSpectatorMode() == OBS_MODE_IN_EYE || GetSpectatorMode() == OBS_MODE_CHASE ) )
+      if ( pSpectatorTarget && ( GetSpectatorMode() == OBS_MODE_IN_EYE ||
+                                 GetSpectatorMode() == OBS_MODE_CHASE ||
+                                 GetSpectatorMode() == OBS_MODE_POI ) )
       {
         if ( pSpectatorTarget->GetTeamNumber() == team )
         {
@@ -1316,16 +1421,23 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
     if ( !IsInCommentaryMode() )
     {
       wchar_t wszCvarName[64];
-      g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "cvarname" ), wszCvarName, sizeof( wszCvarName ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode(
+          event->GetString( "cvarname" ), wszCvarName, sizeof( wszCvarName ) );
 
       wchar_t wszCvarValue[64];
-      g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "cvarvalue" ), wszCvarValue, sizeof( wszCvarValue ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode( event->GetString( "cvarvalue" ),
+                                             wszCvarValue,
+                                             sizeof( wszCvarValue ) );
 
       wchar_t wszLocalized[256];
-      g_pVGuiLocalize->ConstructString( wszLocalized, sizeof( wszLocalized ), g_pVGuiLocalize->Find( "#game_server_cvar_changed" ), 2, wszCvarName, wszCvarValue );
+      g_pVGuiLocalize->ConstructString(
+          wszLocalized, sizeof( wszLocalized ),
+          g_pVGuiLocalize->Find( "#game_server_cvar_changed" ), 2,
+          wszCvarName, wszCvarValue );
 
       char szLocalized[256];
-      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized, sizeof( szLocalized ) );
+      g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalized, szLocalized,
+                                             sizeof( szLocalized ) );
 
       hudChat->Printf( CHAT_FILTER_SERVERMSG, "%s", szLocalized );
     }
@@ -1341,22 +1453,29 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 
     if ( !IsInCommentaryMode() )
     {
-      CAchievementMgr *pAchievementMgr = dynamic_cast< CAchievementMgr * >( engine->GetAchievementMgr() );
+      CAchievementMgr *pAchievementMgr =
+          dynamic_cast< CAchievementMgr * >( engine->GetAchievementMgr() );
       if ( !pAchievementMgr )
         return;
 
-      IAchievement *pAchievement = pAchievementMgr->GetAchievementByID( iAchievement );
+      IAchievement *pAchievement =
+          pAchievementMgr->GetAchievementByID( iAchievement );
       if ( pAchievement )
       {
-        if ( !pPlayer->IsDormant() && pPlayer->ShouldAnnounceAchievement() )
+        if ( !pPlayer->IsDormant() &&
+             pPlayer->ShouldAnnounceAchievement() )
         {
-          pPlayer->SetNextAchievementAnnounceTime( gpGlobals->curtime + ACHIEVEMENT_ANNOUNCEMENT_MIN_TIME );
+          pPlayer->SetNextAchievementAnnounceTime(
+              gpGlobals->curtime + ACHIEVEMENT_ANNOUNCEMENT_MIN_TIME );
 
-          // no particle effect if the local player is the one with the achievement or the player is dead
+          // no particle effect if the local player is the one with
+          // the achievement or the player is dead
           if ( !pPlayer->IsLocalPlayer() && pPlayer->IsAlive() )
           {
-            // tagES using the "head" attachment won't work for CS and DoD
-            pPlayer->ParticleProp()->Create( "achieved", PATTACH_POINT_FOLLOW, "head" );
+            // tagES using the "head" attachment won't work for CS
+            // and DoD
+            pPlayer->ParticleProp()->Create(
+                "achieved", PATTACH_POINT_FOLLOW, "head" );
           }
 
           pPlayer->OnAchievementAchieved( iAchievement );
@@ -1365,18 +1484,28 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
         if ( g_PR )
         {
           wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-          g_pVGuiLocalize->ConvertANSIToUnicode( g_PR->GetPlayerName( iPlayerIndex ), wszPlayerName, sizeof( wszPlayerName ) );
+          g_pVGuiLocalize->ConvertANSIToUnicode(
+              g_PR->GetPlayerName( iPlayerIndex ), wszPlayerName,
+              sizeof( wszPlayerName ) );
 
-          const wchar_t *pchLocalizedAchievement = ACHIEVEMENT_LOCALIZED_NAME_FROM_STR( pAchievement->GetName() );
+          const wchar_t *pchLocalizedAchievement =
+              ACHIEVEMENT_LOCALIZED_NAME_FROM_STR(
+                  pAchievement->GetName() );
           if ( pchLocalizedAchievement )
           {
             wchar_t wszLocalizedString[128];
-            g_pVGuiLocalize->ConstructString( wszLocalizedString, sizeof( wszLocalizedString ), g_pVGuiLocalize->Find( "#Achievement_Earned" ), 2, wszPlayerName, pchLocalizedAchievement );
+            g_pVGuiLocalize->ConstructString(
+                wszLocalizedString, sizeof( wszLocalizedString ),
+                g_pVGuiLocalize->Find( "#Achievement_Earned" ), 2,
+                wszPlayerName, pchLocalizedAchievement );
 
             char szLocalized[128];
-            g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalizedString, szLocalized, sizeof( szLocalized ) );
+            g_pVGuiLocalize->ConvertUnicodeToANSI(
+                wszLocalizedString, szLocalized,
+                sizeof( szLocalized ) );
 
-            hudChat->ChatPrintf( iPlayerIndex, CHAT_FILTER_SERVERMSG, "%s", szLocalized );
+            hudChat->ChatPrintf( iPlayerIndex, CHAT_FILTER_SERVERMSG,
+                                 "%s", szLocalized );
           }
         }
       }
@@ -1389,18 +1518,27 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
     entityquality_t iItemQuality = event->GetInt( "quality" );
     int iMethod = event->GetInt( "method" );
     int iItemDef = event->GetInt( "itemdef" );
-    C_BasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
-    const GameItemDefinition_t *pItemDefinition = dynamic_cast< GameItemDefinition_t * >( GetItemSchema()->GetItemDefinition( iItemDef ) );
+    bool bIsStrange = event->GetInt( "isstrange" );
+    bool bIsUnusual = event->GetInt( "isunusual" );
+    float flWear = event->GetFloat( "wear" );
 
-    if ( !pPlayer || !pItemDefinition )
+    C_BasePlayer *pPlayer = UTIL_PlayerByIndex( iPlayerIndex );
+    const GameItemDefinition_t *pItemDefinition =
+        dynamic_cast< GameItemDefinition_t * >(
+            GetItemSchema()->GetItemDefinition( iItemDef ) );
+
+    if ( !pPlayer || !pItemDefinition || pItemDefinition->IsHidden() )
       return;
 
     if ( g_PR )
     {
       wchar_t wszPlayerName[MAX_PLAYER_NAME_LENGTH];
-      g_pVGuiLocalize->ConvertANSIToUnicode( g_PR->GetPlayerName( iPlayerIndex ), wszPlayerName, sizeof( wszPlayerName ) );
+      g_pVGuiLocalize->ConvertANSIToUnicode(
+          g_PR->GetPlayerName( iPlayerIndex ), wszPlayerName,
+          sizeof( wszPlayerName ) );
 
-      if ( iMethod < 0 || iMethod >= ARRAYSIZE( g_pszItemFoundMethodStrings ) )
+      if ( iMethod < 0 ||
+           iMethod >= ARRAYSIZE( g_pszItemFoundMethodStrings ) )
       {
         iMethod = 0;
       }
@@ -1409,27 +1547,114 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
       if ( pszLocString )
       {
         wchar_t wszItemFound[256];
-        _snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls", g_pVGuiLocalize->Find( pszLocString ) );
+        _snwprintf( wszItemFound, ARRAYSIZE( wszItemFound ), L"%ls",
+                    g_pVGuiLocalize->Find( pszLocString ) );
 
         wchar_t *colorMarker = wcsstr( wszItemFound, L"::" );
+        const CEconItemRarityDefinition *pItemRarity =
+            GetItemSchema()->GetRarityDefinition(
+                pItemDefinition->GetRarity() );
+
         if ( colorMarker )
         {
-          const char *pszQualityColorString = EconQuality_GetColorString( ( EEconItemQuality )iItemQuality );
-          if ( pszQualityColorString )
+          if ( pItemRarity )
           {
-            hudChat->SetCustomColor( pszQualityColorString );
-            *( colorMarker + 1 ) = COLOR_CUSTOM;
+            attrib_colors_t colorRarity =
+                pItemRarity->GetAttribColor();
+            vgui::HScheme scheme =
+                vgui::scheme()->GetScheme( "ClientScheme" );
+            vgui::IScheme *pScheme =
+                vgui::scheme()->GetIScheme( scheme );
+            Color color = pScheme->GetColor(
+                GetColorNameForAttribColor( colorRarity ),
+                Color( 255, 255, 255, 255 ) );
+            hudChat->SetCustomColor( color );
+          }
+          else
+          {
+            const char *pszQualityColorString =
+                EconQuality_GetColorString(
+                    ( EEconItemQuality )iItemQuality );
+            if ( pszQualityColorString )
+            {
+              hudChat->SetCustomColor( pszQualityColorString );
+            }
+          }
+
+          *( colorMarker + 1 ) = COLOR_CUSTOM;
+        }
+
+        // TODO: Update the localization strings to only have two format
+        // parameters since that's all we need.
+        wchar_t wszLocalizedString[256];
+        g_pVGuiLocalize->ConstructString(
+            wszLocalizedString, sizeof( wszLocalizedString ),
+            LOCCHAR( "%s1" ), 1,
+            CEconItemLocalizedFullNameGenerator(
+                GLocalizationProvider(), pItemDefinition, iItemQuality )
+                .GetFullName() );
+
+        locchar_t tempName[MAX_ITEM_NAME_LENGTH];
+        if ( pItemRarity )
+        {
+          // grade and Wear
+          loc_scpy_safe( tempName, wszLocalizedString );
+
+          const locchar_t *loc_WearText = LOCCHAR( "" );
+          const char *pszTooltipText = "TFUI_InvTooltip_Rarity";
+
+          if ( !IsWearableSlot(
+                   pItemDefinition->GetDefaultLoadoutSlot() ) )
+          {
+            loc_WearText = g_pVGuiLocalize->Find(
+                GetWearLocalizationString( flWear ) );
+          }
+          else
+          {
+            pszTooltipText = "TFUI_InvTooltip_RarityNoWear";
+          }
+
+          g_pVGuiLocalize->ConstructString(
+              wszLocalizedString,
+              ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
+              g_pVGuiLocalize->Find( pszTooltipText ), 3,
+              g_pVGuiLocalize->Find( pItemRarity->GetLocKey() ),
+              tempName, loc_WearText );
+
+          if ( bIsUnusual )
+          {
+            loc_scpy_safe( tempName, wszLocalizedString );
+
+            g_pVGuiLocalize->ConstructString(
+                wszLocalizedString,
+                ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
+                LOCCHAR( "%s1 %s2" ), 2,
+                g_pVGuiLocalize->Find( "rarity4" ), tempName );
+          }
+
+          if ( bIsStrange )
+          {
+            loc_scpy_safe( tempName, wszLocalizedString );
+
+            g_pVGuiLocalize->ConstructString(
+                wszLocalizedString,
+                ARRAYSIZE( wszLocalizedString ) * sizeof( locchar_t ),
+                LOCCHAR( "%s1 %s2" ), 2,
+                g_pVGuiLocalize->Find( "strange" ), tempName );
           }
         }
 
-        // TODO: Update the localization strings to only have two format parameters since that's all we need.
-        wchar_t wszLocalizedString[256];
-        g_pVGuiLocalize->ConstructString( wszLocalizedString, sizeof( wszLocalizedString ), wszItemFound, 3, wszPlayerName, CEconItemLocalizedFullNameGenerator( GLocalizationProvider(), pItemDefinition, iItemQuality ).GetFullName(), L"" );
+        loc_scpy_safe( tempName, wszLocalizedString );
+        g_pVGuiLocalize->ConstructString(
+            wszLocalizedString, sizeof( wszLocalizedString ),
+            wszItemFound, 3, wszPlayerName, tempName, L"" );
 
         char szLocalized[256];
-        g_pVGuiLocalize->ConvertUnicodeToANSI( wszLocalizedString, szLocalized, sizeof( szLocalized ) );
+        g_pVGuiLocalize->ConvertUnicodeToANSI(
+            wszLocalizedString, szLocalized, sizeof( szLocalized ) );
 
-        hudChat->ChatPrintf( iPlayerIndex, CHAT_FILTER_SERVERMSG, "%s", szLocalized );
+        hudChat->ChatPrintf( iPlayerIndex, CHAT_FILTER_SERVERMSG, "%s",
+                             szLocalized );
       }
     }
   }
@@ -1437,7 +1662,9 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
 #if defined( REPLAY_ENABLED )
   else if ( !V_strcmp( "replay_servererror", eventname ) )
   {
-    DisplayReplayMessage( event->GetString( "error", "#Replay_DefaultServerError" ), replay_msgduration_error.GetFloat(), true, NULL, false );
+    DisplayReplayMessage(
+        event->GetString( "error", "#Replay_DefaultServerError" ),
+        replay_msgduration_error.GetFloat(), true, NULL, false );
   }
   else if ( !V_strcmp( "replay_startrecord", eventname ) )
   {
@@ -1449,19 +1676,24 @@ void ClientModeShared::FireGameEvent( IGameEvent *event )
   }
   else if ( !V_strcmp( "replay_replaysavailable", eventname ) )
   {
-    DisplayReplayMessage( "#Replay_ReplaysAvailable", replay_msgduration_replaysavailable.GetFloat(), false, NULL, false );
+    DisplayReplayMessage( "#Replay_ReplaysAvailable",
+                          replay_msgduration_replaysavailable.GetFloat(),
+                          false, NULL, false );
   }
 
   else if ( !V_strcmp( "game_newmap", eventname ) )
   {
-    // Make sure the instance count is reset to 0.  Sometimes the count stay in sync and we get replay messages displaying lower than they should.
+    // Make sure the instance count is reset to 0.  Sometimes the count stay
+    // in sync and we get replay messages displaying lower than they should.
     CReplayMessagePanel::RemoveAll();
   }
 #endif
 
   else
   {
-    DevMsg( 2, "Unhandled GameEvent in ClientModeShared::FireGameEvent - %s\n", event->GetName() );
+    DevMsg( 2,
+            "Unhandled GameEvent in ClientModeShared::FireGameEvent - %s\n",
+            event->GetName() );
   }
 }
 
@@ -1471,7 +1703,9 @@ void ClientModeShared::UpdateReplayMessages()
   // Received a replay_startrecord event?
   if ( m_flReplayStartRecordTime != 0.0f )
   {
-    DisplayReplayMessage( "#Replay_StartRecord", replay_msgduration_startrecord.GetFloat(), true, "replay\\startrecord.mp3", false );
+    DisplayReplayMessage( "#Replay_StartRecord",
+                          replay_msgduration_startrecord.GetFloat(), true,
+                          "replay\\startrecord.mp3", false );
 
     m_flReplayStartRecordTime = 0.0f;
     m_flReplayStopRecordTime = 0.0f;
@@ -1480,7 +1714,9 @@ void ClientModeShared::UpdateReplayMessages()
   // Received a replay_endrecord event?
   if ( m_flReplayStopRecordTime != 0.0f )
   {
-    DisplayReplayMessage( "#Replay_EndRecord", replay_msgduration_stoprecord.GetFloat(), true, "replay\\stoprecord.wav", false );
+    DisplayReplayMessage( "#Replay_EndRecord",
+                          replay_msgduration_stoprecord.GetFloat(), true,
+                          "replay\\stoprecord.wav", false );
 
     // Hide the replay reminder
     if ( m_pReplayReminderPanel )
@@ -1505,11 +1741,13 @@ void ClientModeShared::ClearReplayMessageList()
 #endif
 }
 
-void ClientModeShared::DisplayReplayMessage( const char *pLocalizeName, float flDuration, bool bUrgent,
+void ClientModeShared::DisplayReplayMessage( const char *pLocalizeName,
+                                             float flDuration, bool bUrgent,
                                              const char *pSound, bool bDlg )
 {
 #if defined( REPLAY_ENABLED )
-  // Don't display during replay playback, and don't allow more than 4 at a time
+  // Don't display during replay playback, and don't allow more than 4 at a
+  // time
   const bool bInReplay = g_pEngineClientReplay->IsPlayingReplayDemo();
   if ( bInReplay || ( !bDlg && CReplayMessagePanel::InstanceCount() >= 4 ) )
     return;
@@ -1537,12 +1775,14 @@ void ClientModeShared::DisplayReplayMessage( const char *pLocalizeName, float fl
     }
     else
     {
-      ShowMessageBox( "#Replay_GenericMsgTitle", pLocalizeName, "#GameUI_OK" );
+      ShowMessageBox( "#Replay_GenericMsgTitle", pLocalizeName,
+                      "#GameUI_OK" );
     }
   }
   else
   {
-    CReplayMessagePanel *pMsgPanel = new CReplayMessagePanel( pLocalizeName, flDuration, bUrgent );
+    CReplayMessagePanel *pMsgPanel =
+        new CReplayMessagePanel( pLocalizeName, flDuration, bUrgent );
     pMsgPanel->Show();
   }
 
@@ -1559,9 +1799,13 @@ void ClientModeShared::DisplayReplayReminder()
 #if defined( REPLAY_ENABLED )
   if ( m_pReplayReminderPanel && g_pReplay->IsRecording() )
   {
-    // Only display the panel if we haven't already requested a replay for the given life
-    CReplay *pCurLifeReplay = static_cast< CReplay * >( g_pClientReplayContext->GetReplayManager()->GetReplayForCurrentLife() );
-    if ( pCurLifeReplay && !pCurLifeReplay->m_bRequestedByUser && !pCurLifeReplay->m_bSaved )
+    // Only display the panel if we haven't already requested a replay for
+    // the given life
+    CReplay *pCurLifeReplay =
+        static_cast< CReplay * >( g_pClientReplayContext->GetReplayManager()
+                                      ->GetReplayForCurrentLife() );
+    if ( pCurLifeReplay && !pCurLifeReplay->m_bRequestedByUser &&
+         !pCurLifeReplay->m_bSaved )
     {
       m_pReplayReminderPanel->Show();
     }
@@ -1574,7 +1818,8 @@ void ClientModeShared::DisplayReplayReminder()
 //-----------------------------------------------------------------------------
 void ClientModeShared::ActivateInGameVGuiContext( vgui::Panel *pPanel )
 {
-  vgui::ivgui()->AssociatePanelWithContext( s_hVGuiContext, pPanel->GetVPanel() );
+  vgui::ivgui()->AssociatePanelWithContext( s_hVGuiContext,
+                                            pPanel->GetVPanel() );
   vgui::ivgui()->ActivateContext( s_hVGuiContext );
 }
 

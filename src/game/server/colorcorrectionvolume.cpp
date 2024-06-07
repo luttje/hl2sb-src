@@ -161,11 +161,7 @@ void CColorCorrectionVolume::Spawn( void )
 
 bool CColorCorrectionVolume::PassesTriggerFilters( CBaseEntity *pEntity )
 {
-#ifdef HL2SB
-  if ( pEntity && pEntity->IsPlayer() )
-#else
   if ( pEntity == UTIL_GetLocalPlayer() )
-#endif
     return true;
 
   return false;

@@ -1,4 +1,4 @@
-//========== Copyleft © 2011, Team Sandbox, Some rights reserved. ===========//
+//========== Copyleft ï¿½ 2011, Team Sandbox, Some rights reserved. ===========//
 //
 // Purpose:
 //
@@ -56,8 +56,8 @@ LUALIB_API int( luaopen_CRecipientFilter )( lua_State *L );
 #define LUA_TAKEDAMAGEINFOLIBNAME "CTakeDamageInfo"
 LUALIB_API int( luaopen_CTakeDamageInfo )( lua_State *L );
 
-#define LUA_CVARLIBNAME "cvar"
-LUALIB_API int( luaopen_cvar )( lua_State *L );
+#define LUA_CVARLIBNAME "cvars"
+LUALIB_API int( luaopen_cvars )( lua_State *L );
 
 #define LUA_DBGLIBNAME "dbg"
 LUALIB_API int( luaopen_dbg )( lua_State *L );

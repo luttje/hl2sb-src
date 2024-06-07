@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -23,7 +24,8 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
-LPropertyDialog::LPropertyDialog( Panel *parent, const char *panelName, lua_State *L )
+LPropertyDialog::LPropertyDialog( Panel *parent, const char *panelName,
+                                  lua_State *L )
     : PropertyDialog( parent, panelName )
 {
 #if defined( LUA_SDK )
@@ -138,7 +140,8 @@ void LPropertyDialog::EnableApplyButton( bool bEnable )
 
 LUA_API lua_PropertyDialog *lua_topropertydialog( lua_State *L, int idx )
 {
-  PHandle *phPanel = dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
+  PHandle *phPanel =
+      dynamic_cast< PHandle * >( ( PHandle * )lua_touserdata( L, idx ) );
   if ( phPanel == NULL )
     return NULL;
   return dynamic_cast< lua_PropertyDialog * >( phPanel->Get() );
@@ -159,7 +162,8 @@ LUA_API void lua_pushpropertydialog( lua_State *L, PropertyDialog *pDialog )
   lua_setmetatable( L, -2 );
 }
 
-LUALIB_API lua_PropertyDialog *luaL_checkpropertydialog( lua_State *L, int narg )
+LUALIB_API lua_PropertyDialog *luaL_checkpropertydialog( lua_State *L,
+                                                         int narg )
 {
   lua_PropertyDialog *d = lua_topropertydialog( L, narg );
   if ( d == NULL ) /* avoid extra test when d is not 0 */
@@ -169,7 +173,8 @@ LUALIB_API lua_PropertyDialog *luaL_checkpropertydialog( lua_State *L, int narg 
 
 static int PropertyDialog_AddPage( lua_State *L )
 {
-  luaL_checkpropertydialog( L, 1 )->AddPage( luaL_checkpanel( L, 2 ), luaL_checkstring( L, 3 ) );
+  luaL_checkpropertydialog( L, 1 )->AddPage( luaL_checkpanel( L, 2 ),
+                                             luaL_checkstring( L, 3 ) );
   return 0;
 }
 
@@ -193,7 +198,8 @@ static int PropertyDialog_ChainToMap( lua_State *L )
 
 static int PropertyDialog_EnableApplyButton( lua_State *L )
 {
-  LPropertyDialog *plDialog = dynamic_cast< LPropertyDialog * >( luaL_checkpropertydialog( L, 1 ) );
+  LPropertyDialog *plDialog =
+      dynamic_cast< LPropertyDialog * >( luaL_checkpropertydialog( L, 1 ) );
   if ( plDialog )
     plDialog->EnableApplyButton( luaL_checkboolean( L, 2 ) );
   return 0;
@@ -219,10 +225,11 @@ static int PropertyDialog_GetPanelClassName( lua_State *L )
 
 static int PropertyDialog_GetRefTable( lua_State *L )
 {
-  LPropertyDialog *plDialog = dynamic_cast< LPropertyDialog * >( luaL_checkpropertydialog( L, 1 ) );
+  LPropertyDialog *plDialog =
+      dynamic_cast< LPropertyDialog * >( luaL_checkpropertydialog( L, 1 ) );
   if ( plDialog )
   {
-    if ( plDialog->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plDialog->m_nTableReference ) )
     {
       lua_newtable( L );
       plDialog->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -236,7 +243,8 @@ static int PropertyDialog_GetRefTable( lua_State *L )
 
 static int PropertyDialog_KB_AddBoundKey( lua_State *L )
 {
-  luaL_checkpropertydialog( L, 1 )->KB_AddBoundKey( luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
+  luaL_checkpropertydialog( L, 1 )->KB_AddBoundKey(
+      luaL_checkstring( L, 2 ), luaL_checkint( L, 3 ), luaL_checkint( L, 4 ) );
   return 0;
 }
 
@@ -260,7 +268,8 @@ static int PropertyDialog_SetApplyButtonText( lua_State *L )
 
 static int PropertyDialog_SetApplyButtonVisible( lua_State *L )
 {
-  luaL_checkpropertydialog( L, 1 )->SetApplyButtonVisible( luaL_checkboolean( L, 2 ) );
+  luaL_checkpropertydialog( L, 1 )->SetApplyButtonVisible(
+      luaL_checkboolean( L, 2 ) );
   return 0;
 }
 
@@ -272,7 +281,8 @@ static int PropertyDialog_SetCancelButtonText( lua_State *L )
 
 static int PropertyDialog_SetCancelButtonVisible( lua_State *L )
 {
-  luaL_checkpropertydialog( L, 1 )->SetCancelButtonVisible( luaL_checkboolean( L, 2 ) );
+  luaL_checkpropertydialog( L, 1 )->SetCancelButtonVisible(
+      luaL_checkboolean( L, 2 ) );
   return 0;
 }
 
@@ -298,11 +308,12 @@ static int PropertyDialog___index( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LPropertyDialog *plDialog = dynamic_cast< LPropertyDialog * >( pDialog );
-  if ( plDialog && plDialog->m_nTableReference != LUA_NOREF )
+  if ( plDialog && luasrc_isrefvalid( L, plDialog->m_nTableReference ) )
   {
     lua_getref( L, plDialog->m_nTableReference );
     lua_pushvalue( L, 2 );
@@ -376,13 +387,14 @@ static int PropertyDialog___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index an INVALID_PANEL",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
   LPropertyDialog *plDialog = dynamic_cast< LPropertyDialog * >( pDialog );
   if ( plDialog )
   {
-    if ( plDialog->m_nTableReference == LUA_NOREF )
+    if ( !luasrc_isrefvalid( L, plDialog->m_nTableReference ) )
     {
       lua_newtable( L );
       plDialog->m_nTableReference = luaL_ref( L, LUA_REGISTRYINDEX );
@@ -400,14 +412,16 @@ static int PropertyDialog___newindex( lua_State *L )
     lua_getinfo( L, "fl", &ar1 );
     lua_Debug ar2;
     lua_getinfo( L, ">S", &ar2 );
-    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel", ar2.short_src, ar1.currentline );
+    lua_pushfstring( L, "%s:%d: attempt to index a non-scripted panel",
+                     ar2.short_src, ar1.currentline );
     return lua_error( L );
   }
 }
 
 static int PropertyDialog___gc( lua_State *L )
 {
-  LPropertyDialog *plDialog = dynamic_cast< LPropertyDialog * >( lua_topropertydialog( L, 1 ) );
+  LPropertyDialog *plDialog =
+      dynamic_cast< LPropertyDialog * >( lua_topropertydialog( L, 1 ) );
   if ( plDialog )
   {
     --plDialog->m_nRefCount;
@@ -421,7 +435,8 @@ static int PropertyDialog___gc( lua_State *L )
 
 static int PropertyDialog___eq( lua_State *L )
 {
-  lua_pushboolean( L, lua_topropertydialog( L, 1 ) == lua_topropertydialog( L, 2 ) );
+  lua_pushboolean( L,
+                   lua_topropertydialog( L, 1 ) == lua_topropertydialog( L, 2 ) );
   return 1;
 }
 
@@ -468,14 +483,15 @@ static const luaL_Reg PropertyDialogmeta[] = {
 
 static int luasrc_PropertyDialog( lua_State *L )
 {
-  PropertyDialog *pDialog = new LPropertyDialog( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ), luaL_checkstring( L, 2 ), L );
+  PropertyDialog *pDialog =
+      new LPropertyDialog( luaL_optpanel( L, 1, VGui_GetClientLuaRootPanel() ),
+                           luaL_checkstring( L, 2 ), L );
   lua_pushpropertydialog( L, pDialog );
   return 1;
 }
 
 static const luaL_Reg PropertyDialog_funcs[] = {
-    { "PropertyDialog", luasrc_PropertyDialog },
-    { NULL, NULL } };
+    { "PropertyDialog", luasrc_PropertyDialog }, { NULL, NULL } };
 
 /*
 ** Open PropertyDialog object

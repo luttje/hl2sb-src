@@ -1,4 +1,5 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved.
+//============//
 //
 // Purpose:
 //
@@ -35,7 +36,8 @@
 
 #define LUA_MAX_WEAPON_ACTIVITIES 32
 
-#pragma warning( disable : 4800 )  // forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning( disable : 4800 )  // forcing value to bool 'true' or 'false'
+                                   // (performance warning)
 
 #define BEGIN_LUA_SET_ENUM_LIB( L, libraryName ) \
   const char *lib = libraryName;                 \
@@ -259,17 +261,18 @@
       lua_pop( L, 1 );                             \
   }
 
-#define RETURN_LUA_WEAPON()                                                         \
-  if ( lua_gettop( L ) == 1 )                                                       \
-  {                                                                                 \
-    if ( lua_isuserdata( L, -1 ) && luaL_checkudata( L, -1, "CBaseCombatWeapon" ) ) \
-    {                                                                               \
-      CBaseCombatWeapon *res = luaL_checkweapon( L, -1 );                           \
-      lua_pop( L, 1 );                                                              \
-      return res;                                                                   \
-    }                                                                               \
-    else                                                                            \
-      lua_pop( L, 1 );                                                              \
+#define RETURN_LUA_WEAPON()                               \
+  if ( lua_gettop( L ) == 1 )                             \
+  {                                                       \
+    if ( lua_isuserdata( L, -1 ) &&                       \
+         luaL_checkudata( L, -1, "CBaseCombatWeapon" ) )  \
+    {                                                     \
+      CBaseCombatWeapon *res = luaL_checkweapon( L, -1 ); \
+      lua_pop( L, 1 );                                    \
+      return res;                                         \
+    }                                                     \
+    else                                                  \
+      lua_pop( L, 1 );                                    \
   }
 
 #define RETURN_LUA_ENTITY()                                                   \
@@ -327,8 +330,7 @@
 extern ConVar gamemode;
 
 LUALIB_API int luaL_checkboolean( lua_State *L, int narg );
-LUALIB_API int luaL_optboolean( lua_State *L, int narg,
-                                int def );
+LUALIB_API int luaL_optboolean( lua_State *L, int narg, int def );
 
 #ifdef CLIENT_DLL
 extern lua_State *LGameUI;  // gameui state
@@ -349,6 +351,7 @@ void luasrc_shutdown( void );
 
 LUA_API int( luasrc_dostring )( lua_State *L, const char *string );
 LUA_API int( luasrc_dofile )( lua_State *L, const char *filename );
+LUA_API int( luasrc_dofile_leave_stack )( lua_State *L, const char *filename );
 LUA_API void( luasrc_dofolder )( lua_State *L, const char *path );
 
 LUA_API int( luasrc_pcall )( lua_State *L, int nargs, int nresults, int errfunc );
@@ -361,5 +364,7 @@ void luasrc_LoadWeapons( const char *path = 0 );
 
 bool luasrc_LoadGamemode( const char *gamemode );
 bool luasrc_SetGamemode( const char *gamemode );
+
+bool luasrc_isrefvalid( lua_State *L, int ref );
 
 #endif  // LUAMANAGER_H

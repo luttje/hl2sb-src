@@ -4,33 +4,49 @@
 	icon	"icon_hl2"
 	title	"HALF+LIFE'"
 	title2	"sandbox"
+
+	developer "Planimeter"
+	developer_url "https://github.com/Planimeter/hl2sb"
+	manual "https://github.com/Planimeter/hl2sb"
+
 	nomodels 0
 	nohimodel 1
 	nocrosshair 1
+	nodifficulty	"1"
+	hasportals	"0"
+	advcrosshair	"0"
+
 	hidden_maps
 	{
 		"test_speakers"		1
 		"test_hardware"		1
 	}
-	developer "Planimeter"
-	developer_url "https://github.com/Planimeter/hl2sb"
-	manual "https://github.com/Planimeter/hl2sb"
-
 
 	FileSystem
 	{
-		SteamAppId				218		// GCF for Source SDK Base 2007
-		ToolsAppId				211		// Tools will load this (ie: source SDK caches) to get things like materials\debug, materials\editor, etc.
-
-		//Orange box sdk allows an extra appid to be defined here to mount additional content. 320 is HL2MP
-		AdditionalContentId			320
-		
+		SteamAppId				243750		// Source SDK Base 2013
 
 		SearchPaths
 		{
-			Game				|gameinfo_path|.
-			Game				|all_source_engine_paths|hl2mp
-			Game				|all_source_engine_paths|hl2
+			game+mod	"hl2mp/custom/*"
+			game+mod	"hl2/custom/*"
+			game+mod+mod_write+default_write_path	"|gameinfo_path|."
+			gamebin	"|gameinfo_path|bin"
+			game_lv	"hl2/hl2_lv.vpk"
+			game+mod	"hl2mp/hl2mp_english.vpk"
+			game+mod	"hl2mp/hl2mp_pak.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_english.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_pak.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_textures.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_sound_vo_english.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_sound_misc.vpk"
+			game	"|all_source_engine_paths|hl2/hl2_misc.vpk"
+			platform	"|all_source_engine_paths|platform/platform_misc.vpk"
+			game+game_write	"hl2mp"
+			gamebin	"hl2mp/bin"
+			game	"|all_source_engine_paths|hl2mp"
+			game	"|all_source_engine_paths|hl2"
+			platform	"|all_source_engine_paths|platform"
 		}
 	}
 }

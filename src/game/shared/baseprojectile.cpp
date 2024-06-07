@@ -18,10 +18,14 @@ RecvPropEHandle( RECVINFO( m_hOriginalLauncher ) ),
 #endif  // CLIENT_DLL
     END_NETWORK_TABLE()
 
-    //-----------------------------------------------------------------------------
-    // Purpose: Constructor.
-    //-----------------------------------------------------------------------------
-    CBaseProjectile::CBaseProjectile()
+#ifndef CLIENT_DLL
+        IMPLEMENT_AUTO_LIST( IBaseProjectileAutoList );
+#endif  // !CLIENT_DLL
+
+//-----------------------------------------------------------------------------
+// Purpose: Constructor.
+//-----------------------------------------------------------------------------
+CBaseProjectile::CBaseProjectile()
 {
 #ifdef GAME_DLL
   m_iDestroyableHitCount = 0;

@@ -67,6 +67,8 @@ class CTakeDamageInfo
   Vector GetDamageForce() const;
   void SetDamageForce( const Vector &damageForce );
   void ScaleDamageForce( float flScaleAmount );
+  float GetDamageForForceCalc() const;
+  void SetDamageForForceCalc( const float flScaleAmount );
 
   Vector GetDamagePosition() const;
   void SetDamagePosition( const Vector &damagePosition );
@@ -148,6 +150,8 @@ class CTakeDamageInfo
   float m_flDamageBonus;           // Anything that increases damage (crit) - store the delta
   EHANDLE m_hDamageBonusProvider;  // Who gave us the ability to do extra damage?
   bool m_bForceFriendlyFire;       // Ideally this would be a dmg type, but we can't add more
+
+  float m_flDamageForForce;
 
   DECLARE_SIMPLE_DATADESC();
 };
@@ -305,6 +309,16 @@ inline void CTakeDamageInfo::SetDamageForce( const Vector &damageForce )
 inline void CTakeDamageInfo::ScaleDamageForce( float flScaleAmount )
 {
   m_vecDamageForce *= flScaleAmount;
+}
+
+inline float CTakeDamageInfo::GetDamageForForceCalc() const
+{
+  return m_flDamageForForce;
+}
+
+inline void CTakeDamageInfo::SetDamageForForceCalc( float flDamage )
+{
+  m_flDamageForForce = flDamage;
 }
 
 inline Vector CTakeDamageInfo::GetDamagePosition() const

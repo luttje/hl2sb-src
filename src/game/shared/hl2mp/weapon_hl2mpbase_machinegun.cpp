@@ -62,27 +62,31 @@ void CHL2MPMachineGun::PrimaryAttack( void )
     return;
 
   // Abort here to handle burst and auto fire modes
-  if ( ( UsesClipsForAmmo1() && m_iClip1 == 0 ) || ( !UsesClipsForAmmo1() && !pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) ) )
+  if ( ( UsesClipsForAmmo1() && m_iClip1 == 0 ) ||
+       ( !UsesClipsForAmmo1() && !pPlayer->GetAmmoCount( m_iPrimaryAmmoType ) ) )
     return;
 
   m_nShotsFired++;
 
   pPlayer->DoMuzzleFlash();
 
-  // To make the firing framerate independent, we may have to fire more than one bullet here on low-framerate systems,
-  // especially if the weapon we're firing has a really fast rate of fire.
+  // To make the firing framerate independent, we may have to fire more than
+  // one bullet here on low-framerate systems, especially if the weapon we're
+  // firing has a really fast rate of fire.
   int iBulletsToFire = 0;
   float fireRate = GetFireRate();
 
   while ( m_flNextPrimaryAttack <= gpGlobals->curtime )
   {
-    // MUST call sound before removing a round from the clip of a CHLMachineGun
+    // MUST call sound before removing a round from the clip of a
+    // CHLMachineGun
     WeaponSound( SINGLE, m_flNextPrimaryAttack );
     m_flNextPrimaryAttack = m_flNextPrimaryAttack + fireRate;
     iBulletsToFire++;
   }
 
-  // Make sure we don't fire more than the amount in the clip, if this weapon uses clips
+  // Make sure we don't fire more than the amount in the clip, if this weapon
+  // uses clips
   if ( UsesClipsForAmmo1() )
   {
     if ( iBulletsToFire > m_iClip1 )
@@ -113,7 +117,7 @@ void CHL2MPMachineGun::PrimaryAttack( void )
   }
 
   SendWeaponAnim( GetPrimaryAttackActivity() );
-  pPlayer->SetAnimation( PLAYER_ATTACK1 );
+  ToHL2MPPlayer( pPlayer )->DoAnimationEvent( PLAYERANIMEVENT_ATTACK_PRIMARY );
 }
 
 //-----------------------------------------------------------------------------
@@ -131,7 +135,10 @@ void CHL2MPMachineGun::FireBullets( const FireBulletsInfo_t &info )
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-void CHL2MPMachineGun::DoMachineGunKick( CBasePlayer *pPlayer, float dampEasy, float maxVerticleKickAngle, float fireDurationTime, float slideLimitTime )
+void CHL2MPMachineGun::DoMachineGunKick( CBasePlayer *pPlayer, float dampEasy,
+                                         float maxVerticleKickAngle,
+                                         float fireDurationTime,
+                                         float slideLimitTime )
 {
 #define KICK_MIN_X 0.2f  // Degrees
 #define KICK_MIN_Y 0.2f  // Degrees
@@ -141,10 +148,12 @@ void CHL2MPMachineGun::DoMachineGunKick( CBasePlayer *pPlayer, float dampEasy, f
   int iSeed = CBaseEntity::GetPredictionRandomSeed() & 255;
 
   // Find how far into our accuracy degradation we are
-  float duration = ( fireDurationTime > slideLimitTime ) ? slideLimitTime : fireDurationTime;
+  float duration =
+      ( fireDurationTime > slideLimitTime ) ? slideLimitTime : fireDurationTime;
   float kickPerc = duration / slideLimitTime;
 
-  // do this to get a hard discontinuity, clear out anything under 10 degrees punch
+  // do this to get a hard discontinuity, clear out anything under 10 degrees
+  // punch
   pPlayer->ViewPunchReset( 10 );
 
   // Apply this to the view angles as well
@@ -165,10 +174,12 @@ void CHL2MPMachineGun::DoMachineGunKick( CBasePlayer *pPlayer, float dampEasy, f
     vecScratch.z *= -1;
 
   // Clip this to our desired min/max
-  UTIL_ClipPunchAngleOffset( vecScratch, pPlayer->m_Local.m_vecPunchAngle, QAngle( 24.0f, 3.0f, 1.0f ) );
+  UTIL_ClipPunchAngleOffset( vecScratch, pPlayer->m_Local.m_vecPunchAngle,
+                             QAngle( 24.0f, 3.0f, 1.0f ) );
 
   // Add it to the view punch
-  //  NOTE: 0.5 is just tuned to match the old effect before the punch became simulated
+  //  NOTE: 0.5 is just tuned to match the old effect before the punch became
+  //  simulated
   pPlayer->ViewPunch( vecScratch * 0.5 );
 }
 

@@ -138,7 +138,19 @@ class CServerGameDLL : public IServerGameDLL
   virtual const char *GetServerBrowserGameData() OVERRIDE;
 
   // Called to add output to the status command
-  virtual void Status( void ( *print )( const char *fmt, ... ) );
+  virtual void Status( void ( *print )( const char *fmt, ... ) ) OVERRIDE;
+
+  virtual void PrepareLevelResources( /* in/out */ char *pszMapName, size_t nMapNameSize,
+                                      /* in/out */ char *pszMapFile, size_t nMapFileSize ) OVERRIDE;
+
+  virtual ePrepareLevelResourcesResult AsyncPrepareLevelResources( /* in/out */ char *pszMapName, size_t nMapNameSize,
+                                                                   /* in/out */ char *pszMapFile, size_t nMapFileSize,
+                                                                   float *flProgress = NULL ) OVERRIDE;
+
+  virtual eCanProvideLevelResult CanProvideLevel( /* in/out */ char *pMapName, int nMapNameMax ) OVERRIDE;
+
+  // Called to see if the game server is okay with a manual changelevel or map command
+  virtual bool IsManualMapChangeOkay( const char **pszReason ) OVERRIDE;
 
  private:
   // This can just be a wrapper on MapEntity_ParseAllEntities, but CS does some tricks in here

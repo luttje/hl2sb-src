@@ -11,10 +11,6 @@
 #include "hl2_player.h"
 #endif
 
-#ifdef HL2SB
-#include "hl2mp_player.h"
-#endif
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -84,26 +80,16 @@ float GetZoomOwnerDesiredFOV( CBaseEntity *pZoomOwner )
 //-----------------------------------------------------------------------------
 void CEnvZoom::InputZoom( inputdata_t &inputdata )
 {
-#ifdef HL2SB
-  CBasePlayer *pPlayer = UTIL_GetNearestPlayer( GetAbsOrigin() );
-#else
   CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-#endif
 
   if ( pPlayer )
   {
 #ifdef HL2_DLL
     if ( pPlayer == pPlayer->GetFOVOwner() )
     {
-#ifdef HL2SB
-      CHL2MP_Player *pHLMPPlayer = static_cast< CHL2MP_Player * >( pPlayer );
-
-      pHLMPPlayer->StopZooming();
-#else
       CHL2_Player *pHLPlayer = static_cast< CHL2_Player * >( pPlayer );
 
       pHLPlayer->StopZooming();
-#endif
     }
 #endif
 
@@ -124,11 +110,7 @@ void CEnvZoom::InputZoom( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 void CEnvZoom::InputUnZoom( inputdata_t &inputdata )
 {
-#ifdef HL2SB
-  CBasePlayer *pPlayer = UTIL_GetNearestPlayer( GetAbsOrigin() );
-#else
   CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
-#endif
 
   if ( pPlayer )
   {

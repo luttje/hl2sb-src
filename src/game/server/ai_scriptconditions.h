@@ -192,17 +192,10 @@ class CAI_ScriptConditions : public CBaseEntity, public IEntityListener
     return m_hActor.Get();
   }
 #endif
-#ifdef HL2SB
-  CBasePlayer *GetPlayer()
-  {
-    return UTIL_GetNearestPlayer( GetAbsOrigin() );
-  }
-#else
   CBasePlayer *GetPlayer()
   {
     return UTIL_GetLocalPlayer();
   }
-#endif
 
   //---------------------------------
 

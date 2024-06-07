@@ -1,4 +1,4 @@
---========== Copyleft © 2010, Team Sandbox, Some rights reserved. ===========--
+--========== Copyleft ï¿½ 2010, Team Sandbox, Some rights reserved. ===========--
 --
 -- Purpose:
 --
@@ -20,7 +20,7 @@ local FONTFLAG_CUSTOM = _E.FONTFLAG.CUSTOM
 function GM:CreateDefaultPanels()
   gBuildMenuInterface = vgui.CBuildMenu( VGui_GetClientLuaRootPanel(), "build" )
 
-  surface.AddCustomFontFile( "gamemodes/sandbox/content/resource/DINLi.ttf" )
+  surface.AddCustomFontFile( "DIN-Light", "gamemodes/sandbox/content/resource/DINLi.ttf" )
 
   gBuildMenuInterface.m_hFonts[ "BuildMenuTextLarge" ] = surface.CreateFont()
   surface.SetFontGlyphSet(

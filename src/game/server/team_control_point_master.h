@@ -162,6 +162,10 @@ class CTeamControlPointMaster : public CBaseEntity
   {
     return m_iCurrentRoundIndex;
   }
+  bool ShouldSwitchTeamsOnRoundWin( void )
+  {
+    return m_bSwitchTeamsOnWin;
+  }
 
  private:
   void EXPORT CPMThink( void );

@@ -12,6 +12,7 @@
 
 #include "teamplay_gamerules.h"
 #include "teamplay_round_timer.h"
+#include "GameEventListener.h"
 
 #ifdef GAME_DLL
 #include "team_control_point.h"
@@ -162,7 +163,7 @@ class CTeamplayRoundBasedRulesProxy : public CGameRulesProxy
 //-----------------------------------------------------------------------------
 // Purpose: Teamplay game rules that manage a round based structure for you
 //-----------------------------------------------------------------------------
-class CTeamplayRoundBasedRules : public CTeamplayRules
+class CTeamplayRoundBasedRules : public CTeamplayRules, public CGameEventListener
 {
   DECLARE_CLASS( CTeamplayRoundBasedRules, CTeamplayRules );
 
@@ -326,7 +327,7 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
     return m_bMultipleTrains;
   }
 
-  virtual int GetBonusRoundTime( void );
+  virtual int GetBonusRoundTime( bool bFinal = false );
 
 #if defined( TF_CLIENT_DLL ) || defined( TF_DLL )
 
@@ -336,9 +337,17 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
 
   // Get list of players who are on the defending team now, or are likely
   // to end up on the defending team (not yet connected or assigned a team)
-  void GetMvMPotentialDefendersLobbyPlayerInfo( CUtlVector< LobbyPlayerInfo_t > &vecMvmDefenders, bool bIncludeBots = false );
+  void GetPotentialPlayersLobbyPlayerInfo( CUtlVector< LobbyPlayerInfo_t > &vecLobbyPlayers, bool bIncludeBots = false );
 
 #endif
+
+  void SetAllowBetweenRounds( bool bValue )
+  {
+    m_bAllowBetweenRounds = bValue;
+  }
+
+ public:  // IGameEventListener Interface
+  virtual void FireGameEvent( IGameEvent *event );
 
   //----------------------------------------------------------------------------------
   // Server specific
@@ -441,7 +450,7 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
     return true;
   }
 
-  bool CheckNextLevelCvar( void );
+  bool CheckNextLevelCvar( bool bAllowEnd = true );
 
   virtual bool TimerMayExpire( void );
 
@@ -476,7 +485,7 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
   bool IsPreviouslyPlayedRound( string_t strName );
   string_t GetLastPlayedRound( void );
 
-  virtual void SetWinningTeam( int team, int iWinReason, bool bForceMapReset = true, bool bSwitchTeams = false, bool bDontAddScore = false );
+  virtual void SetWinningTeam( int team, int iWinReason, bool bForceMapReset = true, bool bSwitchTeams = false, bool bDontAddScore = false, bool bFinal = false ) OVERRIDE;
   virtual void SetStalemate( int iReason, bool bForceMapReset = true, bool bSwitchTeams = false );
 
   virtual void SetRoundOverlayDetails( void )
@@ -531,13 +540,14 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
   {
     m_bPlayerReady.Set( iIndex, bState );
   }
+  void ResetPlayerAndTeamReadyState( void );
 
   virtual void PlayTrainCaptureAlert( CTeamControlPoint *pPoint, bool bFinalPointInMap )
   {
     return;
   }
 
-  virtual void PlaySpecialCapSounds( int iCappingTeam )
+  virtual void PlaySpecialCapSounds( int iCappingTeam, CTeamControlPoint *pPoint )
   {
     return;
   }
@@ -580,14 +590,15 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
     return true;
   }
   void CheckRestartRound( void );
-  bool CheckTimeLimit( void );
+  bool CheckTimeLimit( bool bAllowEnd = true );
   int GetTimeLeft( void );
-  virtual bool CheckWinLimit( void );
-  bool CheckMaxRounds( void );
+  virtual bool CheckWinLimit( bool bAllowEnd = true );
+  bool CheckMaxRounds( bool bAllowEnd = true );
 
   void CheckReadyRestart( void );
 #if defined( TF_CLIENT_DLL ) || defined( TF_DLL )
-  bool AreDefendingPlayersReady();
+  bool AreLobbyPlayersOnTeamReady( int iTeam );
+  bool AreLobbyPlayersConnected( void );
 #endif
 
   virtual bool CanChangelevelBecauseOfTimeLimit( void )
@@ -687,6 +698,11 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
   bool MapHasActiveTimer( void );
   void CreateTimeLimitTimer( void );
 
+  virtual float GetLastMajorEventTime( void ) OVERRIDE
+  {
+    return m_flLastTeamWin;
+  }
+
  protected:
   CGameRulesRoundStateInfo *m_pCurStateInfo;  // Per-state data
   float m_flStateTransitionTime;              // Timer for round states
@@ -729,9 +745,12 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
 
   gamerules_roundstate_t m_prevState;
 
+  bool m_bPlayerReadyBefore[MAX_PLAYERS + 1];  // Test to see if a player has hit ready before
+
+  float m_flLastTeamWin;
+
  private:
   CUtlMap< int, int > m_GameTeams;  // Team index, Score
-
 #endif
   // End server specific
   //----------------------------------------------------------------------------------
@@ -796,6 +815,9 @@ class CTeamplayRoundBasedRules : public CTeamplayRules
   float m_flAutoBalanceQueueTimeEnd;
   int m_nAutoBalanceQueuePlayerIndex;
   int m_nAutoBalanceQueuePlayerScore;
+
+ protected:
+  bool m_bAllowBetweenRounds;
 
  public:
   float m_flStopWatchTotalTime;

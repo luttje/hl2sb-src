@@ -1,4 +1,26 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
+//                       TOGL CODE LICENSE
+//
+//  Copyright 2011-2014 Valve Corporation
+//  All Rights Reserved.
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 // glmgr.h
 //	singleton class, common basis for managing GL contexts
@@ -10,6 +32,11 @@
 #define GLMGR_H
 
 #pragma once
+
+#undef HAVE_GL_ARB_SYNC
+#ifndef OSX
+#define HAVE_GL_ARB_SYNC 1
+#endif
 
 #include "glbase.h"
 #include "glentrypoints.h"
@@ -27,6 +54,9 @@
 #include "materialsystem/IShader.h"
 #include "dxabstract_types.h"
 #include "tier0/icommandline.h"
+
+#undef FORCEINLINE
+#define FORCEINLINE inline
 
 //===============================================================================
 
@@ -1269,7 +1299,7 @@ struct GLMVertexSetup
 #define kGLMProgramParamInt4Limit 16
 
 #define kGLMVertexProgramParamFloat4Limit 256
-#define kGLMFragmentProgramParamFloat4Limit 32
+#define kGLMFragmentProgramParamFloat4Limit 256
 
 struct GLMProgramParamsF
 {
@@ -1375,6 +1405,7 @@ class CFlushDrawStatesStats
 };
 
 //===========================================================================//
+#ifndef OSX
 
 #ifndef GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD
 #define GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD 0x9160
@@ -1389,7 +1420,11 @@ class CPinnedMemoryBuffer
 
  public:
   CPinnedMemoryBuffer()
-      : m_pRawBuf( NULL ), m_pBuf( NULL ), m_nSize( 0 ), m_nOfs( 0 ), m_nBufferObj( 0 ), m_nSyncObj( 0 )
+      : m_pRawBuf( NULL ), m_pBuf( NULL ), m_nSize( 0 ), m_nOfs( 0 ), m_nBufferObj( 0 )
+#ifdef HAVE_GL_ARB_SYNC
+        ,
+        m_nSyncObj( 0 )
+#endif
   {
   }
 
@@ -1463,16 +1498,19 @@ class CPinnedMemoryBuffer
 
   void InsertFence()
   {
+#ifdef HAVE_GL_ARB_SYNC
     if ( m_nSyncObj )
     {
       gGL->glDeleteSync( m_nSyncObj );
     }
 
     m_nSyncObj = gGL->glFenceSync( GL_SYNC_GPU_COMMANDS_COMPLETE, 0 );
+#endif
   }
 
   void BlockUntilNotBusy()
   {
+#ifdef HAVE_GL_ARB_SYNC
     if ( m_nSyncObj )
     {
       gGL->glClientWaitSync( m_nSyncObj, GL_SYNC_FLUSH_COMMANDS_BIT, 3000000000000ULL );
@@ -1481,6 +1519,7 @@ class CPinnedMemoryBuffer
 
       m_nSyncObj = 0;
     }
+#endif
     m_nOfs = 0;
   }
 
@@ -1497,9 +1536,11 @@ class CPinnedMemoryBuffer
   uint m_nOfs;
 
   GLuint m_nBufferObj;
-
+#ifdef HAVE_GL_ARB_SYNC
   GLsync m_nSyncObj;
+#endif
 };
+#endif  // !OSX
 
 //===========================================================================//
 
@@ -1527,7 +1568,7 @@ class GLMContext
 
   // textures
   // Lock and Unlock reqs go directly to the tex object
-  CGLMTex *NewTex( GLMTexLayoutKey *key, const char *debugLabel = NULL );
+  CGLMTex *NewTex( GLMTexLayoutKey *key, uint levels = 1, const char *debugLabel = NULL );
   void DelTex( CGLMTex *tex );
 
   // options for Blit (replacement for ResolveTex and BlitTex)
@@ -1580,7 +1621,8 @@ class GLMContext
 
   void SetDrawingLang( EGLMProgramLang lang, bool immediate = false );  // choose ARB or GLSL.  immediate=false defers lang change to top of frame
 
-  void LinkShaderPair( CGLMProgram *vp, CGLMProgram *fp );        // ensure this combo has been linked and is in the GLSL pair cache
+  void LinkShaderPair( CGLMProgram *vp, CGLMProgram *fp );  // ensure this combo has been linked and is in the GLSL pair cache
+  void ValidateShaderPair( CGLMProgram *vp, CGLMProgram *fp );
   void ClearShaderPairCache( void );                              // call this to shoot down all the linked pairs
   void QueryShaderPair( int index, GLMShaderPairInfo *infoOut );  // this lets you query the shader pair cache for saving its state
 
@@ -1627,8 +1669,12 @@ class GLMContext
   void FlushDrawStatesNoShaders();
 
   // drawing
+#ifndef OSX
   FORCEINLINE void DrawRangeElements( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf );
   void DrawRangeElementsNonInline( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf );
+#else
+  void DrawRangeElements( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, CGLMBuffer *pIndexBuf );
+#endif
 
   void CheckNative( void );
 
@@ -1793,7 +1839,6 @@ class GLMContext
 #endif
 
   FORCEINLINE void SetMaxUsedVertexShaderConstantsHint( uint nMaxConstants );
-
   FORCEINLINE DWORD GetCurrentOwnerThreadId() const
   {
     return m_nCurOwnerThreadId;
@@ -1821,7 +1866,9 @@ class GLMContext
   GLMContext( IDirect3DDevice9 *pDevice, GLMDisplayParams *params );
   ~GLMContext();
 
+#ifndef OSX
   FORCEINLINE GLuint FindSamplerObject( const GLMTexSamplingParams &desiredParams );
+#endif
 
   FORCEINLINE void SetBufAndVertexAttribPointer( uint nIndex, GLuint nGLName, GLuint stride, GLuint datatype, GLboolean normalized, GLuint nCompCount, const void *pBuf, uint nRevision )
   {
@@ -1908,9 +1955,26 @@ class GLMContext
   FORCEINLINE void BindIndexBufferToCtx( CGLMBuffer *buff );
   FORCEINLINE void BindVertexBufferToCtx( CGLMBuffer *buff );
 
+  GLuint CreateTex( GLenum texBind, GLenum internalFormat );
+  void CleanupTex( GLenum texBind, GLMTexLayout *pLayout, GLuint tex );
+  void DestroyTex( GLenum texBind, GLMTexLayout *pLayout, GLuint tex );
+  GLuint FillTexCache( bool holdOne, int newTextures );
+  void PurgeTexCache();
+
+  // debug font
+  void GenDebugFontTex( void );
+  void DrawDebugText( float x, float y, float z, float drawCharWidth, float drawCharHeight, char *string );
+
+#ifndef OSX
   CPinnedMemoryBuffer *GetCurPinnedMemoryBuffer()
   {
     return &m_PinnedMemoryBuffers[m_nCurPinnedMemoryBuffer];
+  }
+#endif
+
+  CPersistentBuffer *GetCurPersistentBuffer( EGLMBufferType type )
+  {
+    return &( m_persistentBuffer[m_nCurPersistentBuffer][type] );
   }
 
   // members------------------------------------------
@@ -1920,7 +1984,7 @@ class GLMContext
   uint m_nThreadOwnershipReleaseCounter;
 
   bool m_bUseSamplerObjects;
-  bool m_bPreferMapBufferRange;
+  bool m_bTexClientStorage;
 
   IDirect3DDevice9 *m_pDevice;
   GLMRendererInfoFields m_caps;
@@ -1928,17 +1992,11 @@ class GLMContext
   bool m_displayParamsValid;         // is there a param block copied in yet
   GLMDisplayParams m_displayParams;  // last known display config, either via constructor, or by SetDisplayParams...
 
-#ifdef OSX
-  CGLPixelFormatAttribute m_pixelFormatAttribs[100];  // more than enough
-  PseudoNSGLContextPtr m_nsctx;
-  CGLContextObj m_ctx;
-#elif defined( USE_SDL )
+#if defined( USE_SDL )
   int m_pixelFormatAttribs[100];  // more than enough
   PseudoNSGLContextPtr m_nsctx;
   void *m_ctx;
 #endif
-  bool m_oneCtxEnable;  // true if we use the window's context directly instead of making a second one shared against it
-
   bool m_bUseBoneUniformBuffers;  // if true, we use two uniform buffers for vertex shader constants vs. one
 
   // texture form table
@@ -2034,6 +2092,8 @@ class GLMContext
 
   CUtlVector< CGLMFBO * > m_fboTable;  // each live FBO goes in the table
 
+  uint m_fragDataMask;
+
   // program bindings
   EGLMProgramLang m_drawingLangAtFrameStart;  // selector for start of frame (spills into m_drawingLang)
   EGLMProgramLang m_drawingLang;              // selector for which language we desire to draw with on the next batch
@@ -2041,7 +2101,7 @@ class GLMContext
   bool m_bDirtyPrograms;
 
   GLMProgramParamsF m_programParamsF[kGLMNumProgramTypes];
-  GLMProgramParamsB m_programParamsB[kGLMNumProgramTypes];  // two banks, but only the vertex one is used
+  GLMProgramParamsB m_programParamsB[kGLMNumProgramTypes];
   GLMProgramParamsI m_programParamsI[kGLMNumProgramTypes];  // two banks, but only the vertex one is used
   EGLMParamWriteMode m_paramWriteMode;
 
@@ -2051,6 +2111,10 @@ class GLMContext
   CGLMProgram *m_preload2DTexFragmentProgram;
   CGLMProgram *m_preload3DTexFragmentProgram;
   CGLMProgram *m_preloadCubeTexFragmentProgram;
+
+#if defined( OSX ) && defined( GLMDEBUG )
+  CGLMProgram *m_boundProgram[kGLMNumProgramTypes];
+#endif
 
   CGLMShaderPairCache *m_pairCache;  // GLSL only
   CGLMShaderPair *m_pBoundPair;      // GLSL only
@@ -2106,12 +2170,31 @@ class GLMContext
   uint m_nCurFrame;
   uint m_nBatchCounter;
 
+  struct TextureEntry_t
+  {
+    GLenum m_nTexBind;
+    GLenum m_nInternalFormat;
+    GLuint m_nTexName;
+  };
+
+  GLuint m_destroyPBO;
+  CUtlVector< TextureEntry_t > m_availableTextures;
+
+#ifndef OSX
   enum
   {
     cNumPinnedMemoryBuffers = 4
   };
   CPinnedMemoryBuffer m_PinnedMemoryBuffers[cNumPinnedMemoryBuffers];
   uint m_nCurPinnedMemoryBuffer;
+#endif
+
+  enum
+  {
+    cNumPersistentBuffers = 3
+  };
+  CPersistentBuffer m_persistentBuffer[cNumPersistentBuffers][kGLMNumBufferTypes];
+  uint m_nCurPersistentBuffer;
 
   void SaveColorMaskAndSetToDefault();
   void RestoreSavedColorMask();
@@ -2152,6 +2235,8 @@ class GLMContext
 #endif
 };
 
+#ifndef OSX
+
 FORCEINLINE void GLMContext::DrawRangeElements( GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices, uint baseVertex, CGLMBuffer *pIndexBuf )
 {
 #if GL_ENABLE_INDEX_VERIFICATION
@@ -2175,69 +2260,75 @@ FORCEINLINE void GLMContext::DrawRangeElements( GLenum mode, GLuint start, GLuin
     // you have to pass actual address, not offset
     indicesActual = ( void * )( ( int )indicesActual + ( int )pIndexBuf->m_pPseudoBuf );
   }
-
-#if GLMDEBUG
-  bool hasVP = m_drawingProgram[kGLMVertexProgram] != NULL;
-  bool hasFP = m_drawingProgram[kGLMFragmentProgram] != NULL;
-
-  // init debug hook information
-  GLMDebugHookInfo info;
-  memset( &info, 0, sizeof( info ) );
-  info.m_caller = eDrawElements;
-
-  // relay parameters we're operating under
-  info.m_drawMode = mode;
-  info.m_drawStart = start;
-  info.m_drawEnd = end;
-  info.m_drawCount = count;
-  info.m_drawType = type;
-  info.m_drawIndices = indices;
-
-  do
+  if ( pIndexBuf->m_bUsingPersistentBuffer )
   {
-    // obey global options re pre-draw clear
-    if ( m_autoClearColor || m_autoClearDepth || m_autoClearStencil )
-    {
-      GLMPRINTF( ( "-- DrawRangeElements auto clear" ) );
-      this->DebugClear();
-    }
+    indicesActual = ( void * )( ( int )indicesActual + ( int )pIndexBuf->m_nPersistentBufferStartOffset );
+  }
 
-    // always sync with editable shader text prior to draw
+// #if GLMDEBUG
+#if 0
+	bool	hasVP = m_drawingProgram[ kGLMVertexProgram ] != NULL;
+	bool	hasFP = m_drawingProgram[ kGLMFragmentProgram ] != NULL;
+
+	// init debug hook information
+	GLMDebugHookInfo info;
+	memset( &info, 0, sizeof(info) );
+	info.m_caller = eDrawElements;
+
+	// relay parameters we're operating under
+	info.m_drawMode = mode;
+	info.m_drawStart = start;
+	info.m_drawEnd = end;
+	info.m_drawCount = count;
+	info.m_drawType = type;
+	info.m_drawIndices = indices;
+		
+	do
+	{
+		// obey global options re pre-draw clear
+		if ( m_autoClearColor || m_autoClearDepth || m_autoClearStencil )
+		{
+			GLMPRINTF(("-- DrawRangeElements auto clear" ));
+			this->DebugClear();
+		}
+
+		// always sync with editable shader text prior to draw
 #if GLMDEBUG
-    // FIXME disengage this path if context is in GLSL mode..
-    //  it will need fixes to get the shader pair re-linked etc if edits happen anyway.
+		//FIXME disengage this path if context is in GLSL mode..
+		// it will need fixes to get the shader pair re-linked etc if edits happen anyway.
 
-    if ( m_drawingProgram[kGLMVertexProgram] )
-    {
-      m_drawingProgram[kGLMVertexProgram]->SyncWithEditable();
-    }
-    else
-    {
-      AssertOnce( !"drawing with no vertex program bound" );
-    }
+		if (m_drawingProgram[ kGLMVertexProgram ])
+		{
+			m_drawingProgram[ kGLMVertexProgram ]->SyncWithEditable();
+		}
+		else
+		{
+			AssertOnce(!"drawing with no vertex program bound");
+		}
 
-    if ( m_drawingProgram[kGLMFragmentProgram] )
-    {
-      m_drawingProgram[kGLMFragmentProgram]->SyncWithEditable();
-    }
-    else
-    {
-      AssertOnce( !"drawing with no fragment program bound" );
-    }
+
+		if (m_drawingProgram[ kGLMFragmentProgram ])
+		{
+			m_drawingProgram[ kGLMFragmentProgram ]->SyncWithEditable();
+		}
+		else
+		{
+			AssertOnce(!"drawing with no fragment program bound");
+		}
 #endif
-    // do the drawing
-    if ( hasVP && hasFP )
-    {
-      gGL->glDrawRangeElementsBaseVertex( mode, start, end, count, type, indicesActual, baseVertex );
+		// do the drawing
+		if (hasVP && hasFP)
+		{
+			gGL->glDrawRangeElementsBaseVertex( mode, start, end, count, type, indicesActual, baseVertex );
 
-      if ( m_slowCheckEnable )
-      {
-        CheckNative();
-      }
-    }
-    this->DebugHook( &info );
+			if ( m_slowCheckEnable )
+			{
+				CheckNative();
+			}
+		}
+		this->DebugHook( &info );
 
-  } while ( info.m_loop );
+	} while ( info.m_loop );
 #else
   Assert( m_drawingLang == kGLMGLSL );
 
@@ -2256,6 +2347,8 @@ FORCEINLINE void GLMContext::DrawRangeElements( GLenum mode, GLuint start, GLuin
 
 #endif  // GL_ENABLE_INDEX_VERIFICATION
 }
+
+#endif  // #ifndef OSX
 
 FORCEINLINE void GLMContext::SetVertexProgram( CGLMProgram *pProg )
 {
@@ -2294,23 +2387,53 @@ FORCEINLINE void GLMContext::SetProgramParametersF( EGLMProgramType type, uint b
 
   if ( ( type == kGLMVertexProgram ) && ( m_bUseBoneUniformBuffers ) )
   {
-    if ( ( baseSlot + slotCount ) > DXABSTRACT_VS_FIRST_BONE_SLOT )
+    // changes here to handle vertex shaders which use constants before and after the bone array i.e. before c58 and after c216
+    // a better change may be to modify the shaders and place the bone consts at either start or end - would simplify this and the flush code
+    // the current supporting code (shader translator(dx9asmtogl2), param setting(here) and flushing(glmgr_flush.inl) should work unchanged, even if the const mapping is changed.
+    int firstDirty = ( int )baseSlot;
+    int highWater = ( int )( baseSlot + slotCount );
+
+    if ( highWater <= DXABSTRACT_VS_FIRST_BONE_SLOT )
     {
-      if ( baseSlot < DXABSTRACT_VS_FIRST_BONE_SLOT )
+      m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, firstDirty );
+      m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, highWater );
+    }
+    else if ( highWater <= ( DXABSTRACT_VS_LAST_BONE_SLOT + 1 ) )
+    {
+      if ( firstDirty < DXABSTRACT_VS_FIRST_BONE_SLOT )
       {
-        // The register set crosses between the constant buffers - should only happen at startup during init.
-        m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, ( int )baseSlot );
-        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, ( int )MIN( baseSlot + slotCount, DXABSTRACT_VS_FIRST_BONE_SLOT ) );
-        baseSlot = DXABSTRACT_VS_FIRST_BONE_SLOT;
+        m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, firstDirty );
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, MIN( DXABSTRACT_VS_FIRST_BONE_SLOT, highWater ) );
+        firstDirty = DXABSTRACT_VS_FIRST_BONE_SLOT;
       }
 
-      int nNumActualBones = ( baseSlot + slotCount ) - DXABSTRACT_VS_FIRST_BONE_SLOT;
+      int nNumActualBones = ( firstDirty + slotCount ) - DXABSTRACT_VS_FIRST_BONE_SLOT;
       m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterBone, nNumActualBones );
     }
     else
     {
-      m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, ( int )baseSlot );
-      m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, ( int )( baseSlot + slotCount ) );
+      const int maxBoneSlots = ( DXABSTRACT_VS_LAST_BONE_SLOT + 1 ) - DXABSTRACT_VS_FIRST_BONE_SLOT;
+
+      if ( firstDirty > DXABSTRACT_VS_LAST_BONE_SLOT )
+      {
+        m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, firstDirty - maxBoneSlots );
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, highWater - maxBoneSlots );
+      }
+      else if ( firstDirty >= DXABSTRACT_VS_FIRST_BONE_SLOT )
+      {
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterBone = DXABSTRACT_VS_LAST_BONE_SLOT + 1;
+
+        m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, DXABSTRACT_VS_FIRST_BONE_SLOT );
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, highWater - maxBoneSlots );
+      }
+      else
+      {
+        int nNumActualBones = ( DXABSTRACT_VS_LAST_BONE_SLOT + 1 ) - DXABSTRACT_VS_FIRST_BONE_SLOT;
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterBone, nNumActualBones );
+
+        m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone = MIN( m_programParamsF[kGLMVertexProgram].m_firstDirtySlotNonBone, firstDirty );
+        m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone = MAX( m_programParamsF[kGLMVertexProgram].m_dirtySlotHighWaterNonBone, highWater - maxBoneSlots );
+      }
     }
   }
   else
@@ -2327,7 +2450,7 @@ FORCEINLINE void GLMContext::SetProgramParametersB( EGLMProgramType type, uint b
 #endif
 
   Assert( m_drawingLang == kGLMGLSL );
-  Assert( type == kGLMVertexProgram );
+  Assert( type == kGLMVertexProgram || type == kGLMFragmentProgram );
 
   Assert( baseSlot < kGLMProgramParamBoolLimit );
   Assert( baseSlot + boolCount <= kGLMProgramParamBoolLimit );
@@ -2508,7 +2631,7 @@ FORCEINLINE void GLMContext::BindIndexBufferToCtx( CGLMBuffer *buff )
 
   Assert( !buff || ( buff->m_buffGLTarget == GL_ELEMENT_ARRAY_BUFFER_ARB ) );
 
-  GLuint nGLName = buff ? buff->m_nHandle : 0;
+  GLuint nGLName = buff ? buff->GetHandle() : 0;
 
   if ( m_nBoundGLBuffer[kGLMIndexBuffer] == nGLName )
     return;
@@ -2523,7 +2646,7 @@ FORCEINLINE void GLMContext::BindVertexBufferToCtx( CGLMBuffer *buff )
 
   Assert( !buff || ( buff->m_buffGLTarget == GL_ARRAY_BUFFER_ARB ) );
 
-  GLuint nGLName = buff ? buff->m_nHandle : 0;
+  GLuint nGLName = buff ? buff->GetHandle() : 0;
 
   if ( m_nBoundGLBuffer[kGLMVertexBuffer] == nGLName )
     return;
@@ -2553,6 +2676,43 @@ struct GLMTestParams
   bool m_intlErrToConsole;
 
   int m_frameCount;  // how many frames to test.
+};
+
+class GLMTester
+{
+ public:
+  GLMTester( GLMTestParams *params );
+  ~GLMTester();
+
+  // optionally callable by test routines to get basic drawables wired up
+  void StdSetup( void );
+  void StdCleanup( void );
+
+  // callable by test routines to clear the frame or present it
+  void Clear( void );
+  void Present( int seed );
+
+  // error reporting
+  void CheckGLError( const char *comment );          // obey m_params setting for console / debugger response
+  void InternalError( int errcode, char *comment );  // if errcode!=0, obey m_params setting for console / debugger response
+
+  void RunTests();
+
+  void RunOneTest( int testindex );
+
+  // test routines themselves
+  void Test0();
+  void Test1();
+  void Test2();
+  void Test3();
+
+  GLMTestParams m_params;  // copy of caller's params, do not mutate...
+
+  // std-setup stuff
+  int m_drawWidth, m_drawHeight;
+  CGLMFBO *m_drawFBO;
+  CGLMTex *m_drawColorTex;
+  CGLMTex *m_drawDepthTex;
 };
 
 class CShowPixelsParams

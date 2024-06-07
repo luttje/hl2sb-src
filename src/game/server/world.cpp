@@ -31,6 +31,7 @@
 #include "engine/IStaticPropMgr.h"
 #include "particle_parse.h"
 #include "globalstate.h"
+
 #ifdef LUA_SDK
 #include "luamanager.h"
 #endif

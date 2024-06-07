@@ -623,7 +623,7 @@ void ScrollBar::UseImages( const char *pszUpArrow, const char *pszDownArrow, con
   }
   else if ( m_pUpArrow )
   {
-    m_pUpArrow->DeletePanel();
+    m_pUpArrow->MarkForDeletion();
     m_pUpArrow = NULL;
   }
 
@@ -646,7 +646,7 @@ void ScrollBar::UseImages( const char *pszUpArrow, const char *pszDownArrow, con
   }
   else if ( m_pDownArrow )
   {
-    m_pDownArrow->DeletePanel();
+    m_pDownArrow->MarkForDeletion();
     m_pDownArrow = NULL;
   }
 
@@ -667,7 +667,7 @@ void ScrollBar::UseImages( const char *pszUpArrow, const char *pszDownArrow, con
   }
   else if ( m_pLine )
   {
-    m_pLine->DeletePanel();
+    m_pLine->MarkForDeletion();
     m_pLine = NULL;
   }
 
@@ -688,7 +688,7 @@ void ScrollBar::UseImages( const char *pszUpArrow, const char *pszDownArrow, con
   }
   else if ( m_pBox )
   {
-    m_pBox->DeletePanel();
+    m_pBox->MarkForDeletion();
     m_pBox = NULL;
   }
 

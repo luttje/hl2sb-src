@@ -228,6 +228,7 @@ abstract_class CBasePlayerAnimState : virtual public IPlayerAnimState
 
   void EstimateYaw();
 
+  virtual bool ShouldResetMainSequence( int iCurrentSequence, int iNewSequence );
   void ComputeMainSequence();
   void ComputeAimSequence();
 

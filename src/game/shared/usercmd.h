@@ -50,6 +50,9 @@ class CUserCmd
     weaponselect = 0;
     weaponsubtype = 0;
     random_seed = 0;
+#ifdef GAME_DLL
+    server_random_seed = 0;
+#endif
     mousedx = 0;
     mousedy = 0;
 
@@ -75,6 +78,9 @@ class CUserCmd
     weaponselect = src.weaponselect;
     weaponsubtype = src.weaponsubtype;
     random_seed = src.random_seed;
+#ifdef GAME_DLL
+    server_random_seed = src.server_random_seed;
+#endif
     mousedx = src.mousedx;
     mousedy = src.mousedy;
 
@@ -150,6 +156,9 @@ class CUserCmd
   int weaponsubtype;
 
   int random_seed;  // For shared random functions
+#ifdef GAME_DLL
+  int server_random_seed;  // Only the server populates this seed
+#endif
 
   short mousedx;  // mouse accum in x from create move
   short mousedy;  // mouse accum in y from create move
