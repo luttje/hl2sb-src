@@ -42,11 +42,13 @@
 #include <vector>
 #include <google/protobuf/repeated_field.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
-class Message;                      // message.h
-class UnknownField;                 // below
+class Message;       // message.h
+class UnknownField;  // below
 
 // An UnknownFieldSet contains fields that were encountered while parsing a
 // message but were not defined by its type.  Keeping track of these can be
@@ -60,7 +62,8 @@ class UnknownField;                 // below
 //
 // This class is necessarily tied to the protocol buffer wire format, unlike
 // the Reflection interface which is independent of any serialization scheme.
-class LIBPROTOBUF_EXPORT UnknownFieldSet {
+class LIBPROTOBUF_EXPORT UnknownFieldSet
+{
  public:
   UnknownFieldSet();
   ~UnknownFieldSet();
@@ -72,10 +75,10 @@ class LIBPROTOBUF_EXPORT UnknownFieldSet {
   inline bool empty() const;
 
   // Merge the contents of some other UnknownFieldSet with this one.
-  void MergeFrom(const UnknownFieldSet& other);
+  void MergeFrom( const UnknownFieldSet& other );
 
   // Swaps the contents of some other UnknownFieldSet with this one.
-  inline void Swap(UnknownFieldSet* x);
+  inline void Swap( UnknownFieldSet* x );
 
   // Computes (an estimate of) the total number of bytes currently used for
   // storing the unknown fields in memory. Does NOT include
@@ -89,47 +92,50 @@ class LIBPROTOBUF_EXPORT UnknownFieldSet {
   inline int field_count() const;
   // Get a field in the set, where 0 <= index < field_count().  The fields
   // appear in the order in which they were added.
-  inline const UnknownField& field(int index) const;
+  inline const UnknownField& field( int index ) const;
   // Get a mutable pointer to a field in the set, where
   // 0 <= index < field_count().  The fields appear in the order in which
   // they were added.
-  inline UnknownField* mutable_field(int index);
+  inline UnknownField* mutable_field( int index );
 
   // Adding fields ---------------------------------------------------
 
-  void AddVarint(int number, uint64 value);
-  void AddFixed32(int number, uint32 value);
-  void AddFixed64(int number, uint64 value);
-  void AddLengthDelimited(int number, const string& value);
-  string* AddLengthDelimited(int number);
-  UnknownFieldSet* AddGroup(int number);
+  void AddVarint( int number, uint64 value );
+  void AddFixed32( int number, uint32 value );
+  void AddFixed64( int number, uint64 value );
+  void AddLengthDelimited( int number, const string& value );
+  string* AddLengthDelimited( int number );
+  UnknownFieldSet* AddGroup( int number );
 
   // Adds an unknown field from another set.
-  void AddField(const UnknownField& field);
+  void AddField( const UnknownField& field );
 
   // Parsing helpers -------------------------------------------------
   // These work exactly like the similarly-named methods of Message.
 
-  bool MergeFromCodedStream(io::CodedInputStream* input);
-  bool ParseFromCodedStream(io::CodedInputStream* input);
-  bool ParseFromZeroCopyStream(io::ZeroCopyInputStream* input);
-  bool ParseFromArray(const void* data, int size);
-  inline bool ParseFromString(const string& data) {
-    return ParseFromArray(data.data(), data.size());
+  bool MergeFromCodedStream( io::CodedInputStream* input );
+  bool ParseFromCodedStream( io::CodedInputStream* input );
+  bool ParseFromZeroCopyStream( io::ZeroCopyInputStream* input );
+  bool ParseFromArray( const void* data, int size );
+  inline bool ParseFromString( const string& data )
+  {
+    return ParseFromArray( data.data(), data.size() );
   }
 
  private:
   void ClearFallback();
 
-  vector<UnknownField>* fields_;
+  vector< UnknownField >* fields_;
 
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(UnknownFieldSet);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( UnknownFieldSet );
 };
 
 // Represents one field in an UnknownFieldSet.
-class LIBPROTOBUF_EXPORT UnknownField {
+class LIBPROTOBUF_EXPORT UnknownField
+{
  public:
-  enum Type {
+  enum Type
+  {
     TYPE_VARINT,
     TYPE_FIXED32,
     TYPE_FIXED64,
@@ -152,10 +158,10 @@ class LIBPROTOBUF_EXPORT UnknownField {
   inline const string& length_delimited() const;
   inline const UnknownFieldSet& group() const;
 
-  inline void set_varint(uint64 value);
-  inline void set_fixed32(uint32 value);
-  inline void set_fixed64(uint64 value);
-  inline void set_length_delimited(const string& value);
+  inline void set_varint( uint64 value );
+  inline void set_fixed32( uint32 value );
+  inline void set_fixed64( uint64 value );
+  inline void set_length_delimited( const string& value );
   inline string* mutable_length_delimited();
   inline UnknownFieldSet* mutable_group();
 
@@ -169,8 +175,9 @@ class LIBPROTOBUF_EXPORT UnknownField {
   void DeepCopy();
 
   unsigned int number_ : 29;
-  unsigned int type_   : 3;
-  union {
+  unsigned int type_ : 3;
+  union
+  {
     uint64 varint_;
     uint32 fixed32_;
     uint64 fixed64_;
@@ -182,83 +189,106 @@ class LIBPROTOBUF_EXPORT UnknownField {
 // ===================================================================
 // inline implementations
 
-inline void UnknownFieldSet::Clear() {
-  if (fields_ != NULL) {
+inline void UnknownFieldSet::Clear()
+{
+  if ( fields_ != NULL )
+  {
     ClearFallback();
   }
 }
 
-inline bool UnknownFieldSet::empty() const {
+inline bool UnknownFieldSet::empty() const
+{
   return fields_ == NULL || fields_->empty();
 }
 
-inline void UnknownFieldSet::Swap(UnknownFieldSet* x) {
-  std::swap(fields_, x->fields_);
+inline void UnknownFieldSet::Swap( UnknownFieldSet* x )
+{
+  std::swap( fields_, x->fields_ );
 }
 
-inline int UnknownFieldSet::field_count() const {
-  return (fields_ == NULL) ? 0 : fields_->size();
+inline int UnknownFieldSet::field_count() const
+{
+  return ( fields_ == NULL ) ? 0 : fields_->size();
 }
-inline const UnknownField& UnknownFieldSet::field(int index) const {
-  return (*fields_)[index];
+inline const UnknownField& UnknownFieldSet::field( int index ) const
+{
+  return ( *fields_ )[index];
 }
-inline UnknownField* UnknownFieldSet::mutable_field(int index) {
-  return &(*fields_)[index];
+inline UnknownField* UnknownFieldSet::mutable_field( int index )
+{
+  return &( *fields_ )[index];
 }
 
 inline void UnknownFieldSet::AddLengthDelimited(
-    int number, const string& value) {
-  AddLengthDelimited(number)->assign(value);
+    int number, const string& value )
+{
+  AddLengthDelimited( number )->assign( value );
 }
 
-inline int UnknownField::number() const { return number_; }
-inline UnknownField::Type UnknownField::type() const {
-  return static_cast<Type>(type_);
+inline int UnknownField::number() const
+{
+  return number_;
+}
+inline UnknownField::Type UnknownField::type() const
+{
+  return static_cast< Type >( type_ );
 }
 
-inline uint64 UnknownField::varint () const {
-  GOOGLE_DCHECK_EQ(type_, TYPE_VARINT);
+inline uint64 UnknownField::varint() const
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_VARINT );
   return varint_;
 }
-inline uint32 UnknownField::fixed32() const {
-  GOOGLE_DCHECK_EQ(type_, TYPE_FIXED32);
+inline uint32 UnknownField::fixed32() const
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_FIXED32 );
   return fixed32_;
 }
-inline uint64 UnknownField::fixed64() const {
-  GOOGLE_DCHECK_EQ(type_, TYPE_FIXED64);
+inline uint64 UnknownField::fixed64() const
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_FIXED64 );
   return fixed64_;
 }
-inline const string& UnknownField::length_delimited() const {
-  GOOGLE_DCHECK_EQ(type_, TYPE_LENGTH_DELIMITED);
+inline const string& UnknownField::length_delimited() const
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_LENGTH_DELIMITED );
   return *length_delimited_;
 }
-inline const UnknownFieldSet& UnknownField::group() const {
-  GOOGLE_DCHECK_EQ(type_, TYPE_GROUP);
+inline const UnknownFieldSet& UnknownField::group() const
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_GROUP );
   return *group_;
 }
 
-inline void UnknownField::set_varint(uint64 value) {
-  GOOGLE_DCHECK_EQ(type_, TYPE_VARINT);
+inline void UnknownField::set_varint( uint64 value )
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_VARINT );
   varint_ = value;
 }
-inline void UnknownField::set_fixed32(uint32 value) {
-  GOOGLE_DCHECK_EQ(type_, TYPE_FIXED32);
+inline void UnknownField::set_fixed32( uint32 value )
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_FIXED32 );
   fixed32_ = value;
 }
-inline void UnknownField::set_fixed64(uint64 value) {
-  GOOGLE_DCHECK_EQ(type_, TYPE_FIXED64);
+inline void UnknownField::set_fixed64( uint64 value )
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_FIXED64 );
   fixed64_ = value;
 }
-inline void UnknownField::set_length_delimited(const string& value) {
-  GOOGLE_DCHECK_EQ(type_, TYPE_LENGTH_DELIMITED);
-  length_delimited_->assign(value);
+inline void UnknownField::set_length_delimited( const string& value )
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_LENGTH_DELIMITED );
+  length_delimited_->assign( value );
 }
-inline string* UnknownField::mutable_length_delimited() {
-  GOOGLE_DCHECK_EQ(type_, TYPE_LENGTH_DELIMITED);
+inline string* UnknownField::mutable_length_delimited()
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_LENGTH_DELIMITED );
   return length_delimited_;
 }
-inline UnknownFieldSet* UnknownField::mutable_group() {
-  GOOGLE_DCHECK_EQ(type_, TYPE_GROUP);
+inline UnknownFieldSet* UnknownField::mutable_group()
+{
+  GOOGLE_DCHECK_EQ( type_, TYPE_GROUP );
   return group_;
 }
 

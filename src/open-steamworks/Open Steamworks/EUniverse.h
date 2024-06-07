@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -23,14 +23,14 @@
 // Steam universes.  Each universe is a self-contained Steam instance.
 typedef enum EUniverse
 {
-	k_EUniverseInvalid = 0,
-	k_EUniversePublic = 1,
-	k_EUniverseBeta = 2,
-	k_EUniverseInternal = 3,
-	k_EUniverseDev = 4,
-	k_EUniverseRC = 5,
+  k_EUniverseInvalid = 0,
+  k_EUniversePublic = 1,
+  k_EUniverseBeta = 2,
+  k_EUniverseInternal = 3,
+  k_EUniverseDev = 4,
+  k_EUniverseRC = 5,
 
-	k_EUniverseMax
+  k_EUniverseMax
 } EUniverse;
 
-#endif // EUNIVERSE_H
+#endif  // EUNIVERSE_H

@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-// Purpose: 
+// Purpose:
 //
 // $Workfile:     $
 // $Date:         $
@@ -23,92 +23,91 @@
 ** access functions (stack -> C)
 */
 
-
-LUA_API lua_ConCommand *lua_toconcommand (lua_State *L, int idx) {
-  lua_ConCommand **ppConCommand = (lua_ConCommand **)luaL_checkudata(L, idx, "ConCommand");
+LUA_API lua_ConCommand *lua_toconcommand( lua_State *L, int idx )
+{
+  lua_ConCommand **ppConCommand = ( lua_ConCommand ** )luaL_checkudata( L, idx, "ConCommand" );
   return *ppConCommand;
 }
 
-
-LUA_API lua_ConVar *lua_toconvar (lua_State *L, int idx) {
-  lua_ConVar **ppConVar = (lua_ConVar **)luaL_checkudata(L, idx, "ConVar");
+LUA_API lua_ConVar *lua_toconvar( lua_State *L, int idx )
+{
+  lua_ConVar **ppConVar = ( lua_ConVar ** )luaL_checkudata( L, idx, "ConVar" );
   return *ppConVar;
 }
-
-
 
 /*
 ** push functions (C -> stack)
 */
 
-
-LUA_API void lua_pushconcommand (lua_State *L, lua_ConCommand *pConCommand) {
-  if (pConCommand == NULL)
-    lua_pushnil(L);
-  else {
-    lua_ConCommand **ppConCommand = (lua_ConCommand **)lua_newuserdata(L, sizeof(lua_ConCommand));
+LUA_API void lua_pushconcommand( lua_State *L, lua_ConCommand *pConCommand )
+{
+  if ( pConCommand == NULL )
+    lua_pushnil( L );
+  else
+  {
+    lua_ConCommand **ppConCommand = ( lua_ConCommand ** )lua_newuserdata( L, sizeof( lua_ConCommand ) );
     *ppConCommand = pConCommand;
-    luaL_getmetatable(L, "ConCommand");
-    lua_setmetatable(L, -2);
+    luaL_getmetatable( L, "ConCommand" );
+    lua_setmetatable( L, -2 );
   }
 }
 
-
-LUA_API void lua_pushconvar (lua_State *L, lua_ConVar *pConVar) {
-  if (pConVar == NULL)
-    lua_pushnil(L);
-  else {
-    lua_ConVar **ppConVar = (lua_ConVar **)lua_newuserdata(L, sizeof(lua_ConVar));
+LUA_API void lua_pushconvar( lua_State *L, lua_ConVar *pConVar )
+{
+  if ( pConVar == NULL )
+    lua_pushnil( L );
+  else
+  {
+    lua_ConVar **ppConVar = ( lua_ConVar ** )lua_newuserdata( L, sizeof( lua_ConVar ) );
     *ppConVar = pConVar;
-    luaL_getmetatable(L, "ConVar");
-    lua_setmetatable(L, -2);
+    luaL_getmetatable( L, "ConVar" );
+    lua_setmetatable( L, -2 );
   }
 }
 
-
-LUALIB_API lua_ConCommand *luaL_checkconcommand (lua_State *L, int narg) {
-  lua_ConCommand *d = lua_toconcommand(L, narg);
-  if (d == NULL)  /* avoid extra test when d is not 0 */
-    luaL_typerror(L, narg, "ConCommand");
+LUALIB_API lua_ConCommand *luaL_checkconcommand( lua_State *L, int narg )
+{
+  lua_ConCommand *d = lua_toconcommand( L, narg );
+  if ( d == NULL ) /* avoid extra test when d is not 0 */
+    luaL_typerror( L, narg, "ConCommand" );
   return d;
 }
 
-
-LUALIB_API lua_ConVar *luaL_checkconvar (lua_State *L, int narg) {
-  lua_ConVar *d = lua_toconvar(L, narg);
-  if (d == NULL)  /* avoid extra test when d is not 0 */
-    luaL_typerror(L, narg, "ConVar");
+LUALIB_API lua_ConVar *luaL_checkconvar( lua_State *L, int narg )
+{
+  lua_ConVar *d = lua_toconvar( L, narg );
+  if ( d == NULL ) /* avoid extra test when d is not 0 */
+    luaL_typerror( L, narg, "ConVar" );
   return d;
 }
 
-
-static int ConCommand_CanAutoComplete (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconcommand(L, 1)->CanAutoComplete());
+static int ConCommand_CanAutoComplete( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconcommand( L, 1 )->CanAutoComplete() );
   return 0;
 }
 
-static int ConCommand_IsCommand (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconcommand(L, 1)->IsCommand());
+static int ConCommand_IsCommand( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconcommand( L, 1 )->IsCommand() );
   return 0;
 }
 
-static int ConCommand___tostring (lua_State *L) {
-  lua_pushfstring(L, "ConCommand: \"%s\"", luaL_checkconcommand(L, 1)->GetName());
+static int ConCommand___tostring( lua_State *L )
+{
+  lua_pushfstring( L, "ConCommand: \"%s\"", luaL_checkconcommand( L, 1 )->GetName() );
   return 1;
 }
 
-
 static const luaL_Reg ConCommandmeta[] = {
-  {"CanAutoComplete", ConCommand_CanAutoComplete},
-  {"IsCommand", ConCommand_IsCommand},
-  {"__tostring", ConCommand___tostring},
-  {NULL, NULL}
-};
+    { "CanAutoComplete", ConCommand_CanAutoComplete },
+    { "IsCommand", ConCommand_IsCommand },
+    { "__tostring", ConCommand___tostring },
+    { NULL, NULL } };
 
+static CUtlDict< ConCommand *, unsigned short > m_ConCommandDatabase;
 
-static CUtlDict< ConCommand*, unsigned short > m_ConCommandDatabase;
-
-void CC_ConCommand( const CCommand& args )
+void CC_ConCommand( const CCommand &args )
 {
 #if 0
 #ifdef CLIENT_DLL
@@ -167,224 +166,234 @@ void CC_ConCommand( const CCommand& args )
 #endif
 }
 
-static int luasrc_ConCommand (lua_State *L) {
-  const char *pName = luaL_checkstring(L, 1);
+static int luasrc_ConCommand( lua_State *L )
+{
+  const char *pName = luaL_checkstring( L, 1 );
   // Complain about duplicately defined ConCommand names...
   unsigned short lookup = m_ConCommandDatabase.Find( pName );
-  if ( lookup != m_ConCommandDatabase.InvalidIndex() || cvar->FindCommand(pName) )
+  if ( lookup != m_ConCommandDatabase.InvalidIndex() || cvar->FindCommand( pName ) )
   {
-    lua_pushconcommand(L, cvar->FindCommand(pName));
+    lua_pushconcommand( L, cvar->FindCommand( pName ) );
     return 1;
   }
 
-  ConCommand *pConCommand = new ConCommand(strdup(pName), CC_ConCommand, strdup(luaL_optstring(L, 2, 0)), luaL_optint(L, 3, 0), NULL);
+  ConCommand *pConCommand = new ConCommand( strdup( pName ), CC_ConCommand, strdup( luaL_optstring( L, 2, 0 ) ), luaL_optint( L, 3, 0 ), NULL );
 
   lookup = m_ConCommandDatabase.Insert( pName, pConCommand );
   Assert( lookup != m_ConCommandDatabase.InvalidIndex() );
-  lua_pushconcommand(L, pConCommand);
+  lua_pushconcommand( L, pConCommand );
   return 1;
 }
 
 void ResetConCommandDatabase( void )
 {
-	int c = m_ConCommandDatabase.Count(); 
-	for ( int i = 0; i < c; ++i )
-	{
-		ConCommand *pConCommand = m_ConCommandDatabase[ i ];
-		cvar->UnregisterConCommand(pConCommand);
-		delete pConCommand;
-	}
-	m_ConCommandDatabase.RemoveAll();
+  int c = m_ConCommandDatabase.Count();
+  for ( int i = 0; i < c; ++i )
+  {
+    ConCommand *pConCommand = m_ConCommandDatabase[i];
+    cvar->UnregisterConCommand( pConCommand );
+    delete pConCommand;
+  }
+  m_ConCommandDatabase.RemoveAll();
 }
 
-
 static const luaL_Reg ConCommand_funcs[] = {
-  {"ConCommand", luasrc_ConCommand},
-  {NULL, NULL}
-};
-
+    { "ConCommand", luasrc_ConCommand },
+    { NULL, NULL } };
 
 /*
 ** Open ConCommand object
 */
-int luaopen_ConCommand (lua_State *L) {
-  luaL_newmetatable(L, "ConCommand");
-  luaL_register(L, NULL, ConCommandmeta);
-  lua_pushvalue(L, -1);  /* push metatable */
-  lua_setfield(L, -2, "__index");  /* metatable.__index = metatable */
-  lua_pushstring(L, "concommand");
-  lua_setfield(L, -2, "__type");  /* metatable.__type = "concommand" */
-  luaL_register(L, "_G", ConCommand_funcs);
-  lua_pop(L, 2);
+int luaopen_ConCommand( lua_State *L )
+{
+  luaL_newmetatable( L, "ConCommand" );
+  luaL_register( L, NULL, ConCommandmeta );
+  lua_pushvalue( L, -1 );           /* push metatable */
+  lua_setfield( L, -2, "__index" ); /* metatable.__index = metatable */
+  lua_pushstring( L, "concommand" );
+  lua_setfield( L, -2, "__type" ); /* metatable.__type = "concommand" */
+  luaL_register( L, "_G", ConCommand_funcs );
+  lua_pop( L, 2 );
   return 1;
 }
 
-
-static int ConVar_AddFlags (lua_State *L) {
-  luaL_checkconvar(L, 1)->AddFlags(luaL_checkinteger(L, 2));
+static int ConVar_AddFlags( lua_State *L )
+{
+  luaL_checkconvar( L, 1 )->AddFlags( luaL_checkinteger( L, 2 ) );
   return 0;
 }
 
-static int ConVar_GetBool (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->GetBool());
+static int ConVar_GetBool( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->GetBool() );
   return 1;
 }
 
-static int ConVar_GetDefault (lua_State *L) {
-  lua_pushstring(L, luaL_checkconvar(L, 1)->GetDefault());
+static int ConVar_GetDefault( lua_State *L )
+{
+  lua_pushstring( L, luaL_checkconvar( L, 1 )->GetDefault() );
   return 1;
 }
 
-static int ConVar_GetFloat (lua_State *L) {
-  lua_pushnumber(L, luaL_checkconvar(L, 1)->GetFloat());
+static int ConVar_GetFloat( lua_State *L )
+{
+  lua_pushnumber( L, luaL_checkconvar( L, 1 )->GetFloat() );
   return 1;
 }
 
-static int ConVar_GetHelpText (lua_State *L) {
-  lua_pushstring(L, luaL_checkconvar(L, 1)->GetHelpText());
+static int ConVar_GetHelpText( lua_State *L )
+{
+  lua_pushstring( L, luaL_checkconvar( L, 1 )->GetHelpText() );
   return 1;
 }
 
-static int ConVar_GetInt (lua_State *L) {
-  lua_pushinteger(L, luaL_checkconvar(L, 1)->GetInt());
+static int ConVar_GetInt( lua_State *L )
+{
+  lua_pushinteger( L, luaL_checkconvar( L, 1 )->GetInt() );
   return 1;
 }
 
-static int ConVar_GetMax (lua_State *L) {
+static int ConVar_GetMax( lua_State *L )
+{
   float maxVal;
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->GetMax(maxVal));
-  lua_pushnumber(L, maxVal);
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->GetMax( maxVal ) );
+  lua_pushnumber( L, maxVal );
   return 2;
 }
 
-static int ConVar_GetMin (lua_State *L) {
+static int ConVar_GetMin( lua_State *L )
+{
   float minVal;
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->GetMin(minVal));
-  lua_pushnumber(L, minVal);
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->GetMin( minVal ) );
+  lua_pushnumber( L, minVal );
   return 2;
 }
 
-static int ConVar_GetName (lua_State *L) {
-  lua_pushstring(L, luaL_checkconvar(L, 1)->GetName());
+static int ConVar_GetName( lua_State *L )
+{
+  lua_pushstring( L, luaL_checkconvar( L, 1 )->GetName() );
   return 1;
 }
 
-static int ConVar_GetString (lua_State *L) {
-  lua_pushstring(L, luaL_checkconvar(L, 1)->GetString());
+static int ConVar_GetString( lua_State *L )
+{
+  lua_pushstring( L, luaL_checkconvar( L, 1 )->GetString() );
   return 1;
 }
 
-static int ConVar_IsCommand (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->IsCommand());
+static int ConVar_IsCommand( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->IsCommand() );
   return 1;
 }
 
-static int ConVar_IsFlagSet (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->IsFlagSet(luaL_checkinteger(L, 2)));
+static int ConVar_IsFlagSet( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->IsFlagSet( luaL_checkinteger( L, 2 ) ) );
   return 1;
 }
 
-static int ConVar_IsRegistered (lua_State *L) {
-  lua_pushboolean(L, luaL_checkconvar(L, 1)->IsRegistered());
+static int ConVar_IsRegistered( lua_State *L )
+{
+  lua_pushboolean( L, luaL_checkconvar( L, 1 )->IsRegistered() );
   return 1;
 }
 
-static int ConVar_Revert (lua_State *L) {
-  luaL_checkconvar(L, 1)->Revert();
+static int ConVar_Revert( lua_State *L )
+{
+  luaL_checkconvar( L, 1 )->Revert();
   return 0;
 }
 
-static int ConVar_SetValue (lua_State *L) {
-  switch(lua_type(L, 2)) {
-	case LUA_TNUMBER:
-	  luaL_checkconvar(L, 1)->SetValue((float)luaL_checknumber(L, 2));
-	  break;
-	case LUA_TSTRING:
-	default:
-	  luaL_checkconvar(L, 1)->SetValue(luaL_checkstring(L, 2));
-	  break;
+static int ConVar_SetValue( lua_State *L )
+{
+  switch ( lua_type( L, 2 ) )
+  {
+    case LUA_TNUMBER:
+      luaL_checkconvar( L, 1 )->SetValue( ( float )luaL_checknumber( L, 2 ) );
+      break;
+    case LUA_TSTRING:
+    default:
+      luaL_checkconvar( L, 1 )->SetValue( luaL_checkstring( L, 2 ) );
+      break;
   }
   return 0;
 }
 
-static int ConVar___tostring (lua_State *L) {
-  lua_pushfstring(L, "ConVar: \"%s\" = \"%s\"", luaL_checkconvar(L, 1)->GetName(), luaL_checkconvar(L, 1)->GetString());
+static int ConVar___tostring( lua_State *L )
+{
+  lua_pushfstring( L, "ConVar: \"%s\" = \"%s\"", luaL_checkconvar( L, 1 )->GetName(), luaL_checkconvar( L, 1 )->GetString() );
   return 1;
 }
 
-
 static const luaL_Reg ConVarmeta[] = {
-  {"AddFlags", ConVar_AddFlags},
-  {"GetBool", ConVar_GetBool},
-  {"GetDefault", ConVar_GetDefault},
-  {"GetFloat", ConVar_GetFloat},
-  {"GetHelpText", ConVar_GetHelpText},
-  {"GetInt", ConVar_GetInt},
-  {"GetMax", ConVar_GetMax},
-  {"GetMin", ConVar_GetMin},
-  {"GetName", ConVar_GetName},
-  {"GetString", ConVar_GetString},
-  {"IsCommand", ConVar_IsCommand},
-  {"IsFlagSet", ConVar_IsFlagSet},
-  {"IsRegistered", ConVar_IsRegistered},
-  {"Revert", ConVar_Revert},
-  {"SetValue", ConVar_SetValue},
-  {"__tostring", ConVar___tostring},
-  {NULL, NULL}
-};
+    { "AddFlags", ConVar_AddFlags },
+    { "GetBool", ConVar_GetBool },
+    { "GetDefault", ConVar_GetDefault },
+    { "GetFloat", ConVar_GetFloat },
+    { "GetHelpText", ConVar_GetHelpText },
+    { "GetInt", ConVar_GetInt },
+    { "GetMax", ConVar_GetMax },
+    { "GetMin", ConVar_GetMin },
+    { "GetName", ConVar_GetName },
+    { "GetString", ConVar_GetString },
+    { "IsCommand", ConVar_IsCommand },
+    { "IsFlagSet", ConVar_IsFlagSet },
+    { "IsRegistered", ConVar_IsRegistered },
+    { "Revert", ConVar_Revert },
+    { "SetValue", ConVar_SetValue },
+    { "__tostring", ConVar___tostring },
+    { NULL, NULL } };
 
+static CUtlDict< ConVar *, unsigned short > m_ConVarDatabase;
 
-static CUtlDict< ConVar*, unsigned short > m_ConVarDatabase;
-
-static int luasrc_ConVar (lua_State *L) {
-  const char *pName = luaL_checkstring(L, 1);
+static int luasrc_ConVar( lua_State *L )
+{
+  const char *pName = luaL_checkstring( L, 1 );
   // Complain about duplicately defined ConVar names...
   unsigned short lookup = m_ConVarDatabase.Find( pName );
-  if ( lookup != m_ConVarDatabase.InvalidIndex() || cvar->FindVar(pName) )
+  if ( lookup != m_ConVarDatabase.InvalidIndex() || cvar->FindVar( pName ) )
   {
-    lua_pushconvar(L, cvar->FindVar(pName));
+    lua_pushconvar( L, cvar->FindVar( pName ) );
     return 1;
   }
 
-  ConVar *pConVar = new ConVar(strdup(pName), luaL_checkstring(L, 2), luaL_optint(L, 3, 0), strdup(luaL_optstring(L, 4, 0)), luaL_optboolean(L, 5, 0), luaL_optnumber(L, 6, 0.0), luaL_optboolean(L, 7, 0), luaL_optnumber(L, 8, 0));
+  ConVar *pConVar = new ConVar( strdup( pName ), luaL_checkstring( L, 2 ), luaL_optint( L, 3, 0 ), strdup( luaL_optstring( L, 4, 0 ) ), luaL_optboolean( L, 5, 0 ), luaL_optnumber( L, 6, 0.0 ), luaL_optboolean( L, 7, 0 ), luaL_optnumber( L, 8, 0 ) );
 
   lookup = m_ConVarDatabase.Insert( pName, pConVar );
   Assert( lookup != m_ConVarDatabase.InvalidIndex() );
-  lua_pushconvar(L, pConVar);
+  lua_pushconvar( L, pConVar );
   return 1;
 }
 
 void ResetConVarDatabase( void )
 {
-	int c = m_ConVarDatabase.Count(); 
-	for ( int i = 0; i < c; ++i )
-	{
-		ConVar *pConVar = m_ConVarDatabase[ i ];
-		cvar->UnregisterConCommand(pConVar);
-		delete pConVar;
-	}
-	m_ConVarDatabase.RemoveAll();
+  int c = m_ConVarDatabase.Count();
+  for ( int i = 0; i < c; ++i )
+  {
+    ConVar *pConVar = m_ConVarDatabase[i];
+    cvar->UnregisterConCommand( pConVar );
+    delete pConVar;
+  }
+  m_ConVarDatabase.RemoveAll();
 }
 
-
 static const luaL_Reg ConVar_funcs[] = {
-  {"ConVar", luasrc_ConVar},
-  {NULL, NULL}
-};
-
+    { "ConVar", luasrc_ConVar },
+    { NULL, NULL } };
 
 /*
 ** Open ConVar object
 */
-int luaopen_ConVar (lua_State *L) {
-  luaL_newmetatable(L, "ConVar");
-  luaL_register(L, NULL, ConVarmeta);
-  lua_pushvalue(L, -1);  /* push metatable */
-  lua_setfield(L, -2, "__index");  /* metatable.__index = metatable */
-  lua_pushstring(L, "convar");
-  lua_setfield(L, -2, "__type");  /* metatable.__type = "convar" */
-  luaL_register(L, "_G", ConVar_funcs);
-  lua_pop(L, 2);
+int luaopen_ConVar( lua_State *L )
+{
+  luaL_newmetatable( L, "ConVar" );
+  luaL_register( L, NULL, ConVarmeta );
+  lua_pushvalue( L, -1 );           /* push metatable */
+  lua_setfield( L, -2, "__index" ); /* metatable.__index = metatable */
+  lua_pushstring( L, "convar" );
+  lua_setfield( L, -2, "__type" ); /* metatable.__type = "convar" */
+  luaL_register( L, "_G", ConVar_funcs );
+  lua_pop( L, 2 );
   return 1;
 }
-

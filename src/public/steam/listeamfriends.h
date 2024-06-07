@@ -16,23 +16,17 @@
 /* type for ISteamFriends functions */
 typedef ISteamFriends lua_ISteamFriends;
 
-
-
 /*
 ** access functions (stack -> C)
 */
 
-LUA_API lua_ISteamFriends     *(lua_tosteamfriends) (lua_State *L, int idx);
-
+LUA_API lua_ISteamFriends *( lua_tosteamfriends )( lua_State *L, int idx );
 
 /*
 ** push functions (C -> stack)
 */
-LUA_API void  (lua_pushsteamfriends) (lua_State *L, lua_ISteamFriends *pSteamFriends);
+LUA_API void( lua_pushsteamfriends )( lua_State *L, lua_ISteamFriends *pSteamFriends );
 
+LUALIB_API lua_ISteamFriends *( luaL_checksteamfriends )( lua_State *L, int narg );
 
-
-LUALIB_API lua_ISteamFriends *(luaL_checksteamfriends) (lua_State *L, int narg);
-
-
-#endif // LISTEAMFRIENDS_H
+#endif  // LISTEAMFRIENDS_H

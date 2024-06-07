@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,19 +22,18 @@
 
 typedef struct TSteamSubscriptionReceipt
 {
-	ESteamSubscriptionStatus eStatus;
-	ESteamSubscriptionStatus ePreviousStatus;
-	ESteamSubscriptionBillingInfoType eReceiptInfoType;
+  ESteamSubscriptionStatus eStatus;
+  ESteamSubscriptionStatus ePreviousStatus;
+  ESteamSubscriptionBillingInfoType eReceiptInfoType;
 
-	char szConfirmationCode[ STEAM_CONFIRMATION_CODE_SIZE + 1 ];
+  char szConfirmationCode[STEAM_CONFIRMATION_CODE_SIZE + 1];
 
-	union
-	{
-		TSteamPaymentCardReceiptInfo PaymentCardReceiptInfo;
-		TSteamPrepurchaseReceiptInfo PrepurchaseReceiptInfo;
-	};
+  union
+  {
+    TSteamPaymentCardReceiptInfo PaymentCardReceiptInfo;
+    TSteamPrepurchaseReceiptInfo PrepurchaseReceiptInfo;
+  };
 
-}  TSteamSubscriptionReceipt;
+} TSteamSubscriptionReceipt;
 
-
-#endif // TSTEAMSUBSCRIPTIONRECEIPT_H
+#endif  // TSTEAMSUBSCRIPTIONRECEIPT_H

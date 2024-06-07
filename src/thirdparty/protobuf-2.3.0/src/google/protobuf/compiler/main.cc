@@ -35,27 +35,25 @@
 #include <google/protobuf/compiler/python/python_generator.h>
 #include <google/protobuf/compiler/java/java_generator.h>
 
-
-int main(int argc, char* argv[]) {
-
+int main( int argc, char* argv[] )
+{
   google::protobuf::compiler::CommandLineInterface cli;
-  cli.AllowPlugins("protoc-");
+  cli.AllowPlugins( "protoc-" );
 
   // Proto2 C++
   google::protobuf::compiler::cpp::CppGenerator cpp_generator;
-  cli.RegisterGenerator("--cpp_out", &cpp_generator,
-                        "Generate C++ header and source.");
+  cli.RegisterGenerator( "--cpp_out", &cpp_generator,
+                         "Generate C++ header and source." );
 
   // Proto2 Java
   google::protobuf::compiler::java::JavaGenerator java_generator;
-  cli.RegisterGenerator("--java_out", &java_generator,
-                        "Generate Java source file.");
-
+  cli.RegisterGenerator( "--java_out", &java_generator,
+                         "Generate Java source file." );
 
   // Proto2 Python
   google::protobuf::compiler::python::Generator py_generator;
-  cli.RegisterGenerator("--python_out", &py_generator,
-                        "Generate Python source file.");
+  cli.RegisterGenerator( "--python_out", &py_generator,
+                         "Generate Python source file." );
 
-  return cli.Run(argc, argv);
+  return cli.Run( argc, argv );
 }

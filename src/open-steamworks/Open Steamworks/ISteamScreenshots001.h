@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -20,25 +20,20 @@
 #pragma once
 #endif
 
-
 #include "SteamTypes.h"
 #include "ScreenshotsCommon.h"
 
-
 abstract_class ISteamScreenshots001
 {
+ public:
+  virtual HScreenshot WriteScreenshot( const uint8* pubRGBData, uint32 uRGBDataSize, int32 iWidth, int32 iHeight ) = 0;
+  virtual HScreenshot AddScreenshotToLibrary( const char* cszScreenshotPath, const char* cszThumbnailPath, int32 iWidth, int32 iHeight ) = 0;
 
-public:
-	virtual HScreenshot WriteScreenshot( const uint8 *pubRGBData, uint32 uRGBDataSize, int32 iWidth, int32 iHeight ) = 0;
-	virtual HScreenshot AddScreenshotToLibrary( const char* cszScreenshotPath, const char* cszThumbnailPath, int32 iWidth, int32 iHeight ) = 0;
+  virtual void TriggerScreenshot() = 0;
+  virtual void HookScreenshots( bool ) = 0;
 
-	virtual void TriggerScreenshot() = 0;
-	virtual void HookScreenshots( bool ) = 0;
-
-	virtual bool SetLocation( HScreenshot hScreenshot, const char * cszLocation ) = 0;
-	virtual bool TagUser( HScreenshot hScreenshot, CSteamID steamIDUser ) = 0;
-
+  virtual bool SetLocation( HScreenshot hScreenshot, const char* cszLocation ) = 0;
+  virtual bool TagUser( HScreenshot hScreenshot, CSteamID steamIDUser ) = 0;
 };
 
-
-#endif // ISTEAMSCREENSHOTS001_H
+#endif  // ISTEAMSCREENSHOTS001_H

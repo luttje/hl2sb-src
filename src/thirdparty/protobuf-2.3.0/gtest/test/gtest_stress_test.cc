@@ -42,8 +42,10 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-namespace testing {
-namespace {
+namespace testing
+{
+namespace
+{
 
 using internal::String;
 using internal::TestPropertyKeyIs;
@@ -52,91 +54,103 @@ using internal::Vector;
 // How many threads to create?
 const int kThreadCount = 50;
 
-String IdToKey(int id, const char* suffix) {
+String IdToKey( int id, const char* suffix )
+{
   Message key;
   key << "key_" << id << "_" << suffix;
   return key.GetString();
 }
 
-String IdToString(int id) {
+String IdToString( int id )
+{
   Message id_message;
   id_message << id;
   return id_message.GetString();
 }
 
-void ExpectKeyAndValueWereRecordedForId(const Vector<TestProperty>& properties,
-                                        int id,
-                                        const char* suffix) {
-  TestPropertyKeyIs matches_key(IdToKey(id, suffix).c_str());
-  const TestProperty* property = properties.FindIf(matches_key);
-  ASSERT_TRUE(property != NULL)
+void ExpectKeyAndValueWereRecordedForId( const Vector< TestProperty >& properties,
+                                         int id,
+                                         const char* suffix )
+{
+  TestPropertyKeyIs matches_key( IdToKey( id, suffix ).c_str() );
+  const TestProperty* property = properties.FindIf( matches_key );
+  ASSERT_TRUE( property != NULL )
       << "expecting " << suffix << " value for id " << id;
-  EXPECT_STREQ(IdToString(id).c_str(), property->value());
+  EXPECT_STREQ( IdToString( id ).c_str(), property->value() );
 }
 
 // Calls a large number of Google Test assertions, where exactly one of them
 // will fail.
-void ManyAsserts(int id) {
+void ManyAsserts( int id )
+{
   ::std::cout << "Thread #" << id << " running...\n";
 
-  SCOPED_TRACE(Message() << "Thread #" << id);
+  SCOPED_TRACE( Message() << "Thread #" << id );
 
-  for (int i = 0; i < kThreadCount; i++) {
-    SCOPED_TRACE(Message() << "Iteration #" << i);
+  for ( int i = 0; i < kThreadCount; i++ )
+  {
+    SCOPED_TRACE( Message() << "Iteration #" << i );
 
     // A bunch of assertions that should succeed.
-    EXPECT_TRUE(true);
-    ASSERT_FALSE(false) << "This shouldn't fail.";
-    EXPECT_STREQ("a", "a");
-    ASSERT_LE(5, 6);
-    EXPECT_EQ(i, i) << "This shouldn't fail.";
+    EXPECT_TRUE( true );
+    ASSERT_FALSE( false ) << "This shouldn't fail.";
+    EXPECT_STREQ( "a", "a" );
+    ASSERT_LE( 5, 6 );
+    EXPECT_EQ( i, i ) << "This shouldn't fail.";
 
     // RecordProperty() should interact safely with other threads as well.
     // The shared_key forces property updates.
-    Test::RecordProperty(IdToKey(id, "string").c_str(), IdToString(id).c_str());
-    Test::RecordProperty(IdToKey(id, "int").c_str(), id);
-    Test::RecordProperty("shared_key", IdToString(id).c_str());
+    Test::RecordProperty( IdToKey( id, "string" ).c_str(), IdToString( id ).c_str() );
+    Test::RecordProperty( IdToKey( id, "int" ).c_str(), id );
+    Test::RecordProperty( "shared_key", IdToString( id ).c_str() );
 
     // This assertion should fail kThreadCount times per thread.  It
     // is for testing whether Google Test can handle failed assertions in a
     // multi-threaded context.
-    EXPECT_LT(i, 0) << "This should always fail.";
+    EXPECT_LT( i, 0 ) << "This should always fail.";
   }
 }
 
 // Tests using SCOPED_TRACE() and Google Test assertions in many threads
 // concurrently.
-TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
+TEST( StressTest, CanUseScopedTraceAndAssertionsInManyThreads )
+{
   // TODO(wan): when Google Test is made thread-safe, run
   // ManyAsserts() in many threads here.
 }
 
-TEST(NoFatalFailureTest, ExpectNoFatalFailureIgnoresFailuresInOtherThreads) {
+TEST( NoFatalFailureTest, ExpectNoFatalFailureIgnoresFailuresInOtherThreads )
+{
   // TODO(mheule@google.com): Test this works correctly when Google
   // Test is made thread-safe.
 }
 
-TEST(NoFatalFailureTest, AssertNoFatalFailureIgnoresFailuresInOtherThreads) {
+TEST( NoFatalFailureTest, AssertNoFatalFailureIgnoresFailuresInOtherThreads )
+{
   // TODO(mheule@google.com): Test this works correctly when Google
   // Test is made thread-safe.
 }
 
-TEST(FatalFailureTest, ExpectFatalFailureIgnoresFailuresInOtherThreads) {
+TEST( FatalFailureTest, ExpectFatalFailureIgnoresFailuresInOtherThreads )
+{
   // TODO(mheule@google.com): Test this works correctly when Google
   // Test is made thread-safe.
 }
 
-TEST(FatalFailureOnAllThreadsTest, ExpectFatalFailureOnAllThreads) {
+TEST( FatalFailureOnAllThreadsTest, ExpectFatalFailureOnAllThreads )
+{
   // TODO(wan@google.com): Test this works correctly when Google Test
   // is made thread-safe.
 }
 
-TEST(NonFatalFailureTest, ExpectNonFatalFailureIgnoresFailuresInOtherThreads) {
+TEST( NonFatalFailureTest, ExpectNonFatalFailureIgnoresFailuresInOtherThreads )
+{
   // TODO(mheule@google.com): Test this works correctly when Google
   // Test is made thread-safe.
 }
 
-TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
+TEST( NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads )
+{
   // TODO(wan@google.com): Test this works correctly when Google Test
   // is made thread-safe.
 }
@@ -144,8 +158,9 @@ TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 }  // namespace
 }  // namespace testing
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+int main( int argc, char** argv )
+{
+  testing::InitGoogleTest( &argc, argv );
 
   return RUN_ALL_TESTS();
 }

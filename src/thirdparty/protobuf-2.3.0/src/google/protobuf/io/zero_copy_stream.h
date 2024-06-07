@@ -110,10 +110,13 @@
 #include <string>
 #include <google/protobuf/stubs/common.h>
 
-namespace google {
+namespace google
+{
 
-namespace protobuf {
-namespace io {
+namespace protobuf
+{
+namespace io
+{
 
 // Defined in this file.
 class ZeroCopyInputStream;
@@ -121,7 +124,8 @@ class ZeroCopyOutputStream;
 
 // Abstract interface similar to an input stream but designed to minimize
 // copying.
-class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
+class LIBPROTOBUF_EXPORT ZeroCopyInputStream
+{
  public:
   inline ZeroCopyInputStream() {}
   virtual ~ZeroCopyInputStream();
@@ -142,7 +146,7 @@ class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
   // * It is legal for the returned buffer to have zero size, as long
   //   as repeatedly calling Next() eventually yields a buffer with non-zero
   //   size.
-  virtual bool Next(const void** data, int* size) = 0;
+  virtual bool Next( const void** data, int* size ) = 0;
 
   // Backs up a number of bytes, so that the next call to Next() returns
   // data again that was already returned by the last call to Next().  This
@@ -160,25 +164,25 @@ class LIBPROTOBUF_EXPORT ZeroCopyInputStream {
   // * The last "count" bytes of the last buffer returned by Next() will be
   //   pushed back into the stream.  Subsequent calls to Next() will return
   //   the same data again before producing new data.
-  virtual void BackUp(int count) = 0;
+  virtual void BackUp( int count ) = 0;
 
   // Skips a number of bytes.  Returns false if the end of the stream is
   // reached or some input error occurred.  In the end-of-stream case, the
   // stream is advanced to the end of the stream (so ByteCount() will return
   // the total size of the stream).
-  virtual bool Skip(int count) = 0;
+  virtual bool Skip( int count ) = 0;
 
   // Returns the total number of bytes read since this object was created.
   virtual int64 ByteCount() const = 0;
 
-
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ZeroCopyInputStream);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( ZeroCopyInputStream );
 };
 
 // Abstract interface similar to an output stream but designed to minimize
 // copying.
-class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
+class LIBPROTOBUF_EXPORT ZeroCopyOutputStream
+{
  public:
   inline ZeroCopyOutputStream() {}
   virtual ~ZeroCopyOutputStream();
@@ -203,7 +207,7 @@ class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
   // * It is legal for the returned buffer to have zero size, as long
   //   as repeatedly calling Next() eventually yields a buffer with non-zero
   //   size.
-  virtual bool Next(void** data, int* size) = 0;
+  virtual bool Next( void** data, int* size ) = 0;
 
   // Backs up a number of bytes, so that the end of the last buffer returned
   // by Next() is not actually written.  This is needed when you finish
@@ -221,14 +225,13 @@ class LIBPROTOBUF_EXPORT ZeroCopyOutputStream {
   // Postconditions:
   // * The last "count" bytes of the last buffer returned by Next() will be
   //   ignored.
-  virtual void BackUp(int count) = 0;
+  virtual void BackUp( int count ) = 0;
 
   // Returns the total number of bytes written since this object was created.
   virtual int64 ByteCount() const = 0;
 
-
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(ZeroCopyOutputStream);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( ZeroCopyOutputStream );
 };
 
 }  // namespace io

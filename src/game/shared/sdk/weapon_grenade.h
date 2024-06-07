@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -12,10 +12,9 @@
 
 #include "weapon_basesdkgrenade.h"
 
-
 #ifdef CLIENT_DLL
-	
-	#define CWeaponGrenade C_WeaponGrenade
+
+#define CWeaponGrenade C_WeaponGrenade
 
 #endif
 
@@ -24,27 +23,29 @@
 //-----------------------------------------------------------------------------
 class CWeaponGrenade : public CBaseSDKGrenade
 {
-public:
-	DECLARE_CLASS( CWeaponGrenade, CBaseSDKGrenade );
-	DECLARE_NETWORKCLASS();
-	DECLARE_PREDICTABLE();
-	DECLARE_ACTTABLE();
+ public:
+  DECLARE_CLASS( CWeaponGrenade, CBaseSDKGrenade );
+  DECLARE_NETWORKCLASS();
+  DECLARE_PREDICTABLE();
+  DECLARE_ACTTABLE();
 
-	CWeaponGrenade() {}
+  CWeaponGrenade() {}
 
-	virtual SDKWeaponID GetWeaponID( void ) const		{ return SDK_WEAPON_GRENADE; }
+  virtual SDKWeaponID GetWeaponID( void ) const
+  {
+    return SDK_WEAPON_GRENADE;
+  }
 
 #ifdef CLIENT_DLL
 
 #else
-	DECLARE_DATADESC();
+  DECLARE_DATADESC();
 
-	virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon );
-	
+  virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon );
+
 #endif
 
-	CWeaponGrenade( const CWeaponGrenade & ) {}
+  CWeaponGrenade( const CWeaponGrenade& ) {}
 };
 
-
-#endif // WEAPON_GRENADE_H
+#endif  // WEAPON_GRENADE_H

@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,13 +22,13 @@
 
 typedef enum ESteamServerType
 {
-	eSteamValveCDKeyValidationServer = 0,
-	eSteamHalfLifeMasterServer = 1,
-	eSteamFriendsServer = 2,
-	eSteamCSERServer = 3,
-	eSteamHalfLife2MasterServer = 4,
-	eSteamRDKFMasterServer = 5,
-	eMaxServerTypes = 6,
+  eSteamValveCDKeyValidationServer = 0,
+  eSteamHalfLifeMasterServer = 1,
+  eSteamFriendsServer = 2,
+  eSteamCSERServer = 3,
+  eSteamHalfLife2MasterServer = 4,
+  eSteamRDKFMasterServer = 5,
+  eMaxServerTypes = 6,
 } ESteamServerType;
 
-#endif // ESTEAMSERVERTYPE_H
+#endif  // ESTEAMSERVERTYPE_H

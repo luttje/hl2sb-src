@@ -46,11 +46,17 @@
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/io/tokenizer.h>
 
-namespace google {
-namespace protobuf { class Message; }
+namespace google
+{
+namespace protobuf
+{
+class Message;
+}
 
-namespace protobuf {
-namespace compiler {
+namespace protobuf
+{
+namespace compiler
+{
 
 // Defined in this file.
 class Parser;
@@ -63,14 +69,15 @@ class SourceLocationTable;
 // to a FileDescriptorProto.  It does not resolve import directives or perform
 // many other kinds of validation needed to construct a complete
 // FileDescriptor.
-class LIBPROTOBUF_EXPORT Parser {
+class LIBPROTOBUF_EXPORT Parser
+{
  public:
   Parser();
   ~Parser();
 
   // Parse the entire input and construct a FileDescriptorProto representing
   // it.  Returns true if no errors occurred, false otherwise.
-  bool Parse(io::Tokenizer* input, FileDescriptorProto* file);
+  bool Parse( io::Tokenizer* input, FileDescriptorProto* file );
 
   // Optional fetaures:
 
@@ -78,25 +85,31 @@ class LIBPROTOBUF_EXPORT Parser {
   // SourceLocationTable while parsing.  This can be used to look up exact line
   // and column numbers for errors reported by DescriptorPool during validation.
   // Set to NULL (the default) to discard source location information.
-  void RecordSourceLocationsTo(SourceLocationTable* location_table) {
+  void RecordSourceLocationsTo( SourceLocationTable* location_table )
+  {
     source_location_table_ = location_table;
   }
 
   // Requsets that errors be recorded to the given ErrorCollector while
   // parsing.  Set to NULL (the default) to discard error messages.
-  void RecordErrorsTo(io::ErrorCollector* error_collector) {
+  void RecordErrorsTo( io::ErrorCollector* error_collector )
+  {
     error_collector_ = error_collector;
   }
 
   // Returns the identifier used in the "syntax = " declaration, if one was
   // seen during the last call to Parse(), or the empty string otherwise.
-  const string& GetSyntaxIdentifier() { return syntax_identifier_; }
+  const string& GetSyntaxIdentifier()
+  {
+    return syntax_identifier_;
+  }
 
   // If set true, input files will be required to begin with a syntax
   // identifier.  Otherwise, files may omit this.  If a syntax identifier
   // is provided, it must be 'syntax = "proto2";' and must appear at the
   // top of this file regardless of whether or not it was required.
-  void SetRequireSyntaxIdentifier(bool value) {
+  void SetRequireSyntaxIdentifier( bool value )
+  {
     require_syntax_identifier_ = value;
   }
 
@@ -108,7 +121,8 @@ class LIBPROTOBUF_EXPORT Parser {
   // presumably the caller intends to deal with that), but other kinds of
   // errors (e.g. parse errors) will still be reported.  When this is enabled,
   // you may pass a NULL FileDescriptorProto to Parse().
-  void SetStopAfterSyntaxIdentifier(bool value) {
+  void SetStopAfterSyntaxIdentifier( bool value )
+  {
     stop_after_syntax_identifier_ = value;
   }
 
@@ -140,56 +154,56 @@ class LIBPROTOBUF_EXPORT Parser {
   inline bool AtEnd();
 
   // True if the next token matches the given text.
-  inline bool LookingAt(const char* text);
+  inline bool LookingAt( const char* text );
   // True if the next token is of the given type.
-  inline bool LookingAtType(io::Tokenizer::TokenType token_type);
+  inline bool LookingAtType( io::Tokenizer::TokenType token_type );
 
   // If the next token exactly matches the text given, consume it and return
   // true.  Otherwise, return false without logging an error.
-  bool TryConsume(const char* text);
+  bool TryConsume( const char* text );
 
   // These attempt to read some kind of token from the input.  If successful,
   // they return true.  Otherwise they return false and add the given error
   // to the error list.
 
   // Consume a token with the exact text given.
-  bool Consume(const char* text, const char* error);
+  bool Consume( const char* text, const char* error );
   // Same as above, but automatically generates the error "Expected \"text\".",
   // where "text" is the expected token text.
-  bool Consume(const char* text);
+  bool Consume( const char* text );
   // Consume a token of type IDENTIFIER and store its text in "output".
-  bool ConsumeIdentifier(string* output, const char* error);
+  bool ConsumeIdentifier( string* output, const char* error );
   // Consume an integer and store its value in "output".
-  bool ConsumeInteger(int* output, const char* error);
+  bool ConsumeInteger( int* output, const char* error );
   // Consume a 64-bit integer and store its value in "output".  If the value
   // is greater than max_value, an error will be reported.
-  bool ConsumeInteger64(uint64 max_value, uint64* output, const char* error);
+  bool ConsumeInteger64( uint64 max_value, uint64* output, const char* error );
   // Consume a number and store its value in "output".  This will accept
   // tokens of either INTEGER or FLOAT type.
-  bool ConsumeNumber(double* output, const char* error);
+  bool ConsumeNumber( double* output, const char* error );
   // Consume a string literal and store its (unescaped) value in "output".
-  bool ConsumeString(string* output, const char* error);
+  bool ConsumeString( string* output, const char* error );
 
   // -----------------------------------------------------------------
   // Error logging helpers
 
   // Invokes error_collector_->AddError(), if error_collector_ is not NULL.
-  void AddError(int line, int column, const string& error);
+  void AddError( int line, int column, const string& error );
 
   // Invokes error_collector_->AddError() with the line and column number
   // of the current token.
-  void AddError(const string& error);
+  void AddError( const string& error );
 
   // Record the given line and column and associate it with this descriptor
   // in the SourceLocationTable.
-  void RecordLocation(const Message* descriptor,
-                      DescriptorPool::ErrorCollector::ErrorLocation location,
-                      int line, int column);
+  void RecordLocation( const Message* descriptor,
+                       DescriptorPool::ErrorCollector::ErrorLocation location,
+                       int line, int column );
 
   // Record the current line and column and associate it with this descriptor
   // in the SourceLocationTable.
-  void RecordLocation(const Message* descriptor,
-                      DescriptorPool::ErrorCollector::ErrorLocation location);
+  void RecordLocation( const Message* descriptor,
+                       DescriptorPool::ErrorCollector::ErrorLocation location );
 
   // =================================================================
   // Parsers for various language constructs
@@ -210,81 +224,81 @@ class LIBPROTOBUF_EXPORT Parser {
   // makes logic much simpler for the caller.
 
   // Parse a top-level message, enum, service, etc.
-  bool ParseTopLevelStatement(FileDescriptorProto* file);
+  bool ParseTopLevelStatement( FileDescriptorProto* file );
 
   // Parse various language high-level language construrcts.
-  bool ParseMessageDefinition(DescriptorProto* message);
-  bool ParseEnumDefinition(EnumDescriptorProto* enum_type);
-  bool ParseServiceDefinition(ServiceDescriptorProto* service);
-  bool ParsePackage(FileDescriptorProto* file);
-  bool ParseImport(string* import_filename);
-  bool ParseOption(Message* options);
+  bool ParseMessageDefinition( DescriptorProto* message );
+  bool ParseEnumDefinition( EnumDescriptorProto* enum_type );
+  bool ParseServiceDefinition( ServiceDescriptorProto* service );
+  bool ParsePackage( FileDescriptorProto* file );
+  bool ParseImport( string* import_filename );
+  bool ParseOption( Message* options );
 
   // These methods parse the contents of a message, enum, or service type and
   // add them to the given object.  They consume the entire block including
   // the beginning and ending brace.
-  bool ParseMessageBlock(DescriptorProto* message);
-  bool ParseEnumBlock(EnumDescriptorProto* enum_type);
-  bool ParseServiceBlock(ServiceDescriptorProto* service);
+  bool ParseMessageBlock( DescriptorProto* message );
+  bool ParseEnumBlock( EnumDescriptorProto* enum_type );
+  bool ParseServiceBlock( ServiceDescriptorProto* service );
 
   // Parse one statement within a message, enum, or service block, inclunding
   // final semicolon.
-  bool ParseMessageStatement(DescriptorProto* message);
-  bool ParseEnumStatement(EnumDescriptorProto* message);
-  bool ParseServiceStatement(ServiceDescriptorProto* message);
+  bool ParseMessageStatement( DescriptorProto* message );
+  bool ParseEnumStatement( EnumDescriptorProto* message );
+  bool ParseServiceStatement( ServiceDescriptorProto* message );
 
   // Parse a field of a message.  If the field is a group, its type will be
   // added to "messages".
-  bool ParseMessageField(FieldDescriptorProto* field,
-                         RepeatedPtrField<DescriptorProto>* messages);
+  bool ParseMessageField( FieldDescriptorProto* field,
+                          RepeatedPtrField< DescriptorProto >* messages );
 
   // Parse an "extensions" declaration.
-  bool ParseExtensions(DescriptorProto* message);
+  bool ParseExtensions( DescriptorProto* message );
 
   // Parse an "extend" declaration.
-  bool ParseExtend(RepeatedPtrField<FieldDescriptorProto>* extensions,
-                   RepeatedPtrField<DescriptorProto>* messages);
+  bool ParseExtend( RepeatedPtrField< FieldDescriptorProto >* extensions,
+                    RepeatedPtrField< DescriptorProto >* messages );
 
   // Parse a single enum value within an enum block.
-  bool ParseEnumConstant(EnumValueDescriptorProto* enum_value);
+  bool ParseEnumConstant( EnumValueDescriptorProto* enum_value );
 
   // Parse enum constant options, i.e. the list in square brackets at the end
   // of the enum constant value definition.
-  bool ParseEnumConstantOptions(EnumValueDescriptorProto* value);
+  bool ParseEnumConstantOptions( EnumValueDescriptorProto* value );
 
   // Parse a single method within a service definition.
-  bool ParseServiceMethod(MethodDescriptorProto* method);
+  bool ParseServiceMethod( MethodDescriptorProto* method );
 
   // Parse "required", "optional", or "repeated" and fill in "label"
   // with the value.
-  bool ParseLabel(FieldDescriptorProto::Label* label);
+  bool ParseLabel( FieldDescriptorProto::Label* label );
 
   // Parse a type name and fill in "type" (if it is a primitive) or
   // "type_name" (if it is not) with the type parsed.
-  bool ParseType(FieldDescriptorProto::Type* type,
-                 string* type_name);
+  bool ParseType( FieldDescriptorProto::Type* type,
+                  string* type_name );
   // Parse a user-defined type and fill in "type_name" with the name.
   // If a primitive type is named, it is treated as an error.
-  bool ParseUserDefinedType(string* type_name);
+  bool ParseUserDefinedType( string* type_name );
 
   // Parses field options, i.e. the stuff in square brackets at the end
   // of a field definition.  Also parses default value.
-  bool ParseFieldOptions(FieldDescriptorProto* field);
+  bool ParseFieldOptions( FieldDescriptorProto* field );
 
   // Parse the "default" option.  This needs special handling because its
   // type is the field's type.
-  bool ParseDefaultAssignment(FieldDescriptorProto* field);
+  bool ParseDefaultAssignment( FieldDescriptorProto* field );
 
   // Parse a single option name/value pair, e.g. "ctype = CORD".  The name
   // identifies a field of the given Message, and the value of that field
   // is set to the parsed value.
-  bool ParseOptionAssignment(Message* options);
+  bool ParseOptionAssignment( Message* options );
 
   // Parses a single part of a multipart option name. A multipart name consists
   // of names separated by dots. Each name is either an identifier or a series
   // of identifiers separated by dots and enclosed in parentheses. E.g.,
   // "foo.(bar.baz).qux".
-  bool ParseOptionNamePart(UninterpretedOption* uninterpreted_option);
+  bool ParseOptionNamePart( UninterpretedOption* uninterpreted_option );
 
   // =================================================================
 
@@ -296,13 +310,14 @@ class LIBPROTOBUF_EXPORT Parser {
   bool stop_after_syntax_identifier_;
   string syntax_identifier_;
 
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(Parser);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( Parser );
 };
 
 // A table mapping (descriptor, ErrorLocation) pairs -- as reported by
 // DescriptorPool when validating descriptors -- to line and column numbers
 // within the original source code.
-class LIBPROTOBUF_EXPORT SourceLocationTable {
+class LIBPROTOBUF_EXPORT SourceLocationTable
+{
  public:
   SourceLocationTable();
   ~SourceLocationTable();
@@ -312,22 +327,23 @@ class LIBPROTOBUF_EXPORT SourceLocationTable {
   // -1 and *column to 0 (since line = -1 is used to mean "error has no exact
   // location" in the ErrorCollector interface).  Returns true if found, false
   // otherwise.
-  bool Find(const Message* descriptor,
-            DescriptorPool::ErrorCollector::ErrorLocation location,
-            int* line, int* column) const;
+  bool Find( const Message* descriptor,
+             DescriptorPool::ErrorCollector::ErrorLocation location,
+             int* line, int* column ) const;
 
   // Adds a location to the table.
-  void Add(const Message* descriptor,
-           DescriptorPool::ErrorCollector::ErrorLocation location,
-           int line, int column);
+  void Add( const Message* descriptor,
+            DescriptorPool::ErrorCollector::ErrorLocation location,
+            int line, int column );
 
   // Clears the contents of the table.
   void Clear();
 
  private:
   typedef map<
-    pair<const Message*, DescriptorPool::ErrorCollector::ErrorLocation>,
-    pair<int, int> > LocationMap;
+      pair< const Message*, DescriptorPool::ErrorCollector::ErrorLocation >,
+      pair< int, int > >
+      LocationMap;
   LocationMap location_map_;
 };
 

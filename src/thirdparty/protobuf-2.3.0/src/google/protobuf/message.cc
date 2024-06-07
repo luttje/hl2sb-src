@@ -49,137 +49,164 @@
 #include <google/protobuf/stubs/map-util.h>
 #include <google/protobuf/stubs/stl_util-inl.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
-using internal::WireFormat;
 using internal::ReflectionOps;
+using internal::WireFormat;
 
 Message::~Message() {}
 
-void Message::MergeFrom(const Message& from) {
+void Message::MergeFrom( const Message& from )
+{
   const Descriptor* descriptor = GetDescriptor();
-  GOOGLE_CHECK_EQ(from.GetDescriptor(), descriptor)
-    << ": Tried to merge from a message with a different type.  "
-       "to: " << descriptor->full_name() << ", "
-       "from:" << from.GetDescriptor()->full_name();
-  ReflectionOps::Merge(from, this);
+  GOOGLE_CHECK_EQ( from.GetDescriptor(), descriptor )
+      << ": Tried to merge from a message with a different type.  "
+         "to: "
+      << descriptor->full_name() << ", "
+                                    "from:"
+      << from.GetDescriptor()->full_name();
+  ReflectionOps::Merge( from, this );
 }
 
-void Message::CheckTypeAndMergeFrom(const MessageLite& other) {
-  MergeFrom(*down_cast<const Message*>(&other));
+void Message::CheckTypeAndMergeFrom( const MessageLite& other )
+{
+  MergeFrom( *down_cast< const Message* >( &other ) );
 }
 
-void Message::CopyFrom(const Message& from) {
+void Message::CopyFrom( const Message& from )
+{
   const Descriptor* descriptor = GetDescriptor();
-  GOOGLE_CHECK_EQ(from.GetDescriptor(), descriptor)
-    << ": Tried to copy from a message with a different type."
-       "to: " << descriptor->full_name() << ", "
-       "from:" << from.GetDescriptor()->full_name();
-  ReflectionOps::Copy(from, this);
+  GOOGLE_CHECK_EQ( from.GetDescriptor(), descriptor )
+      << ": Tried to copy from a message with a different type."
+         "to: "
+      << descriptor->full_name() << ", "
+                                    "from:"
+      << from.GetDescriptor()->full_name();
+  ReflectionOps::Copy( from, this );
 }
 
-string Message::GetTypeName() const {
+string Message::GetTypeName() const
+{
   return GetDescriptor()->full_name();
 }
 
-void Message::Clear() {
-  ReflectionOps::Clear(this);
+void Message::Clear()
+{
+  ReflectionOps::Clear( this );
 }
 
-bool Message::IsInitialized() const {
-  return ReflectionOps::IsInitialized(*this);
+bool Message::IsInitialized() const
+{
+  return ReflectionOps::IsInitialized( *this );
 }
 
-void Message::FindInitializationErrors(vector<string>* errors) const {
-  return ReflectionOps::FindInitializationErrors(*this, "", errors);
+void Message::FindInitializationErrors( vector< string >* errors ) const
+{
+  return ReflectionOps::FindInitializationErrors( *this, "", errors );
 }
 
-string Message::InitializationErrorString() const {
-  vector<string> errors;
-  FindInitializationErrors(&errors);
-  return JoinStrings(errors, ", ");
+string Message::InitializationErrorString() const
+{
+  vector< string > errors;
+  FindInitializationErrors( &errors );
+  return JoinStrings( errors, ", " );
 }
 
-void Message::CheckInitialized() const {
-  GOOGLE_CHECK(IsInitialized())
-    << "Message of type \"" << GetDescriptor()->full_name()
-    << "\" is missing required fields: " << InitializationErrorString();
+void Message::CheckInitialized() const
+{
+  GOOGLE_CHECK( IsInitialized() )
+      << "Message of type \"" << GetDescriptor()->full_name()
+      << "\" is missing required fields: " << InitializationErrorString();
 }
 
-void Message::DiscardUnknownFields() {
-  return ReflectionOps::DiscardUnknownFields(this);
+void Message::DiscardUnknownFields()
+{
+  return ReflectionOps::DiscardUnknownFields( this );
 }
 
-bool Message::MergePartialFromCodedStream(io::CodedInputStream* input) {
-  return WireFormat::ParseAndMergePartial(input, this);
+bool Message::MergePartialFromCodedStream( io::CodedInputStream* input )
+{
+  return WireFormat::ParseAndMergePartial( input, this );
 }
 
-bool Message::ParseFromFileDescriptor(int file_descriptor) {
-  io::FileInputStream input(file_descriptor);
-  return ParseFromZeroCopyStream(&input) && input.GetErrno() == 0;
+bool Message::ParseFromFileDescriptor( int file_descriptor )
+{
+  io::FileInputStream input( file_descriptor );
+  return ParseFromZeroCopyStream( &input ) && input.GetErrno() == 0;
 }
 
-bool Message::ParsePartialFromFileDescriptor(int file_descriptor) {
-  io::FileInputStream input(file_descriptor);
-  return ParsePartialFromZeroCopyStream(&input) && input.GetErrno() == 0;
+bool Message::ParsePartialFromFileDescriptor( int file_descriptor )
+{
+  io::FileInputStream input( file_descriptor );
+  return ParsePartialFromZeroCopyStream( &input ) && input.GetErrno() == 0;
 }
 
-bool Message::ParseFromIstream(istream* input) {
-  io::IstreamInputStream zero_copy_input(input);
-  return ParseFromZeroCopyStream(&zero_copy_input) && input->eof();
+bool Message::ParseFromIstream( istream* input )
+{
+  io::IstreamInputStream zero_copy_input( input );
+  return ParseFromZeroCopyStream( &zero_copy_input ) && input->eof();
 }
 
-bool Message::ParsePartialFromIstream(istream* input) {
-  io::IstreamInputStream zero_copy_input(input);
-  return ParsePartialFromZeroCopyStream(&zero_copy_input) && input->eof();
+bool Message::ParsePartialFromIstream( istream* input )
+{
+  io::IstreamInputStream zero_copy_input( input );
+  return ParsePartialFromZeroCopyStream( &zero_copy_input ) && input->eof();
 }
-
 
 void Message::SerializeWithCachedSizes(
-    io::CodedOutputStream* output) const {
-  WireFormat::SerializeWithCachedSizes(*this, GetCachedSize(), output);
+    io::CodedOutputStream* output ) const
+{
+  WireFormat::SerializeWithCachedSizes( *this, GetCachedSize(), output );
 }
 
-int Message::ByteSize() const {
-  int size = WireFormat::ByteSize(*this);
-  SetCachedSize(size);
+int Message::ByteSize() const
+{
+  int size = WireFormat::ByteSize( *this );
+  SetCachedSize( size );
   return size;
 }
 
-void Message::SetCachedSize(int size) const {
-  GOOGLE_LOG(FATAL) << "Message class \"" << GetDescriptor()->full_name()
-             << "\" implements neither SetCachedSize() nor ByteSize().  "
-                "Must implement one or the other.";
+void Message::SetCachedSize( int size ) const
+{
+  GOOGLE_LOG( FATAL ) << "Message class \"" << GetDescriptor()->full_name()
+                      << "\" implements neither SetCachedSize() nor ByteSize().  "
+                         "Must implement one or the other.";
 }
 
-int Message::SpaceUsed() const {
-  return GetReflection()->SpaceUsed(*this);
+int Message::SpaceUsed() const
+{
+  return GetReflection()->SpaceUsed( *this );
 }
 
-bool Message::SerializeToFileDescriptor(int file_descriptor) const {
-  io::FileOutputStream output(file_descriptor);
-  return SerializeToZeroCopyStream(&output);
+bool Message::SerializeToFileDescriptor( int file_descriptor ) const
+{
+  io::FileOutputStream output( file_descriptor );
+  return SerializeToZeroCopyStream( &output );
 }
 
-bool Message::SerializePartialToFileDescriptor(int file_descriptor) const {
-  io::FileOutputStream output(file_descriptor);
-  return SerializePartialToZeroCopyStream(&output);
+bool Message::SerializePartialToFileDescriptor( int file_descriptor ) const
+{
+  io::FileOutputStream output( file_descriptor );
+  return SerializePartialToZeroCopyStream( &output );
 }
 
-bool Message::SerializeToOstream(ostream* output) const {
+bool Message::SerializeToOstream( ostream* output ) const
+{
   {
-    io::OstreamOutputStream zero_copy_output(output);
-    if (!SerializeToZeroCopyStream(&zero_copy_output)) return false;
+    io::OstreamOutputStream zero_copy_output( output );
+    if ( !SerializeToZeroCopyStream( &zero_copy_output ) ) return false;
   }
   return output->good();
 }
 
-bool Message::SerializePartialToOstream(ostream* output) const {
-  io::OstreamOutputStream zero_copy_output(output);
-  return SerializePartialToZeroCopyStream(&zero_copy_output);
+bool Message::SerializePartialToOstream( ostream* output ) const
+{
+  io::OstreamOutputStream zero_copy_output( output );
+  return SerializePartialToZeroCopyStream( &zero_copy_output );
 }
-
 
 Reflection::~Reflection() {}
 
@@ -188,109 +215,124 @@ Reflection::~Reflection() {}
 
 MessageFactory::~MessageFactory() {}
 
-namespace {
+namespace
+{
 
-class GeneratedMessageFactory : public MessageFactory {
+class GeneratedMessageFactory : public MessageFactory
+{
  public:
   GeneratedMessageFactory();
   ~GeneratedMessageFactory();
 
   static GeneratedMessageFactory* singleton();
 
-  typedef void RegistrationFunc(const string&);
-  void RegisterFile(const char* file, RegistrationFunc* registration_func);
-  void RegisterType(const Descriptor* descriptor, const Message* prototype);
+  typedef void RegistrationFunc( const string& );
+  void RegisterFile( const char* file, RegistrationFunc* registration_func );
+  void RegisterType( const Descriptor* descriptor, const Message* prototype );
 
   // implements MessageFactory ---------------------------------------
-  const Message* GetPrototype(const Descriptor* type);
+  const Message* GetPrototype( const Descriptor* type );
 
  private:
   // Only written at static init time, so does not require locking.
-  hash_map<const char*, RegistrationFunc*,
-           hash<const char*>, streq> file_map_;
+  hash_map< const char*, RegistrationFunc*,
+            hash< const char* >, streq >
+      file_map_;
 
   // Initialized lazily, so requires locking.
   Mutex mutex_;
-  hash_map<const Descriptor*, const Message*> type_map_;
+  hash_map< const Descriptor*, const Message* > type_map_;
 };
 
 GeneratedMessageFactory* generated_message_factory_ = NULL;
-GOOGLE_PROTOBUF_DECLARE_ONCE(generated_message_factory_once_init_);
+GOOGLE_PROTOBUF_DECLARE_ONCE( generated_message_factory_once_init_ );
 
-void ShutdownGeneratedMessageFactory() {
+void ShutdownGeneratedMessageFactory()
+{
   delete generated_message_factory_;
 }
 
-void InitGeneratedMessageFactory() {
+void InitGeneratedMessageFactory()
+{
   generated_message_factory_ = new GeneratedMessageFactory;
-  internal::OnShutdown(&ShutdownGeneratedMessageFactory);
+  internal::OnShutdown( &ShutdownGeneratedMessageFactory );
 }
 
 GeneratedMessageFactory::GeneratedMessageFactory() {}
 GeneratedMessageFactory::~GeneratedMessageFactory() {}
 
-GeneratedMessageFactory* GeneratedMessageFactory::singleton() {
-  ::google::protobuf::GoogleOnceInit(&generated_message_factory_once_init_,
-                 &InitGeneratedMessageFactory);
+GeneratedMessageFactory* GeneratedMessageFactory::singleton()
+{
+  ::google::protobuf::GoogleOnceInit( &generated_message_factory_once_init_,
+                                      &InitGeneratedMessageFactory );
   return generated_message_factory_;
 }
 
 void GeneratedMessageFactory::RegisterFile(
-    const char* file, RegistrationFunc* registration_func) {
-  if (!InsertIfNotPresent(&file_map_, file, registration_func)) {
-    GOOGLE_LOG(FATAL) << "File is already registered: " << file;
+    const char* file, RegistrationFunc* registration_func )
+{
+  if ( !InsertIfNotPresent( &file_map_, file, registration_func ) )
+  {
+    GOOGLE_LOG( FATAL ) << "File is already registered: " << file;
   }
 }
 
-void GeneratedMessageFactory::RegisterType(const Descriptor* descriptor,
-                                           const Message* prototype) {
-  GOOGLE_DCHECK_EQ(descriptor->file()->pool(), DescriptorPool::generated_pool())
-    << "Tried to register a non-generated type with the generated "
-       "type registry.";
+void GeneratedMessageFactory::RegisterType( const Descriptor* descriptor,
+                                            const Message* prototype )
+{
+  GOOGLE_DCHECK_EQ( descriptor->file()->pool(), DescriptorPool::generated_pool() )
+      << "Tried to register a non-generated type with the generated "
+         "type registry.";
 
   // This should only be called as a result of calling a file registration
   // function during GetPrototype(), in which case we already have locked
   // the mutex.
   mutex_.AssertHeld();
-  if (!InsertIfNotPresent(&type_map_, descriptor, prototype)) {
-    GOOGLE_LOG(DFATAL) << "Type is already registered: " << descriptor->full_name();
+  if ( !InsertIfNotPresent( &type_map_, descriptor, prototype ) )
+  {
+    GOOGLE_LOG( DFATAL ) << "Type is already registered: " << descriptor->full_name();
   }
 }
 
-const Message* GeneratedMessageFactory::GetPrototype(const Descriptor* type) {
+const Message* GeneratedMessageFactory::GetPrototype( const Descriptor* type )
+{
   {
-    ReaderMutexLock lock(&mutex_);
-    const Message* result = FindPtrOrNull(type_map_, type);
-    if (result != NULL) return result;
+    ReaderMutexLock lock( &mutex_ );
+    const Message* result = FindPtrOrNull( type_map_, type );
+    if ( result != NULL ) return result;
   }
 
   // If the type is not in the generated pool, then we can't possibly handle
   // it.
-  if (type->file()->pool() != DescriptorPool::generated_pool()) return NULL;
+  if ( type->file()->pool() != DescriptorPool::generated_pool() ) return NULL;
 
   // Apparently the file hasn't been registered yet.  Let's do that now.
   RegistrationFunc* registration_func =
-      FindPtrOrNull(file_map_, type->file()->name().c_str());
-  if (registration_func == NULL) {
-    GOOGLE_LOG(DFATAL) << "File appears to be in generated pool but wasn't "
-                   "registered: " << type->file()->name();
+      FindPtrOrNull( file_map_, type->file()->name().c_str() );
+  if ( registration_func == NULL )
+  {
+    GOOGLE_LOG( DFATAL ) << "File appears to be in generated pool but wasn't "
+                            "registered: "
+                         << type->file()->name();
     return NULL;
   }
 
-  WriterMutexLock lock(&mutex_);
+  WriterMutexLock lock( &mutex_ );
 
   // Check if another thread preempted us.
-  const Message* result = FindPtrOrNull(type_map_, type);
-  if (result == NULL) {
+  const Message* result = FindPtrOrNull( type_map_, type );
+  if ( result == NULL )
+  {
     // Nope.  OK, register everything.
-    registration_func(type->file()->name());
+    registration_func( type->file()->name() );
     // Should be here now.
-    result = FindPtrOrNull(type_map_, type);
+    result = FindPtrOrNull( type_map_, type );
   }
 
-  if (result == NULL) {
-    GOOGLE_LOG(DFATAL) << "Type appears to be in generated pool but wasn't "
-                << "registered: " << type->full_name();
+  if ( result == NULL )
+  {
+    GOOGLE_LOG( DFATAL ) << "Type appears to be in generated pool but wasn't "
+                         << "registered: " << type->full_name();
   }
 
   return result;
@@ -298,21 +340,23 @@ const Message* GeneratedMessageFactory::GetPrototype(const Descriptor* type) {
 
 }  // namespace
 
-MessageFactory* MessageFactory::generated_factory() {
+MessageFactory* MessageFactory::generated_factory()
+{
   return GeneratedMessageFactory::singleton();
 }
 
 void MessageFactory::InternalRegisterGeneratedFile(
-    const char* filename, void (*register_messages)(const string&)) {
-  GeneratedMessageFactory::singleton()->RegisterFile(filename,
-                                                     register_messages);
+    const char* filename, void ( *register_messages )( const string& ) )
+{
+  GeneratedMessageFactory::singleton()->RegisterFile( filename,
+                                                      register_messages );
 }
 
 void MessageFactory::InternalRegisterGeneratedMessage(
-    const Descriptor* descriptor, const Message* prototype) {
-  GeneratedMessageFactory::singleton()->RegisterType(descriptor, prototype);
+    const Descriptor* descriptor, const Message* prototype )
+{
+  GeneratedMessageFactory::singleton()->RegisterType( descriptor, prototype );
 }
-
 
 }  // namespace protobuf
 }  // namespace google

@@ -41,11 +41,14 @@
 #include <map>
 #include <google/protobuf/stubs/common.h>
 
-namespace google {
-namespace protobuf {
-namespace io {
+namespace google
+{
+namespace protobuf
+{
+namespace io
+{
 
-class ZeroCopyOutputStream;     // zero_copy_stream.h
+class ZeroCopyOutputStream;  // zero_copy_stream.h
 
 // This simple utility class assists in code generation.  It basically
 // allows the caller to define a set of variables and then output some
@@ -61,11 +64,12 @@ class ZeroCopyOutputStream;     // zero_copy_stream.h
 // Printer aggressively enforces correct usage, crashing (with assert failures)
 // in the case of undefined variables in debug builds. This helps greatly in
 // debugging code which uses it.
-class LIBPROTOBUF_EXPORT Printer {
+class LIBPROTOBUF_EXPORT Printer
+{
  public:
   // Create a printer that writes text to the given output stream.  Use the
   // given character as the delimiter for variables.
-  Printer(ZeroCopyOutputStream* output, char variable_delimiter);
+  Printer( ZeroCopyOutputStream* output, char variable_delimiter );
   ~Printer();
 
   // Print some text after applying variable substitutions.  If a particular
@@ -73,15 +77,15 @@ class LIBPROTOBUF_EXPORT Printer {
   // substituted are identified by their names surrounded by delimiter
   // characters (as given to the constructor).  The variable bindings are
   // defined by the given map.
-  void Print(const map<string, string>& variables, const char* text);
+  void Print( const map< string, string >& variables, const char* text );
 
   // Like the first Print(), except the substitutions are given as parameters.
-  void Print(const char* text);
+  void Print( const char* text );
   // Like the first Print(), except the substitutions are given as parameters.
-  void Print(const char* text, const char* variable, const string& value);
+  void Print( const char* text, const char* variable, const string& value );
   // Like the first Print(), except the substitutions are given as parameters.
-  void Print(const char* text, const char* variable1, const string& value1,
-                               const char* variable2, const string& value2);
+  void Print( const char* text, const char* variable1, const string& value1,
+              const char* variable2, const string& value2 );
   // TODO(kenton):  Overloaded versions with more variables?  Two seems
   //   to be enough.
 
@@ -96,20 +100,23 @@ class LIBPROTOBUF_EXPORT Printer {
 
   // Write a string to the output buffer.
   // This method does not look for newlines to add indentation.
-  void PrintRaw(const string& data);
+  void PrintRaw( const string& data );
 
   // Write a zero-delimited string to output buffer.
   // This method does not look for newlines to add indentation.
-  void PrintRaw(const char* data);
+  void PrintRaw( const char* data );
 
   // Write some bytes to the output buffer.
   // This method does not look for newlines to add indentation.
-  void WriteRaw(const char* data, int size);
+  void WriteRaw( const char* data, int size );
 
   // True if any write to the underlying stream failed.  (We don't just
   // crash in this case because this is an I/O failure, not a programming
   // error.)
-  bool failed() const { return failed_; }
+  bool failed() const
+  {
+    return failed_;
+  }
 
  private:
   const char variable_delimiter_;
@@ -122,7 +129,7 @@ class LIBPROTOBUF_EXPORT Printer {
   bool at_start_of_line_;
   bool failed_;
 
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(Printer);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( Printer );
 };
 
 }  // namespace io

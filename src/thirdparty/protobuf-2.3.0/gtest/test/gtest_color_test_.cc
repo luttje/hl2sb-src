@@ -37,9 +37,11 @@
 
 #include <gtest/gtest.h>
 
-namespace testing {
-namespace internal {
-bool ShouldUseColor(bool stdout_is_tty);
+namespace testing
+{
+namespace internal
+{
+bool ShouldUseColor( bool stdout_is_tty );
 }  // namespace internal
 }  // namespace testing
 
@@ -49,20 +51,25 @@ using testing::internal::ShouldUseColor;
 // created before main() is entered, and thus that ShouldUseColor()
 // works the same way as in a real Google-Test-based test.  We don't actual
 // run the TEST itself.
-TEST(GTestColorTest, Dummy) {
+TEST( GTestColorTest, Dummy )
+{
 }
 
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+int main( int argc, char** argv )
+{
+  testing::InitGoogleTest( &argc, argv );
 
-  if (ShouldUseColor(true)) {
+  if ( ShouldUseColor( true ) )
+  {
     // Google Test decides to use colors in the output (assuming it
     // goes to a TTY).
-    printf("YES\n");
+    printf( "YES\n" );
     return 1;
-  } else {
+  }
+  else
+  {
     // Google Test decides not to use colors in the output.
-    printf("NO\n");
+    printf( "NO\n" );
     return 0;
   }
 }

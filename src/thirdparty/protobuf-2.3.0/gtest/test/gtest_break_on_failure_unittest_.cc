@@ -45,22 +45,25 @@
 #include <windows.h>
 #endif
 
-namespace {
+namespace
+{
 
 // A test that's expected to fail.
-TEST(Foo, Bar) {
-  EXPECT_EQ(2, 3);
+TEST( Foo, Bar )
+{
+  EXPECT_EQ( 2, 3 );
 }
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main( int argc, char **argv )
+{
 #if GTEST_OS_WINDOWS
   // Suppresses display of the Windows error dialog upon encountering
   // a general protection fault (segment violation).
-  SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+  SetErrorMode( SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS );
 #endif
-  testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest( &argc, argv );
 
   return RUN_ALL_TESTS();
 }

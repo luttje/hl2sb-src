@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -41,15 +41,13 @@ class ISteamGameServerItems;
 class ISteamGameServerStats;
 class ISteamHTTP;
 
-
 #define CLIENTENGINE_INTERFACE_VERSION "CLIENTENGINE_INTERFACE_VERSION001"
 
-#define STEAMCLIENT_INTERFACE_VERSION_006		"SteamClient006"
-#define STEAMCLIENT_INTERFACE_VERSION_007		"SteamClient007"
-#define STEAMCLIENT_INTERFACE_VERSION_008		"SteamClient008"
-#define STEAMCLIENT_INTERFACE_VERSION_009		"SteamClient009"
-#define STEAMCLIENT_INTERFACE_VERSION_010		"SteamClient010"
-#define STEAMCLIENT_INTERFACE_VERSION_011		"SteamClient011"
-
+#define STEAMCLIENT_INTERFACE_VERSION_006 "SteamClient006"
+#define STEAMCLIENT_INTERFACE_VERSION_007 "SteamClient007"
+#define STEAMCLIENT_INTERFACE_VERSION_008 "SteamClient008"
+#define STEAMCLIENT_INTERFACE_VERSION_009 "SteamClient009"
+#define STEAMCLIENT_INTERFACE_VERSION_010 "SteamClient010"
+#define STEAMCLIENT_INTERFACE_VERSION_011 "SteamClient011"
 
 #endif

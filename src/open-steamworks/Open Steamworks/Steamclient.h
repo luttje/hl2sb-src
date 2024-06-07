@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -14,7 +14,6 @@
 //
 //=============================================================================
 
-
 #ifndef STEAMCLIENT_H
 #define STEAMCLIENT_H
 #ifdef _WIN32
@@ -24,71 +23,71 @@
 #include "SteamTypes.h"
 
 #ifndef STEAMWORKS_OBSOLETE_INTERFACES
-	#ifdef _MSC_VER
-		#define OBSOLETE_INTERFACE __declspec(deprecated("This interface is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_INTERFACES to suppress this warning."))
-	#elif defined(__GNUC__)
-		#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-			#define OBSOLETE_INTERFACE __attribute__((__deprecated__("This interface is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_INTERFACES to suppress this warning.")))
-		#else
-			#define OBSOLETE_INTERFACE __attribute__((__deprecated__))
-		#endif
-	#else
-		#define OBSOLETE_INTERFACE
-	#endif
+#ifdef _MSC_VER
+#define OBSOLETE_INTERFACE __declspec( deprecated( "This interface is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_INTERFACES to suppress this warning." ) )
+#elif defined( __GNUC__ )
+#if ( __GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 5 ) )
+#define OBSOLETE_INTERFACE __attribute__( ( __deprecated__( "This interface is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_INTERFACES to suppress this warning." ) ) )
 #else
-		#define OBSOLETE_INTERFACE
+#define OBSOLETE_INTERFACE __attribute__( ( __deprecated__ ) )
+#endif
+#else
+#define OBSOLETE_INTERFACE
+#endif
+#else
+#define OBSOLETE_INTERFACE
 #endif
 
 #ifndef STEAMWORKS_OBSOLETE_FUNCTIONS
-	#ifdef _MSC_VER
-		#define OBSOLETE_FUNCTION __declspec(deprecated("This function is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_FUNCTIONS to suppress this warning."))
-	#elif defined(__GNUC__)
-		#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-			#define OBSOLETE_FUNCTION __attribute__((__deprecated__("This function is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_FUNCTIONS to suppress this warning.")))
-		#else
-			#define OBSOLETE_FUNCTION __attribute__((__deprecated__))
-		#endif
-	#else
-		#define OBSOLETE_FUNCTION
-	#endif
+#ifdef _MSC_VER
+#define OBSOLETE_FUNCTION __declspec( deprecated( "This function is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_FUNCTIONS to suppress this warning." ) )
+#elif defined( __GNUC__ )
+#if ( __GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 5 ) )
+#define OBSOLETE_FUNCTION __attribute__( ( __deprecated__( "This function is obsolete and is not available in the latest builds of Steam. #define STEAMWORKS_OBSOLETE_FUNCTIONS to suppress this warning." ) ) )
 #else
-		#define OBSOLETE_FUNCTION
+#define OBSOLETE_FUNCTION __attribute__( ( __deprecated__ ) )
+#endif
+#else
+#define OBSOLETE_FUNCTION
+#endif
+#else
+#define OBSOLETE_FUNCTION
 #endif
 
 #ifndef STEAMWORKS_CLIENT_INTERFACES
-	#ifdef _MSC_VER
-		#define UNSAFE_INTERFACE __declspec(deprecated("IClient interfaces are unversioned and potentially unsafe. Class defintion can change between steamclient releases. #define STEAMWORKS_CLIENT_INTERFACES to suppress this warning."))
-	#elif defined(__GNUC__)
-		#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-			#define UNSAFE_INTERFACE __attribute__((__deprecated__("IClient interfaces are unversioned and potentially unsafe. Class defintion can change between steamclient releases. #define STEAMWORKS_CLIENT_INTERFACES to suppress this warning.")))
-		#else
-			#define UNSAFE_INTERFACE __attribute__((__deprecated__))
-		#endif
-	#else
-		#define UNSAFE_INTERFACE
-	#endif
+#ifdef _MSC_VER
+#define UNSAFE_INTERFACE __declspec( deprecated( "IClient interfaces are unversioned and potentially unsafe. Class defintion can change between steamclient releases. #define STEAMWORKS_CLIENT_INTERFACES to suppress this warning." ) )
+#elif defined( __GNUC__ )
+#if ( __GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 5 ) )
+#define UNSAFE_INTERFACE __attribute__( ( __deprecated__( "IClient interfaces are unversioned and potentially unsafe. Class defintion can change between steamclient releases. #define STEAMWORKS_CLIENT_INTERFACES to suppress this warning." ) ) )
 #else
-		#define UNSAFE_INTERFACE
+#define UNSAFE_INTERFACE __attribute__( ( __deprecated__ ) )
+#endif
+#else
+#define UNSAFE_INTERFACE
+#endif
+#else
+#define UNSAFE_INTERFACE
 #endif
 
 #ifndef STEAM_API_NON_VERSIONED_INTERFACES
-	#ifdef _MSC_VER
-		#define S_API_UNSAFE extern "C" __declspec( dllexport deprecated("Steam*() interface accessing functions are unversioned and potentially unsafe. These are versioned to assume you are using the latest version of the steam_api loader, if this is not the case your code is likely to crash, read the comment above the functions to learn about the version safe accessing method that will account for newer steam_api versions, older versions are always unsupported. #define STEAM_API_NON_VERSIONED_INTERFACES to suppress this warning.") )
-	#elif defined(__GNUC__)
-		#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
-			#define S_API_UNSAFE extern "C" __attribute__((__deprecated__("Steam*() interface accessing functions are unversioned and potentially unsafe. These are versioned to assume you are using the latest version of the steam_api loader, if this is not the case your code is likely to crash, read the comment above the functions to learn about the version safe accessing method that will account for newer steam_api versions, older versions are always unsupported. #define STEAM_API_NON_VERSIONED_INTERFACES to suppress this warning.")))
-		#else
-			#define S_API_UNSAFE extern "C" __attribute__((__deprecated__))
-		#endif
-	#else
-		#define S_API_UNSAFE extern "C"
-	#endif
+#ifdef _MSC_VER
+#define S_API_UNSAFE extern "C" __declspec( dllexport deprecated( "Steam*() interface accessing functions are unversioned and potentially unsafe. These are versioned to assume you are using the latest version of the steam_api loader, if this is not the case your code is likely to crash, read the comment above the functions to learn about the version safe accessing method that will account for newer steam_api versions, older versions are always unsupported. #define STEAM_API_NON_VERSIONED_INTERFACES to suppress this warning." ) )
+#elif defined( __GNUC__ )
+#if ( __GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 5 ) )
+#define S_API_UNSAFE extern "C" __attribute__( ( __deprecated__( "Steam*() interface accessing functions are unversioned and potentially unsafe. These are versioned to assume you are using the latest version of the steam_api loader, if this is not the case your code is likely to crash, read the comment above the functions to learn about the version safe accessing method that will account for newer steam_api versions, older versions are always unsupported. #define STEAM_API_NON_VERSIONED_INTERFACES to suppress this warning." ) ) )
 #else
-	#ifdef _MSC_VER
-		#define S_API_UNSAFE extern "C" __declspec( dllexport )
-	#else
-		#define S_API_UNSAFE extern "C"
-	#endif
+#define S_API_UNSAFE extern "C" __attribute__( ( __deprecated__ ) )
+#endif
+#else
+#define S_API_UNSAFE extern "C"
+#endif
+#else
+#ifdef _MSC_VER
+#define S_API_UNSAFE extern "C" __declspec( dllexport )
+#else
+#define S_API_UNSAFE extern "C"
+#endif
 #endif
 
 #include "SteamTypes.h"
@@ -259,7 +258,7 @@
 #include "IClientUtils.h"
 #include "IClientHTTP.h"
 #include "IClientConfigStore.h"
-#endif // NO_ICLIENT
+#endif  // NO_ICLIENT
 
 // callback
 #include "CCallback.h"
@@ -267,7 +266,7 @@
 // steam_api
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 #include "CSteamAPIContext.h"
-#endif // VERSION_SAFE_STEAM_API_INTERFACES
+#endif  // VERSION_SAFE_STEAM_API_INTERFACES
 
 // Breakpad
 S_API errno_t STEAM_CALL Breakpad_SetSteamID( uint64 ulSteamID );
@@ -275,7 +274,6 @@ S_API errno_t STEAM_CALL Breakpad_SteamSetSteamID( uint64 ulSteamID );
 S_API void STEAM_CALL Breakpad_SteamMiniDumpInit( uint32 a, const char *b, const char *c );
 S_API errno_t STEAM_CALL Breakpad_SteamWriteMiniDumpSetComment( const char *pchMsg );
 S_API void STEAM_CALL Breakpad_SteamWriteMiniDumpUsingExceptionInfoWithBuildId( int a, int b );
-
 
 // Steam user
 S_API bool STEAM_CALL Steam_BConnected( HSteamUser hUser, HSteamPipe hSteamPipe );
@@ -288,7 +286,7 @@ S_API void STEAM_CALL Steam_TerminateGameConnection( HSteamUser hUser, HSteamPip
 // Steam callbacks
 S_API bool STEAM_CALL Steam_BGetCallback( HSteamPipe hSteamPipe, CallbackMsg_t *pCallbackMsg );
 S_API void STEAM_CALL Steam_FreeLastCallback( HSteamPipe hSteamPipe );
-S_API bool STEAM_CALL Steam_GetAPICallResult( HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, void* pCallback, int cubCallback, int iCallbackExpected, bool* pbFailed );
+S_API bool STEAM_CALL Steam_GetAPICallResult( HSteamPipe hSteamPipe, SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed );
 
 // Steam client
 S_API HSteamPipe STEAM_CALL Steam_CreateSteamPipe();
@@ -300,8 +298,8 @@ S_API void STEAM_CALL Steam_ReleaseUser( HSteamPipe hSteamPipe, HSteamUser hUser
 S_API void STEAM_CALL Steam_SetLocalIPBinding( uint32 unIP, uint16 usLocalPort );
 
 // Steam game server
-S_API int STEAM_CALL Steam_GSGetSteamGameConnectToken( HSteamUser hUser, HSteamPipe hSteamPipe, void *pBlob, int cbBlobMax ); // does this exist anymore?
-S_API void* STEAM_CALL Steam_GetGSHandle( HSteamUser hUser, HSteamPipe hSteamPipe );
+S_API int STEAM_CALL Steam_GSGetSteamGameConnectToken( HSteamUser hUser, HSteamPipe hSteamPipe, void *pBlob, int cbBlobMax );  // does this exist anymore?
+S_API void *STEAM_CALL Steam_GetGSHandle( HSteamUser hUser, HSteamPipe hSteamPipe );
 S_API bool STEAM_CALL Steam_GSSendSteam2UserConnect( void *phSteamHandle, uint32 unUserID, const void *pvRawKey, uint32 unKeyLen, uint32 unIPPublic, uint16 usPort, const void *pvCookie, uint32 cubCookie );
 S_API bool STEAM_CALL Steam_GSSendUserDisconnect( void *phSteamHandle, uint64 ulSteamID, uint32 unUserID );
 S_API OBSOLETE_FUNCTION bool STEAM_CALL Steam_GSSendUserStatusResponse( void *phSteamHandle, uint64 ulSteamID, int nSecondsConnected, int nSecondsSinceLast );
@@ -313,8 +311,7 @@ S_API void STEAM_CALL Steam_GSLogOn( void *phSteamHandle );
 S_API void STEAM_CALL Steam_GSLogOff( void *phSteamHandle );
 S_API bool STEAM_CALL Steam_GSBLoggedOn( void *phSteamHandle );
 S_API bool STEAM_CALL Steam_GSSetServerType( void *phSteamHandle, int32 nAppIdServed, uint32 unServerFlags, uint32 unGameIP, uint32 unGamePort, const char *pchGameDir, const char *pchVersion );
-S_API bool STEAM_CALL Steam_GSBSecure( void *phSteamHandle);
-
+S_API bool STEAM_CALL Steam_GSBSecure( void *phSteamHandle );
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //	Steam API setup & shutdown
@@ -326,10 +323,10 @@ S_API bool STEAM_CALL Steam_GSBSecure( void *phSteamHandle);
 // S_API void SteamAPI_Init(); (see below)
 S_API void SteamAPI_Shutdown();
 
-// checks if a local Steam client is running 
+// checks if a local Steam client is running
 S_API bool SteamAPI_IsSteamRunning();
 
-// Detects if your executable was launched through the Steam client, and restarts your game through 
+// Detects if your executable was launched through the Steam client, and restarts your game through
 // the client if necessary. The Steam client will be started if it is not running.
 //
 // Returns: true if your executable was NOT launched through the Steam client. This function will
@@ -343,7 +340,7 @@ S_API bool SteamAPI_IsSteamRunning();
 S_API bool SteamAPI_RestartAppIfNecessary( uint32 unOwnAppID );
 
 // crash dump recording functions
-S_API void SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID );
+S_API void SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void *pvExceptionInfo, uint32 uBuildID );
 S_API void SteamAPI_SetMiniDumpComment( const char *pchMsg );
 
 // this should be called before the game initialized the steam APIs
@@ -356,15 +353,15 @@ S_API void SteamAPI_UseBreakpadCrashHandler( char const *pchVersion, char const 
 S_API void SteamAPI_SetBreakpadAppID( uint32 unAppID );
 
 // interface pointers, configured by SteamAPI_Init()
-S_API_UNSAFE ISteamClient009* STEAM_CALL SteamClient();
+S_API_UNSAFE ISteamClient009 *STEAM_CALL SteamClient();
 
 // VERSION_SAFE_STEAM_API_INTERFACES is usually not necessary, but it provides safety against releasing
 // new steam_api.dll's without recompiling/rereleasing modules that use it.
 //
-// If you use VERSION_SAFE_STEAM_API_INTERFACES, then you should call SteamAPI_InitSafe(). Also, to get the 
+// If you use VERSION_SAFE_STEAM_API_INTERFACES, then you should call SteamAPI_InitSafe(). Also, to get the
 // Steam interfaces, you must create and Init() a CSteamAPIContext (below) and use the interfaces in there.
 //
-// If you don't use VERSION_SAFE_STEAM_API_INTERFACES, then you can use SteamAPI_Init() and the SteamXXXX() 
+// If you don't use VERSION_SAFE_STEAM_API_INTERFACES, then you can use SteamAPI_Init() and the SteamXXXX()
 // functions below to get at the Steam interfaces.
 //
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
@@ -372,23 +369,21 @@ S_API bool STEAM_CALL SteamAPI_InitSafe();
 #else
 S_API bool STEAM_CALL SteamAPI_Init();
 
-S_API_UNSAFE ISteamUser013* STEAM_CALL SteamUser();
-S_API_UNSAFE ISteamFriends005* STEAM_CALL SteamFriends();
-S_API_UNSAFE ISteamUtils005* STEAM_CALL SteamUtils();
-S_API_UNSAFE ISteamMatchmaking008* STEAM_CALL SteamMatchmaking();
-S_API_UNSAFE ISteamUserStats007* STEAM_CALL SteamUserStats();
-S_API_UNSAFE ISteamApps003* STEAM_CALL SteamApps();
-S_API_UNSAFE ISteamNetworking003* STEAM_CALL SteamNetworking();
-S_API_UNSAFE ISteamMatchmakingServers002* STEAM_CALL SteamMatchmakingServers();
-S_API_UNSAFE ISteamRemoteStorage002* STEAM_CALL SteamRemoteStorage();
-#endif // VERSION_SAFE_STEAM_API_INTERFACES
+S_API_UNSAFE ISteamUser013 *STEAM_CALL SteamUser();
+S_API_UNSAFE ISteamFriends005 *STEAM_CALL SteamFriends();
+S_API_UNSAFE ISteamUtils005 *STEAM_CALL SteamUtils();
+S_API_UNSAFE ISteamMatchmaking008 *STEAM_CALL SteamMatchmaking();
+S_API_UNSAFE ISteamUserStats007 *STEAM_CALL SteamUserStats();
+S_API_UNSAFE ISteamApps003 *STEAM_CALL SteamApps();
+S_API_UNSAFE ISteamNetworking003 *STEAM_CALL SteamNetworking();
+S_API_UNSAFE ISteamMatchmakingServers002 *STEAM_CALL SteamMatchmakingServers();
+S_API_UNSAFE ISteamRemoteStorage002 *STEAM_CALL SteamRemoteStorage();
+#endif  // VERSION_SAFE_STEAM_API_INTERFACES
 
 // sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
 S_API void STEAM_CALL SteamAPI_SetTryCatchCallbacks( bool bTryCatchCallbacks );
 
 S_API void SteamAPI_RunCallbacks();
-
-
 
 // functions used by the utility CCallback objects to receive callbacks
 S_API void SteamAPI_RegisterCallback( class CCallbackBase *pCallback, int iCallback );
@@ -406,7 +401,7 @@ S_API void STEAM_CALL Steam_RegisterInterfaceFuncs( void *hModule );
 
 S_API HSteamUser STEAM_CALL Steam_GetHSteamUserCurrent();
 
-S_API const char* STEAM_CALL SteamAPI_GetSteamInstallPath();
+S_API const char *STEAM_CALL SteamAPI_GetSteamInstallPath();
 
 // used in version safe api
 S_API HSteamPipe STEAM_CALL GetHSteamPipe();
@@ -415,8 +410,8 @@ S_API HSteamUser STEAM_CALL GetHSteamUser();
 S_API HSteamPipe STEAM_CALL SteamAPI_GetHSteamPipe();
 S_API HSteamUser STEAM_CALL SteamAPI_GetHSteamUser();
 
-//S_API bool STEAM_CALL SteamGameServer_InitSafe( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
-//S_API bool STEAM_CALL SteamGameServer_Init( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
+// S_API bool STEAM_CALL SteamGameServer_InitSafe( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
+// S_API bool STEAM_CALL SteamGameServer_Init( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
 
 S_API void STEAM_CALL SteamGameServer_Shutdown();
 S_API void STEAM_CALL SteamGameServer_RunCallbacks();
@@ -425,47 +420,45 @@ S_API bool STEAM_CALL SteamGameServer_BSecure();
 S_API uint64 STEAM_CALL SteamGameServer_GetSteamID();
 
 S_API HSteamPipe STEAM_CALL SteamGameServer_GetHSteamPipe();
-S_API HSteamUser STEAM_CALL SteamGameServer_GetHSteamUser(); 
+S_API HSteamUser STEAM_CALL SteamGameServer_GetHSteamUser();
 S_API int32 STEAM_CALL SteamGameServer_GetIPCCallCount();
 
-// Note: if you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE for usQueryPort, then it will use "GameSocketShare" mode, 
-// which means that the game is responsible for sending and receiving UDP packets for the master 
+// Note: if you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE for usQueryPort, then it will use "GameSocketShare" mode,
+// which means that the game is responsible for sending and receiving UDP packets for the master
 // server updater. See references to GameSocketShare in isteammasterserverupdater.h.
 //
-// Pass 0 for usGamePort or usSpectatorPort if you're not using that. Then, the master server updater will report 
+// Pass 0 for usGamePort or usSpectatorPort if you're not using that. Then, the master server updater will report
 // what's running based on that.
 #ifdef VERSION_SAFE_STEAM_API_INTERFACES
 S_API bool STEAM_CALL SteamGameServer_InitSafe( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
 #else
 S_API bool STEAM_CALL SteamGameServer_Init( uint32 unIP, uint16 usPort, uint16 usGamePort, uint16 usSpectatorPort, uint16 usQueryPort, EServerMode eServerMode, const char *pchGameDir, const char *pchVersionString );
 
-S_API_UNSAFE ISteamGameServer010* STEAM_CALL SteamGameServer();
-S_API_UNSAFE ISteamUtils005* STEAM_CALL SteamGameServerUtils();
-S_API_UNSAFE ISteamMasterServerUpdater001* STEAM_CALL SteamMasterServerUpdater();
-S_API_UNSAFE ISteamNetworking003* STEAM_CALL SteamGameServerNetworking();
-S_API_UNSAFE ISteamGameServerStats001* STEAM_CALL SteamGameServerStats();
+S_API_UNSAFE ISteamGameServer010 *STEAM_CALL SteamGameServer();
+S_API_UNSAFE ISteamUtils005 *STEAM_CALL SteamGameServerUtils();
+S_API_UNSAFE ISteamMasterServerUpdater001 *STEAM_CALL SteamMasterServerUpdater();
+S_API_UNSAFE ISteamNetworking003 *STEAM_CALL SteamGameServerNetworking();
+S_API_UNSAFE ISteamGameServerStats001 *STEAM_CALL SteamGameServerStats();
 #endif
 
-//content server
-S_API_UNSAFE ISteamContentServer002* STEAM_CALL SteamContentServer();
-S_API_UNSAFE ISteamUtils005* STEAM_CALL SteamContentServerUtils();
-S_API bool STEAM_CALL SteamContentServer_Init(uint32 unIP, uint16 usPort);
+// content server
+S_API_UNSAFE ISteamContentServer002 *STEAM_CALL SteamContentServer();
+S_API_UNSAFE ISteamUtils005 *STEAM_CALL SteamContentServerUtils();
+S_API bool STEAM_CALL SteamContentServer_Init( uint32 unIP, uint16 usPort );
 
 S_API void STEAM_CALL SteamContentServer_Shutdown();
 S_API void STEAM_CALL SteamContentServer_RunCallbacks();
 
-
 // Purpose: utilities to decode/decrypt a ticket from the
 // ISteamUser::RequestEncryptedAppTicket, ISteamUser::GetEncryptedAppTicket API
-// 
+//
 // To use: declare CSteamEncryptedAppTicket, then call BDecryptTicket
 // if BDecryptTicket returns true, other accessors are valid
-static const int k_nSteamEncryptedAppTicketSymmetricKeyLen = 32;				
-
+static const int k_nSteamEncryptedAppTicketSymmetricKeyLen = 32;
 
 S_API bool SteamEncryptedAppTicket_BDecryptTicket( const uint8 *rgubTicketEncrypted, uint32 cubTicketEncrypted,
-												  uint8 *rgubTicketDecrypted, uint32 *pcubTicketDecrypted,
-												  const uint8 rgubKey[k_nSteamEncryptedAppTicketSymmetricKeyLen], int cubKey );
+                                                   uint8 *rgubTicketDecrypted, uint32 *pcubTicketDecrypted,
+                                                   const uint8 rgubKey[k_nSteamEncryptedAppTicketSymmetricKeyLen], int cubKey );
 
 S_API bool SteamEncryptedAppTicket_BIsTicketForApp( uint8 *rgubTicketDecrypted, uint32 cubTicketDecrypted, AppId_t nAppID );
 
@@ -481,4 +474,4 @@ S_API bool SteamEncryptedAppTicket_BUserIsVacBanned( uint8 *rgubTicketDecrypted,
 
 S_API const uint8 *SteamEncryptedAppTicket_GetUserVariableData( uint8 *rgubTicketDecrypted, uint32 cubTicketDecrypted, uint32 *pcubUserData );
 
-#endif // STEAMCLIENT_H
+#endif  // STEAMCLIENT_H

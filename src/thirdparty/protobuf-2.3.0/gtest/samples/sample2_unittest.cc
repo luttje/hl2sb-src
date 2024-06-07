@@ -31,7 +31,6 @@
 //
 // Author: wan@google.com (Zhanyong Wan)
 
-
 // This sample shows how to write a more complex unit test for a class
 // that has multiple member functions.
 //
@@ -46,7 +45,8 @@
 // In this example, we test the MyString class (a simple string).
 
 // Tests the default c'tor.
-TEST(MyString, DefaultConstructor) {
+TEST( MyString, DefaultConstructor )
+{
   const MyString s;
 
   // Asserts that s.c_string() returns NULL.
@@ -69,41 +69,44 @@ TEST(MyString, DefaultConstructor) {
   // we have to live with this fact.
   //
   // </TechnicalDetails>
-  EXPECT_STREQ(NULL, s.c_string());
+  EXPECT_STREQ( NULL, s.c_string() );
 
-  EXPECT_EQ(0, s.Length());
+  EXPECT_EQ( 0, s.Length() );
 }
 
 const char kHelloString[] = "Hello, world!";
 
 // Tests the c'tor that accepts a C string.
-TEST(MyString, ConstructorFromCString) {
-  const MyString s(kHelloString);
-  EXPECT_TRUE(strcmp(s.c_string(), kHelloString) == 0);
-  EXPECT_EQ(sizeof(kHelloString)/sizeof(kHelloString[0]) - 1,
-            s.Length());
+TEST( MyString, ConstructorFromCString )
+{
+  const MyString s( kHelloString );
+  EXPECT_TRUE( strcmp( s.c_string(), kHelloString ) == 0 );
+  EXPECT_EQ( sizeof( kHelloString ) / sizeof( kHelloString[0] ) - 1,
+             s.Length() );
 }
 
 // Tests the copy c'tor.
-TEST(MyString, CopyConstructor) {
-  const MyString s1(kHelloString);
+TEST( MyString, CopyConstructor )
+{
+  const MyString s1( kHelloString );
   const MyString s2 = s1;
-  EXPECT_TRUE(strcmp(s2.c_string(), kHelloString) == 0);
+  EXPECT_TRUE( strcmp( s2.c_string(), kHelloString ) == 0 );
 }
 
 // Tests the Set method.
-TEST(MyString, Set) {
+TEST( MyString, Set )
+{
   MyString s;
 
-  s.Set(kHelloString);
-  EXPECT_TRUE(strcmp(s.c_string(), kHelloString) == 0);
+  s.Set( kHelloString );
+  EXPECT_TRUE( strcmp( s.c_string(), kHelloString ) == 0 );
 
   // Set should work when the input pointer is the same as the one
   // already in the MyString object.
-  s.Set(s.c_string());
-  EXPECT_TRUE(strcmp(s.c_string(), kHelloString) == 0);
+  s.Set( s.c_string() );
+  EXPECT_TRUE( strcmp( s.c_string(), kHelloString ) == 0 );
 
   // Can we set the MyString to NULL?
-  s.Set(NULL);
-  EXPECT_STREQ(NULL, s.c_string());
+  s.Set( NULL );
+  EXPECT_STREQ( NULL, s.c_string() );
 }

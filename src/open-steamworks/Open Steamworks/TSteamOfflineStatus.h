@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -20,12 +20,10 @@
 #pragma once
 #endif
 
-
 typedef struct TSteamOfflineStatus
 {
-	int eOfflineNow;
-	int eOfflineNextSession;
+  int eOfflineNow;
+  int eOfflineNextSession;
 } TSteamOfflineStatus;
 
-
-#endif // TSTEAMOFFLINESTATUS_H
+#endif  // TSTEAMOFFLINESTATUS_H

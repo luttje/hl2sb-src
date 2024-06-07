@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,9 +22,9 @@
 
 typedef struct TSteamProgress
 {
-	int bValid;                        // non-zero if call provides progress info
-	unsigned int uPercentDone;         // 0 to 100 if bValid
-	char szProgress[ STEAM_MAX_PATH ]; // additional progress info
+  int bValid;                       // non-zero if call provides progress info
+  unsigned int uPercentDone;        // 0 to 100 if bValid
+  char szProgress[STEAM_MAX_PATH];  // additional progress info
 } TSteamProgress;
 
-#endif // TSTEAMPROGRESS_H
+#endif  // TSTEAMPROGRESS_H

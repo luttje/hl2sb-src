@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -14,7 +14,7 @@
 #endif
 
 #if defined( CLIENT_DLL )
-	#define CHL2MPScriptedWeapon C_HL2MPScriptedWeapon
+#define CHL2MPScriptedWeapon C_HL2MPScriptedWeapon
 #endif
 
 //=========================================================
@@ -22,92 +22,92 @@
 //=========================================================
 class CHL2MPScriptedWeapon : public CBaseHL2MPCombatWeapon
 {
-public:
-	DECLARE_CLASS( CHL2MPScriptedWeapon, CWeaponHL2MPBase );
-	DECLARE_DATADESC();
+ public:
+  DECLARE_CLASS( CHL2MPScriptedWeapon, CWeaponHL2MPBase );
+  DECLARE_DATADESC();
 
-	CHL2MPScriptedWeapon();
-	~CHL2MPScriptedWeapon();
+  CHL2MPScriptedWeapon();
+  ~CHL2MPScriptedWeapon();
 
-	bool			IsScripted( void ) const { return true; }
-	
-	DECLARE_NETWORKCLASS(); 
-	DECLARE_PREDICTABLE();
-	// DECLARE_ACTTABLE();
+  bool IsScripted( void ) const
+  {
+    return true;
+  }
 
-	acttable_t m_acttable[LUA_MAX_WEAPON_ACTIVITIES];
-	acttable_t *ActivityList( void );
-	int ActivityListCount( void );
+  DECLARE_NETWORKCLASS();
+  DECLARE_PREDICTABLE();
+  // DECLARE_ACTTABLE();
 
-	void			Precache( void );
-	void			InitScriptedWeapon( void );
+  acttable_t m_acttable[LUA_MAX_WEAPON_ACTIVITIES];
+  acttable_t *ActivityList( void );
+  int ActivityListCount( void );
 
-	void	PrimaryAttack( void );
-	void	SecondaryAttack( void );
+  void Precache( void );
+  void InitScriptedWeapon( void );
 
-	// Firing animations
-	virtual Activity		GetDrawActivity( void );
+  void PrimaryAttack( void );
+  void SecondaryAttack( void );
 
-	// Default calls through to m_hOwner, but plasma weapons can override and shoot projectiles here.
-	virtual void	ItemPostFrame( void );
-	virtual void	ItemBusyFrame( void );
-	virtual void	FireBullets( const FireBulletsInfo_t &info );
-	virtual bool	Reload();
-	
-	virtual bool	Deploy( void );
-	virtual bool	Holster( CBaseCombatWeapon *pSwitchingTo );
+  // Firing animations
+  virtual Activity GetDrawActivity( void );
+
+  // Default calls through to m_hOwner, but plasma weapons can override and shoot projectiles here.
+  virtual void ItemPostFrame( void );
+  virtual void ItemBusyFrame( void );
+  virtual void FireBullets( const FireBulletsInfo_t &info );
+  virtual bool Reload();
+
+  virtual bool Deploy( void );
+  virtual bool Holster( CBaseCombatWeapon *pSwitchingTo );
 
 #ifdef CLIENT_DLL
-	virtual void	OnDataChanged( DataUpdateType_t updateType );
-	virtual const char *GetScriptedClassname( void );
+  virtual void OnDataChanged( DataUpdateType_t updateType );
+  virtual const char *GetScriptedClassname( void );
 #endif
 
-	virtual const Vector &GetBulletSpread( void );
+  virtual const Vector &GetBulletSpread( void );
 
-public:
+ public:
+  // Weapon info accessors for data in the weapon's data file
+  CHL2MPSWeaponInfo *m_pLuaWeaponInfo;
+  virtual const FileWeaponInfo_t &GetWpnData( void ) const;
+  virtual const char *GetViewModel( int viewmodelindex = 0 ) const;
+  virtual const char *GetWorldModel( void ) const;
+  virtual const char *GetAnimPrefix( void ) const;
+  virtual int GetMaxClip1( void ) const;
+  virtual int GetMaxClip2( void ) const;
+  virtual int GetDefaultClip1( void ) const;
+  virtual int GetDefaultClip2( void ) const;
+  virtual int GetWeight( void ) const;
+  virtual bool AllowsAutoSwitchTo( void ) const;
+  virtual bool AllowsAutoSwitchFrom( void ) const;
+  virtual int GetWeaponFlags( void ) const;
+  virtual int GetSlot( void ) const;
+  virtual int GetPosition( void ) const;
+  virtual char const *GetPrintName( void ) const;
+  bool IsMeleeWeapon() const;
 
-	// Weapon info accessors for data in the weapon's data file
-	CHL2MPSWeaponInfo *m_pLuaWeaponInfo;
-	virtual const FileWeaponInfo_t	&GetWpnData( void ) const;
-	virtual const char		*GetViewModel( int viewmodelindex = 0 ) const;
-	virtual const char		*GetWorldModel( void ) const;
-	virtual const char		*GetAnimPrefix( void ) const;
-	virtual int				GetMaxClip1( void ) const;
-	virtual int				GetMaxClip2( void ) const;
-	virtual int				GetDefaultClip1( void ) const;
-	virtual int				GetDefaultClip2( void ) const;
-	virtual int				GetWeight( void ) const;
-	virtual bool			AllowsAutoSwitchTo( void ) const;
-	virtual bool			AllowsAutoSwitchFrom( void ) const;
-	virtual int				GetWeaponFlags( void ) const;
-	virtual int				GetSlot( void ) const;
-	virtual int				GetPosition( void ) const;
-	virtual char const		*GetPrintName( void ) const;
-	bool					IsMeleeWeapon() const;
-
-public:
+ public:
 // Server Only Methods
 #if !defined( CLIENT_DLL )
 
-	virtual int				CapabilitiesGet( void );
+  virtual int CapabilitiesGet( void );
 
 // Client only methods
 #else
 
-	// Returns the aiment render origin + angles
-	virtual int				DrawModel( int flags );
+  // Returns the aiment render origin + angles
+  virtual int DrawModel( int flags );
 
-#endif // End client-only methods
+#endif  // End client-only methods
 
-private:
-	
-	CHL2MPScriptedWeapon( const CHL2MPScriptedWeapon & );
+ private:
+  CHL2MPScriptedWeapon( const CHL2MPScriptedWeapon & );
 
-	CNetworkString( m_iScriptedClassname, MAX_WEAPON_STRING );
-
+  CNetworkString( m_iScriptedClassname, MAX_WEAPON_STRING );
 };
 
 void RegisterScriptedWeapon( const char *szClassname );
 void ResetWeaponFactoryDatabase( void );
 
-#endif // BASEHLCOMBATWEAPON_H
+#endif  // BASEHLCOMBATWEAPON_H

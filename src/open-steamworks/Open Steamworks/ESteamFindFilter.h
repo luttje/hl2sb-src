@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -20,11 +20,11 @@
 #pragma once
 #endif
 
-typedef enum ESteamFindFilter						/* Filter elements returned by SteamFind{First,Next} */
+typedef enum ESteamFindFilter /* Filter elements returned by SteamFind{First,Next} */
 {
-	eSteamFindLocalOnly,			/* limit search to local filesystem */
-	eSteamFindRemoteOnly,			/* limit search to remote repository */
-	eSteamFindAll					/* do not limit search (duplicates allowed) */
+  eSteamFindLocalOnly,  /* limit search to local filesystem */
+  eSteamFindRemoteOnly, /* limit search to remote repository */
+  eSteamFindAll         /* do not limit search (duplicates allowed) */
 } ESteamFindFilter;
 
-#endif // ESTEAMFINDFILTER_H
+#endif  // ESTEAMFINDFILTER_H

@@ -50,28 +50,34 @@
 using google::protobuf::io::FileOutputStream;
 using google::protobuf::io::GzipOutputStream;
 
-int main(int argc, const char** argv) {
-  FileOutputStream fout(STDOUT_FILENO);
-  GzipOutputStream out(&fout);
+int main( int argc, const char** argv )
+{
+  FileOutputStream fout( STDOUT_FILENO );
+  GzipOutputStream out( &fout );
   int readlen;
 
-  while (true) {
+  while ( true )
+  {
     void* outptr;
     int outlen;
     bool ok;
-    do {
-      ok = out.Next(&outptr, &outlen);
-      if (!ok) {
+    do
+    {
+      ok = out.Next( &outptr, &outlen );
+      if ( !ok )
+      {
         break;
       }
-    } while (outlen <= 0);
-    readlen = read(STDIN_FILENO, outptr, outlen);
-    if (readlen <= 0) {
-      out.BackUp(outlen);
+    } while ( outlen <= 0 );
+    readlen = read( STDIN_FILENO, outptr, outlen );
+    if ( readlen <= 0 )
+    {
+      out.BackUp( outlen );
       break;
     }
-    if (readlen < outlen) {
-      out.BackUp(outlen - readlen);
+    if ( readlen < outlen )
+    {
+      out.BackUp( outlen - readlen );
     }
   }
 

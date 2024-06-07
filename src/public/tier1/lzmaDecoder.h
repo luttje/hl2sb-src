@@ -11,31 +11,30 @@
 #pragma once
 
 #if !defined( _X360 )
-#define LZMA_ID				(('A'<<24)|('M'<<16)|('Z'<<8)|('L'))
+#define LZMA_ID ( ( 'A' << 24 ) | ( 'M' << 16 ) | ( 'Z' << 8 ) | ( 'L' ) )
 #else
-#define LZMA_ID				(('L'<<24)|('Z'<<16)|('M'<<8)|('A'))
+#define LZMA_ID ( ( 'L' << 24 ) | ( 'Z' << 16 ) | ( 'M' << 8 ) | ( 'A' ) )
 #endif
 
 // bind the buffer for correct identification
-#pragma pack(1)
+#pragma pack( 1 )
 struct lzma_header_t
 {
-	unsigned int	id;
-	unsigned int	actualSize;		// always little endian
-	unsigned int	lzmaSize;		// always little endian
-	unsigned char	properties[5];
+  unsigned int id;
+  unsigned int actualSize;  // always little endian
+  unsigned int lzmaSize;    // always little endian
+  unsigned char properties[5];
 };
 #pragma pack()
 
 class CLZMA
 {
-public:
-	unsigned int	Uncompress( unsigned char *pInput, unsigned char *pOutput );
-	bool			IsCompressed( unsigned char *pInput );
-	unsigned int	GetActualSize( unsigned char *pInput );
+ public:
+  unsigned int Uncompress( unsigned char *pInput, unsigned char *pOutput );
+  bool IsCompressed( unsigned char *pInput );
+  unsigned int GetActualSize( unsigned char *pInput );
 
-private:
+ private:
 };
 
 #endif
-

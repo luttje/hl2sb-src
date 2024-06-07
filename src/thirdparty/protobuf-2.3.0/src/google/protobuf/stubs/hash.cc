@@ -32,8 +32,10 @@
 
 #include <google/protobuf/stubs/hash.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 // Nothing needed here right now.
 

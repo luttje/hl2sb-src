@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,4 +22,4 @@
 
 #define STEAMAPPTICKET_INTERFACE_VERSION_001 "STEAMAPPTICKET_INTERFACE_VERSION001"
 
-#endif // APPTICKETCOMMON_H
+#endif  // APPTICKETCOMMON_H

@@ -41,12 +41,14 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/stubs/common.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 // Defined in other files.
-class Descriptor;        // descriptor.h
-class DescriptorPool;    // descriptor.h
+class Descriptor;      // descriptor.h
+class DescriptorPool;  // descriptor.h
 
 // Constructs implementations of Message which can emulate types which are not
 // known at compile-time.
@@ -65,7 +67,8 @@ class DescriptorPool;    // descriptor.h
 // encapsulates this "cache".  All DynamicMessages of the same type created
 // from the same factory will share the same support data.  Any Descriptors
 // used with a particular factory must outlive the factory.
-class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory {
+class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory
+{
  public:
   // Construct a DynamicMessageFactory that will search for extensions in
   // the DescriptorPool in which the exendee is defined.
@@ -78,7 +81,7 @@ class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory {
   //   parser to look for extensions in an alternate pool.  However, note that
   //   this is almost never what you want to do.  Almost all users should use
   //   the zero-arg constructor.
-  DynamicMessageFactory(const DescriptorPool* pool);
+  DynamicMessageFactory( const DescriptorPool* pool );
 
   ~DynamicMessageFactory();
 
@@ -88,7 +91,8 @@ class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory {
   // then it should delegate to MessageFactory::generated_factory() instead
   // of constructing a dynamic implementation of the message.  In theory there
   // is no down side to doing this, so it may become the default in the future.
-  void SetDelegateToGeneratedFactory(bool enable) {
+  void SetDelegateToGeneratedFactory( bool enable )
+  {
     delegate_to_generated_factory_ = enable;
   }
 
@@ -109,7 +113,7 @@ class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory {
   // outlive the DynamicMessageFactory.
   //
   // The method is thread-safe.
-  const Message* GetPrototype(const Descriptor* type);
+  const Message* GetPrototype( const Descriptor* type );
 
  private:
   const DescriptorPool* pool_;
@@ -121,13 +125,13 @@ class LIBPROTOBUF_EXPORT DynamicMessageFactory : public MessageFactory {
   // public header (for good reason), but dynamic_message.h is, and public
   // headers may only #include other public headers.
   struct PrototypeMap;
-  scoped_ptr<PrototypeMap> prototypes_;
+  scoped_ptr< PrototypeMap > prototypes_;
   mutable Mutex prototypes_mutex_;
 
   friend class DynamicMessage;
-  const Message* GetPrototypeNoLock(const Descriptor* type);
+  const Message* GetPrototypeNoLock( const Descriptor* type );
 
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(DynamicMessageFactory);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( DynamicMessageFactory );
 };
 
 }  // namespace protobuf

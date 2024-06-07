@@ -45,25 +45,32 @@ using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
-namespace {
+namespace
+{
 
 // We will track memory used by this class.
-class Water {
+class Water
+{
  public:
   // Normal Water declarations go here.
 
   // operator new and operator delete help us control water allocation.
-  void* operator new(size_t allocation_size) {
+  void* operator new( size_t allocation_size )
+  {
     allocated_++;
-    return malloc(allocation_size);
+    return malloc( allocation_size );
   }
 
-  void operator delete(void* block, size_t allocation_size) {
+  void operator delete( void* block, size_t allocation_size )
+  {
     allocated_--;
-    free(block);
+    free( block );
   }
 
-  static int allocated() { return allocated_; }
+  static int allocated()
+  {
+    return allocated_;
+  }
 
  private:
   static int allocated_;
@@ -75,54 +82,62 @@ int Water::allocated_ = 0;
 // destroyed by each test, and reports a failure if a test leaks some Water
 // objects. It does this by comparing the number of live Water objects at
 // the beginning of a test and at the end of a test.
-class LeakChecker : public EmptyTestEventListener {
+class LeakChecker : public EmptyTestEventListener
+{
  private:
   // Called before a test starts.
-  virtual void OnTestStart(const TestInfo& test_info) {
+  virtual void OnTestStart( const TestInfo& test_info )
+  {
     initially_allocated_ = Water::allocated();
   }
 
   // Called after a test ends.
-  virtual void OnTestEnd(const TestInfo& test_info) {
+  virtual void OnTestEnd( const TestInfo& test_info )
+  {
     int difference = Water::allocated() - initially_allocated_;
 
     // You can generate a failure in any event handler except
     // OnTestPartResult. Just use an appropriate Google Test assertion to do
     // it.
-    EXPECT_TRUE(difference <= 0)
+    EXPECT_TRUE( difference <= 0 )
         << "Leaked " << difference << " unit(s) of Water!";
   }
 
   int initially_allocated_;
 };
 
-TEST(ListenersTest, DoesNotLeak) {
+TEST( ListenersTest, DoesNotLeak )
+{
   Water* water = new Water;
   delete water;
 }
 
 // This should fail when the --check_for_leaks command line flag is
 // specified.
-TEST(ListenersTest, LeaksWater) {
+TEST( ListenersTest, LeaksWater )
+{
   Water* water = new Water;
-  EXPECT_TRUE(water != NULL);
+  EXPECT_TRUE( water != NULL );
 }
 
 }  // namespace
 
-int main(int argc, char **argv) {
-  InitGoogleTest(&argc, argv);
+int main( int argc, char** argv )
+{
+  InitGoogleTest( &argc, argv );
 
   bool check_for_leaks = false;
-  if (argc > 1 && strcmp(argv[1], "--check_for_leaks") == 0 )
+  if ( argc > 1 && strcmp( argv[1], "--check_for_leaks" ) == 0 )
     check_for_leaks = true;
   else
-    printf("%s\n", "Run this program with --check_for_leaks to enable "
-           "custom leak checking in the tests.");
+    printf( "%s\n",
+            "Run this program with --check_for_leaks to enable "
+            "custom leak checking in the tests." );
 
   // If we are given the --check_for_leaks command line flag, installs the
   // leak checker.
-  if (check_for_leaks) {
+  if ( check_for_leaks )
+  {
     TestEventListeners& listeners = UnitTest::GetInstance()->listeners();
 
     // Adds the leak checker to the end of the test event listener list,
@@ -139,7 +154,7 @@ int main(int argc, char **argv) {
     //
     // We don't need to worry about deleting the new listener later, as
     // Google Test will do it.
-    listeners.Append(new LeakChecker);
+    listeners.Append( new LeakChecker );
   }
   return RUN_ALL_TESTS();
 }

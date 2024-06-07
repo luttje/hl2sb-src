@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -10,72 +10,67 @@
 #pragma once
 #endif
 
-
 #include "weapon_sdkbase.h"
 
-
 #ifdef CLIENT_DLL
-	
-	#define CBaseSDKGrenade C_BaseSDKGrenade
+
+#define CBaseSDKGrenade C_BaseSDKGrenade
 
 #endif
-
 
 class CBaseSDKGrenade : public CWeaponSDKBase
 {
-public:
-	DECLARE_CLASS( CBaseSDKGrenade, CWeaponSDKBase );
-	DECLARE_NETWORKCLASS();
-	DECLARE_PREDICTABLE();
+ public:
+  DECLARE_CLASS( CBaseSDKGrenade, CWeaponSDKBase );
+  DECLARE_NETWORKCLASS();
+  DECLARE_PREDICTABLE();
 
-	CBaseSDKGrenade();
+  CBaseSDKGrenade();
 
-	virtual void	Precache();
+  virtual void Precache();
 
-	virtual bool	Deploy();
-	bool			Holster( CBaseCombatWeapon *pSwitchingTo );
+  virtual bool Deploy();
+  bool Holster( CBaseCombatWeapon *pSwitchingTo );
 
-	void			PrimaryAttack();
-	void			SecondaryAttack();
+  void PrimaryAttack();
+  void SecondaryAttack();
 
-	bool			Reload();
+  bool Reload();
 
-	virtual void	ItemPostFrame();
-	
-	void			DecrementAmmo( CBaseCombatCharacter *pOwner );
-	virtual void	StartGrenadeThrow();
-	virtual void	ThrowGrenade();
-	virtual void	DropGrenade();
+  virtual void ItemPostFrame();
 
-	bool IsPinPulled() const;
+  void DecrementAmmo( CBaseCombatCharacter *pOwner );
+  virtual void StartGrenadeThrow();
+  virtual void ThrowGrenade();
+  virtual void DropGrenade();
+
+  bool IsPinPulled() const;
 
 #ifndef CLIENT_DLL
-	DECLARE_DATADESC();
+  DECLARE_DATADESC();
 
-	virtual bool AllowsAutoSwitchFrom( void ) const;
+  virtual bool AllowsAutoSwitchFrom( void ) const;
 
-	int		CapabilitiesGet();
-	
-	// Each derived grenade class implements this.
-	virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon );
-	// check a throw from vecSrc.  If not valid, move the position back along the line to vecEye
-	void	CheckThrowPosition( CBasePlayer *pPlayer, const Vector &vecEye, Vector &vecSrc );
+  int CapabilitiesGet();
+
+  // Each derived grenade class implements this.
+  virtual void EmitGrenade( Vector vecSrc, QAngle vecAngles, Vector vecVel, AngularImpulse angImpulse, CBasePlayer *pPlayer, CWeaponSDKBase *pWeapon );
+  // check a throw from vecSrc.  If not valid, move the position back along the line to vecEye
+  void CheckThrowPosition( CBasePlayer *pPlayer, const Vector &vecEye, Vector &vecSrc );
 #endif
 
-protected:
-	CNetworkVar( bool, m_bRedraw );	// Draw the weapon again after throwing a grenade
-	CNetworkVar( bool, m_bPinPulled );	// Set to true when the pin has been pulled but the grenade hasn't been thrown yet.
-	CNetworkVar( float, m_fThrowTime ); // the time at which the grenade will be thrown.  If this value is 0 then the time hasn't been set yet.
+ protected:
+  CNetworkVar( bool, m_bRedraw );      // Draw the weapon again after throwing a grenade
+  CNetworkVar( bool, m_bPinPulled );   // Set to true when the pin has been pulled but the grenade hasn't been thrown yet.
+  CNetworkVar( float, m_fThrowTime );  // the time at which the grenade will be thrown.  If this value is 0 then the time hasn't been set yet.
 
-private:
-	CBaseSDKGrenade( const CBaseSDKGrenade & ) {}
+ private:
+  CBaseSDKGrenade( const CBaseSDKGrenade & ) {}
 };
-
 
 inline bool CBaseSDKGrenade::IsPinPulled() const
 {
-	return m_bPinPulled;
+  return m_bPinPulled;
 }
 
-
-#endif // WEAPON_BASESDKGRENADE_H
+#endif  // WEAPON_BASESDKGRENADE_H

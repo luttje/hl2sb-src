@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -20,25 +20,19 @@
 #pragma once
 #endif
 
-
-
 #define STEAMGAMESTATS_INTERFACE_VERSION_001 "SteamGameStats001"
 
 #define CLIENTGAMESTATS_INTERFACE_VERSION "CLIENTGAMESTATS_INTERFACE_VERSION001"
-
-
 
 //-----------------------------------------------------------------------------
 // Purpose: nAccountType for GetNewSession
 //-----------------------------------------------------------------------------
 typedef enum EGameStatsAccountType
 {
-	k_EGameStatsAccountType_Steam = 1,				// ullAccountID is a 64-bit SteamID for a player
-	k_EGameStatsAccountType_Xbox = 2,				// ullAccountID is a 64-bit XUID
-	k_EGameStatsAccountType_SteamGameServer = 3,	// ullAccountID is a 64-bit SteamID for a game server
+  k_EGameStatsAccountType_Steam = 1,            // ullAccountID is a 64-bit SteamID for a player
+  k_EGameStatsAccountType_Xbox = 2,             // ullAccountID is a 64-bit XUID
+  k_EGameStatsAccountType_SteamGameServer = 3,  // ullAccountID is a 64-bit SteamID for a game server
 } EGameStatsAccountType;
-
-
 
 #pragma pack( push, 8 )
 //-----------------------------------------------------------------------------
@@ -46,27 +40,30 @@ typedef enum EGameStatsAccountType
 //-----------------------------------------------------------------------------
 struct GameStatsSessionIssued_t
 {
-	enum { k_iCallback = k_iSteamGameStatsCallbacks + 1 };
+  enum
+  {
+    k_iCallback = k_iSteamGameStatsCallbacks + 1
+  };
 
-	uint64	m_ulSessionID;
-	EResult	m_eResult;
-	bool	m_bCollectingAny;
-	bool	m_bCollectingDetails;
+  uint64 m_ulSessionID;
+  EResult m_eResult;
+  bool m_bCollectingAny;
+  bool m_bCollectingDetails;
 };
-
 
 //-----------------------------------------------------------------------------
 // Purpose: callback for EndSession() method
 //-----------------------------------------------------------------------------
 struct GameStatsSessionClosed_t
 {
-	enum { k_iCallback = k_iSteamGameStatsCallbacks + 2 };
+  enum
+  {
+    k_iCallback = k_iSteamGameStatsCallbacks + 2
+  };
 
-	uint64	m_ulSessionID;
-	EResult	m_eResult;
+  uint64 m_ulSessionID;
+  EResult m_eResult;
 };
 #pragma pack( pop )
 
-
-
-#endif // GAMESTATSCOMMON_H
+#endif  // GAMESTATSCOMMON_H

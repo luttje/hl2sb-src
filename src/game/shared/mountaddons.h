@@ -1,6 +1,6 @@
 //========== Copyleft © 2011, Team Sandbox, Some rights reserved. ===========//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //===========================================================================//
@@ -13,4 +13,4 @@
 
 void MountAddons();
 
-#endif // MOUNTADDONS_H
+#endif  // MOUNTADDONS_H

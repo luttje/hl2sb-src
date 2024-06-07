@@ -12,4 +12,4 @@
 
 bool PatchTicketValidation();
 
-#endif // TICKETFIX_H
+#endif  // TICKETFIX_H

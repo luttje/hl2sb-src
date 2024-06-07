@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,11 +22,11 @@
 
 typedef enum ESteamAppUpdateStatsQueryType
 {
-	ePhysicalBytesReceivedThisSession = 1,
-	eAppReadyToLaunchStatus = 2,
-	eAppPreloadStatus = 3,
-	eAppEntireDepot = 4,
-	eCacheBytesPresent = 5,
+  ePhysicalBytesReceivedThisSession = 1,
+  eAppReadyToLaunchStatus = 2,
+  eAppPreloadStatus = 3,
+  eAppEntireDepot = 4,
+  eCacheBytesPresent = 5,
 } ESteamAppUpdateStatsQueryType;
 
-#endif // ESTEAMAPPUPDATESTATSQUERYTYPE_H
+#endif  // ESTEAMAPPUPDATESTATSQUERYTYPE_H

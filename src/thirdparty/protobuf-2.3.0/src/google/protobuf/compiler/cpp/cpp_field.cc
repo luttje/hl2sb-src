@@ -44,82 +44,97 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/strutil.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace cpp {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace cpp
+{
 
 using internal::WireFormat;
 
-void SetCommonFieldVariables(const FieldDescriptor* descriptor,
-                             map<string, string>* variables) {
-  (*variables)["name"] = FieldName(descriptor);
-  (*variables)["index"] = SimpleItoa(descriptor->index());
-  (*variables)["number"] = SimpleItoa(descriptor->number());
-  (*variables)["classname"] = ClassName(FieldScope(descriptor), false);
-  (*variables)["declared_type"] = DeclaredTypeMethodName(descriptor->type());
+void SetCommonFieldVariables( const FieldDescriptor* descriptor,
+                              map< string, string >* variables )
+{
+  ( *variables )["name"] = FieldName( descriptor );
+  ( *variables )["index"] = SimpleItoa( descriptor->index() );
+  ( *variables )["number"] = SimpleItoa( descriptor->number() );
+  ( *variables )["classname"] = ClassName( FieldScope( descriptor ), false );
+  ( *variables )["declared_type"] = DeclaredTypeMethodName( descriptor->type() );
 
-  (*variables)["tag_size"] = SimpleItoa(
-    WireFormat::TagSize(descriptor->number(), descriptor->type()));
-  (*variables)["deprecation"] = descriptor->options().deprecated()
-      ? " PROTOBUF_DEPRECATED" : "";
-
+  ( *variables )["tag_size"] = SimpleItoa(
+      WireFormat::TagSize( descriptor->number(), descriptor->type() ) );
+  ( *variables )["deprecation"] = descriptor->options().deprecated()
+                                      ? " PROTOBUF_DEPRECATED"
+                                      : "";
 }
 
 FieldGenerator::~FieldGenerator() {}
 
 void FieldGenerator::
-GenerateMergeFromCodedStreamWithPacking(io::Printer* printer) const {
+    GenerateMergeFromCodedStreamWithPacking( io::Printer* printer ) const
+{
   // Reaching here indicates a bug. Cases are:
   //   - This FieldGenerator should support packing, but this method should be
   //     overridden.
   //   - This FieldGenerator doesn't support packing, and this method should
   //     never have been called.
-  GOOGLE_LOG(FATAL) << "GenerateMergeFromCodedStreamWithPacking() "
-             << "called on field generator that does not support packing.";
-
+  GOOGLE_LOG( FATAL ) << "GenerateMergeFromCodedStreamWithPacking() "
+                      << "called on field generator that does not support packing.";
 }
 
-FieldGeneratorMap::FieldGeneratorMap(const Descriptor* descriptor)
-  : descriptor_(descriptor),
-    field_generators_(
-      new scoped_ptr<FieldGenerator>[descriptor->field_count()]) {
+FieldGeneratorMap::FieldGeneratorMap( const Descriptor* descriptor )
+    : descriptor_( descriptor ),
+      field_generators_(
+          new scoped_ptr< FieldGenerator >[descriptor->field_count()] )
+{
   // Construct all the FieldGenerators.
-  for (int i = 0; i < descriptor->field_count(); i++) {
-    field_generators_[i].reset(MakeGenerator(descriptor->field(i)));
+  for ( int i = 0; i < descriptor->field_count(); i++ )
+  {
+    field_generators_[i].reset( MakeGenerator( descriptor->field( i ) ) );
   }
 }
 
-FieldGenerator* FieldGeneratorMap::MakeGenerator(const FieldDescriptor* field) {
-  if (field->is_repeated()) {
-    switch (field->cpp_type()) {
+FieldGenerator* FieldGeneratorMap::MakeGenerator( const FieldDescriptor* field )
+{
+  if ( field->is_repeated() )
+  {
+    switch ( field->cpp_type() )
+    {
       case FieldDescriptor::CPPTYPE_MESSAGE:
-        return new RepeatedMessageFieldGenerator(field);
+        return new RepeatedMessageFieldGenerator( field );
       case FieldDescriptor::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
+        switch ( field->options().ctype() )
+        {
           default:  // RepeatedStringFieldGenerator handles unknown ctypes.
           case FieldOptions::STRING:
-            return new RepeatedStringFieldGenerator(field);
+            return new RepeatedStringFieldGenerator( field );
         }
       case FieldDescriptor::CPPTYPE_ENUM:
-        return new RepeatedEnumFieldGenerator(field);
+        return new RepeatedEnumFieldGenerator( field );
       default:
-        return new RepeatedPrimitiveFieldGenerator(field);
+        return new RepeatedPrimitiveFieldGenerator( field );
     }
-  } else {
-    switch (field->cpp_type()) {
+  }
+  else
+  {
+    switch ( field->cpp_type() )
+    {
       case FieldDescriptor::CPPTYPE_MESSAGE:
-        return new MessageFieldGenerator(field);
+        return new MessageFieldGenerator( field );
       case FieldDescriptor::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
+        switch ( field->options().ctype() )
+        {
           default:  // StringFieldGenerator handles unknown ctypes.
           case FieldOptions::STRING:
-            return new StringFieldGenerator(field);
+            return new StringFieldGenerator( field );
         }
       case FieldDescriptor::CPPTYPE_ENUM:
-        return new EnumFieldGenerator(field);
+        return new EnumFieldGenerator( field );
       default:
-        return new PrimitiveFieldGenerator(field);
+        return new PrimitiveFieldGenerator( field );
     }
   }
 }
@@ -127,11 +142,11 @@ FieldGenerator* FieldGeneratorMap::MakeGenerator(const FieldDescriptor* field) {
 FieldGeneratorMap::~FieldGeneratorMap() {}
 
 const FieldGenerator& FieldGeneratorMap::get(
-    const FieldDescriptor* field) const {
-  GOOGLE_CHECK_EQ(field->containing_type(), descriptor_);
+    const FieldDescriptor* field ) const
+{
+  GOOGLE_CHECK_EQ( field->containing_type(), descriptor_ );
   return *field_generators_[field->index()];
 }
-
 
 }  // namespace cpp
 }  // namespace compiler

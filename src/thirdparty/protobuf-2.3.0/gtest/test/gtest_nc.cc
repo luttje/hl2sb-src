@@ -44,182 +44,202 @@
 
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+int main( int argc, char** argv )
+{
+  testing::InitGoogleTest( &argc, argv );
   RUN_ALL_TESTS();  // This line shouldn't compile.
 }
 
-#elif defined(TEST_USER_CANNOT_INCLUDE_GTEST_INTERNAL_INL_H)
+#elif defined( TEST_USER_CANNOT_INCLUDE_GTEST_INTERNAL_INL_H )
 // Tests that a user cannot include gtest-internal-inl.h in his code.
 
 #include "src/gtest-internal-inl.h"
 
-#elif defined(TEST_CATCHES_DECLARING_SETUP_IN_TEST_FIXTURE_WITH_TYPO)
+#elif defined( TEST_CATCHES_DECLARING_SETUP_IN_TEST_FIXTURE_WITH_TYPO )
 // Tests that the compiler catches the typo when a user declares a
 // Setup() method in a test fixture.
 
 #include <gtest/gtest.h>
 
-class MyTest : public testing::Test {
+class MyTest : public testing::Test
+{
  protected:
   void Setup() {}
 };
 
-#elif defined(TEST_CATCHES_CALLING_SETUP_IN_TEST_WITH_TYPO)
+#elif defined( TEST_CATCHES_CALLING_SETUP_IN_TEST_WITH_TYPO )
 // Tests that the compiler catches the typo when a user calls Setup()
 // from a test fixture.
 
 #include <gtest/gtest.h>
 
-class MyTest : public testing::Test {
+class MyTest : public testing::Test
+{
  protected:
-  virtual void SetUp() {
+  virtual void SetUp()
+  {
     testing::Test::Setup();  // Tries to call SetUp() in the parent class.
   }
 };
 
-#elif defined(TEST_CATCHES_DECLARING_SETUP_IN_ENVIRONMENT_WITH_TYPO)
+#elif defined( TEST_CATCHES_DECLARING_SETUP_IN_ENVIRONMENT_WITH_TYPO )
 // Tests that the compiler catches the typo when a user declares a
 // Setup() method in a subclass of Environment.
 
 #include <gtest/gtest.h>
 
-class MyEnvironment : public testing::Environment {
+class MyEnvironment : public testing::Environment
+{
  public:
   void Setup() {}
 };
 
-#elif defined(TEST_CATCHES_CALLING_SETUP_IN_ENVIRONMENT_WITH_TYPO)
+#elif defined( TEST_CATCHES_CALLING_SETUP_IN_ENVIRONMENT_WITH_TYPO )
 // Tests that the compiler catches the typo when a user calls Setup()
 // in an Environment.
 
 #include <gtest/gtest.h>
 
-class MyEnvironment : public testing::Environment {
+class MyEnvironment : public testing::Environment
+{
  protected:
-  virtual void SetUp() {
+  virtual void SetUp()
+  {
     // Tries to call SetUp() in the parent class.
     testing::Environment::Setup();
   }
 };
 
-#elif defined(TEST_CATCHES_WRONG_CASE_IN_TYPED_TEST_P)
+#elif defined( TEST_CATCHES_WRONG_CASE_IN_TYPED_TEST_P )
 // Tests that the compiler catches using the wrong test case name in
 // TYPED_TEST_P.
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class FooTest : public testing::Test {
+template < typename T >
+class FooTest : public testing::Test
+{
 };
 
-template <typename T>
-class BarTest : public testing::Test {
+template < typename T >
+class BarTest : public testing::Test
+{
 };
 
-TYPED_TEST_CASE_P(FooTest);
-TYPED_TEST_P(BarTest, A) {}  // Wrong test case name.
-REGISTER_TYPED_TEST_CASE_P(FooTest, A);
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+TYPED_TEST_CASE_P( FooTest );
+TYPED_TEST_P( BarTest, A ) {}  // Wrong test case name.
+REGISTER_TYPED_TEST_CASE_P( FooTest, A );
+INSTANTIATE_TYPED_TEST_CASE_P( My, FooTest, testing::Types< int > );
 
-#elif defined(TEST_CATCHES_WRONG_CASE_IN_REGISTER_TYPED_TEST_CASE_P)
+#elif defined( TEST_CATCHES_WRONG_CASE_IN_REGISTER_TYPED_TEST_CASE_P )
 // Tests that the compiler catches using the wrong test case name in
 // REGISTER_TYPED_TEST_CASE_P.
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class FooTest : public testing::Test {
+template < typename T >
+class FooTest : public testing::Test
+{
 };
 
-template <typename T>
-class BarTest : public testing::Test {
+template < typename T >
+class BarTest : public testing::Test
+{
 };
 
-TYPED_TEST_CASE_P(FooTest);
-TYPED_TEST_P(FooTest, A) {}
-REGISTER_TYPED_TEST_CASE_P(BarTest, A);  // Wrong test case name.
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+TYPED_TEST_CASE_P( FooTest );
+TYPED_TEST_P( FooTest, A ) {}
+REGISTER_TYPED_TEST_CASE_P( BarTest, A );  // Wrong test case name.
+INSTANTIATE_TYPED_TEST_CASE_P( My, FooTest, testing::Types< int > );
 
-#elif defined(TEST_CATCHES_WRONG_CASE_IN_INSTANTIATE_TYPED_TEST_CASE_P)
+#elif defined( TEST_CATCHES_WRONG_CASE_IN_INSTANTIATE_TYPED_TEST_CASE_P )
 // Tests that the compiler catches using the wrong test case name in
 // INSTANTIATE_TYPED_TEST_CASE_P.
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class FooTest : public testing::Test {
+template < typename T >
+class FooTest : public testing::Test
+{
 };
 
-template <typename T>
-class BarTest : public testing::Test {
+template < typename T >
+class BarTest : public testing::Test
+{
 };
 
-TYPED_TEST_CASE_P(FooTest);
-TYPED_TEST_P(FooTest, A) {}
-REGISTER_TYPED_TEST_CASE_P(FooTest, A);
+TYPED_TEST_CASE_P( FooTest );
+TYPED_TEST_P( FooTest, A ) {}
+REGISTER_TYPED_TEST_CASE_P( FooTest, A );
 
 // Wrong test case name.
-INSTANTIATE_TYPED_TEST_CASE_P(My, BarTest, testing::Types<int>);
+INSTANTIATE_TYPED_TEST_CASE_P( My, BarTest, testing::Types< int > );
 
-#elif defined(TEST_CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX)
+#elif defined( TEST_CATCHES_INSTANTIATE_TYPED_TESET_CASE_P_WITH_SAME_NAME_PREFIX )
 // Tests that the compiler catches instantiating TYPED_TEST_CASE_P
 // twice with the same name prefix.
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class FooTest : public testing::Test {
+template < typename T >
+class FooTest : public testing::Test
+{
 };
 
-TYPED_TEST_CASE_P(FooTest);
-TYPED_TEST_P(FooTest, A) {}
-REGISTER_TYPED_TEST_CASE_P(FooTest, A);
+TYPED_TEST_CASE_P( FooTest );
+TYPED_TEST_P( FooTest, A ) {}
+REGISTER_TYPED_TEST_CASE_P( FooTest, A );
 
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<int>);
+INSTANTIATE_TYPED_TEST_CASE_P( My, FooTest, testing::Types< int > );
 
 // Wrong name prefix: "My" has been used.
-INSTANTIATE_TYPED_TEST_CASE_P(My, FooTest, testing::Types<double>);
+INSTANTIATE_TYPED_TEST_CASE_P( My, FooTest, testing::Types< double > );
 
-#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE)
+#elif defined( TEST_STATIC_ASSERT_TYPE_EQ_IS_NOT_A_TYPE )
 
 #include <gtest/gtest.h>
 
 // Tests that StaticAssertTypeEq<T1, T2> cannot be used as a type.
-testing::StaticAssertTypeEq<int, int> dummy;
+testing::StaticAssertTypeEq< int, int > dummy;
 
-#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE)
+#elif defined( TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_NAMESPACE )
 
 #include <gtest/gtest.h>
 
 // Tests that StaticAssertTypeEq<T1, T2> works in a namespace scope.
-static bool dummy = testing::StaticAssertTypeEq<int, const int>();
+static bool dummy = testing::StaticAssertTypeEq< int, const int >();
 
-#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_CLASS)
+#elif defined( TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_CLASS )
 
 #include <gtest/gtest.h>
 
-template <typename T>
-class Helper {
+template < typename T >
+class Helper
+{
  public:
   // Tests that StaticAssertTypeEq<T1, T2> works in a class.
-  Helper() { testing::StaticAssertTypeEq<int, T>(); }
+  Helper()
+  {
+    testing::StaticAssertTypeEq< int, T >();
+  }
 
   void DoSomething() {}
 };
 
-void Test() {
-  Helper<bool> h;
+void Test()
+{
+  Helper< bool > h;
   h.DoSomething();  // To avoid the "unused variable" warning.
 }
 
-#elif defined(TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_FUNCTION)
+#elif defined( TEST_STATIC_ASSERT_TYPE_EQ_WORKS_IN_FUNCTION )
 
 #include <gtest/gtest.h>
 
-void Test() {
+void Test()
+{
   // Tests that StaticAssertTypeEq<T1, T2> works inside a function.
-  testing::StaticAssertTypeEq<const int, int>();
+  testing::StaticAssertTypeEq< const int, int >();
 }
 
 #else
@@ -227,7 +247,8 @@ void Test() {
 
 #include <gtest/gtest.h>
 
-int main() {
+int main()
+{
   return RUN_ALL_TESTS();
 }
 

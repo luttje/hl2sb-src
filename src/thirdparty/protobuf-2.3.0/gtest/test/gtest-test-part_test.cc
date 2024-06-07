@@ -38,120 +38,135 @@ using testing::Test;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 
-namespace {
+namespace
+{
 
 // Tests the TestPartResult class.
 
 // The test fixture for testing TestPartResult.
-class TestPartResultTest : public Test {
+class TestPartResultTest : public Test
+{
  protected:
   TestPartResultTest()
-      : r1_(TestPartResult::kSuccess, "foo/bar.cc", 10, "Success!"),
-        r2_(TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure!"),
-        r3_(TestPartResult::kFatalFailure, NULL, -1, "Failure!") {}
+      : r1_( TestPartResult::kSuccess, "foo/bar.cc", 10, "Success!" ),
+        r2_( TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure!" ),
+        r3_( TestPartResult::kFatalFailure, NULL, -1, "Failure!" ) {}
 
   TestPartResult r1_, r2_, r3_;
 };
 
 // Tests TestPartResult::type().
-TEST_F(TestPartResultTest, type) {
-  EXPECT_EQ(TestPartResult::kSuccess, r1_.type());
-  EXPECT_EQ(TestPartResult::kNonFatalFailure, r2_.type());
-  EXPECT_EQ(TestPartResult::kFatalFailure, r3_.type());
+TEST_F( TestPartResultTest, type )
+{
+  EXPECT_EQ( TestPartResult::kSuccess, r1_.type() );
+  EXPECT_EQ( TestPartResult::kNonFatalFailure, r2_.type() );
+  EXPECT_EQ( TestPartResult::kFatalFailure, r3_.type() );
 }
 
 // Tests TestPartResult::file_name().
-TEST_F(TestPartResultTest, file_name) {
-  EXPECT_STREQ("foo/bar.cc", r1_.file_name());
-  EXPECT_STREQ(NULL, r3_.file_name());
+TEST_F( TestPartResultTest, file_name )
+{
+  EXPECT_STREQ( "foo/bar.cc", r1_.file_name() );
+  EXPECT_STREQ( NULL, r3_.file_name() );
 }
 
 // Tests TestPartResult::line_number().
-TEST_F(TestPartResultTest, line_number) {
-  EXPECT_EQ(10, r1_.line_number());
-  EXPECT_EQ(-1, r2_.line_number());
+TEST_F( TestPartResultTest, line_number )
+{
+  EXPECT_EQ( 10, r1_.line_number() );
+  EXPECT_EQ( -1, r2_.line_number() );
 }
 
 // Tests TestPartResult::message().
-TEST_F(TestPartResultTest, message) {
-  EXPECT_STREQ("Success!", r1_.message());
+TEST_F( TestPartResultTest, message )
+{
+  EXPECT_STREQ( "Success!", r1_.message() );
 }
 
 // Tests TestPartResult::passed().
-TEST_F(TestPartResultTest, Passed) {
-  EXPECT_TRUE(r1_.passed());
-  EXPECT_FALSE(r2_.passed());
-  EXPECT_FALSE(r3_.passed());
+TEST_F( TestPartResultTest, Passed )
+{
+  EXPECT_TRUE( r1_.passed() );
+  EXPECT_FALSE( r2_.passed() );
+  EXPECT_FALSE( r3_.passed() );
 }
 
 // Tests TestPartResult::failed().
-TEST_F(TestPartResultTest, Failed) {
-  EXPECT_FALSE(r1_.failed());
-  EXPECT_TRUE(r2_.failed());
-  EXPECT_TRUE(r3_.failed());
+TEST_F( TestPartResultTest, Failed )
+{
+  EXPECT_FALSE( r1_.failed() );
+  EXPECT_TRUE( r2_.failed() );
+  EXPECT_TRUE( r3_.failed() );
 }
 
 // Tests TestPartResult::fatally_failed().
-TEST_F(TestPartResultTest, FatallyFailed) {
-  EXPECT_FALSE(r1_.fatally_failed());
-  EXPECT_FALSE(r2_.fatally_failed());
-  EXPECT_TRUE(r3_.fatally_failed());
+TEST_F( TestPartResultTest, FatallyFailed )
+{
+  EXPECT_FALSE( r1_.fatally_failed() );
+  EXPECT_FALSE( r2_.fatally_failed() );
+  EXPECT_TRUE( r3_.fatally_failed() );
 }
 
 // Tests TestPartResult::nonfatally_failed().
-TEST_F(TestPartResultTest, NonfatallyFailed) {
-  EXPECT_FALSE(r1_.nonfatally_failed());
-  EXPECT_TRUE(r2_.nonfatally_failed());
-  EXPECT_FALSE(r3_.nonfatally_failed());
+TEST_F( TestPartResultTest, NonfatallyFailed )
+{
+  EXPECT_FALSE( r1_.nonfatally_failed() );
+  EXPECT_TRUE( r2_.nonfatally_failed() );
+  EXPECT_FALSE( r3_.nonfatally_failed() );
 }
 
 // Tests the TestPartResultArray class.
 
-class TestPartResultArrayTest : public Test {
+class TestPartResultArrayTest : public Test
+{
  protected:
   TestPartResultArrayTest()
-      : r1_(TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure 1"),
-        r2_(TestPartResult::kFatalFailure, "foo/bar.cc", -1, "Failure 2") {}
+      : r1_( TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure 1" ),
+        r2_( TestPartResult::kFatalFailure, "foo/bar.cc", -1, "Failure 2" ) {}
 
   const TestPartResult r1_, r2_;
 };
 
 // Tests that TestPartResultArray initially has size 0.
-TEST_F(TestPartResultArrayTest, InitialSizeIsZero) {
+TEST_F( TestPartResultArrayTest, InitialSizeIsZero )
+{
   TestPartResultArray results;
-  EXPECT_EQ(0, results.size());
+  EXPECT_EQ( 0, results.size() );
 }
 
 // Tests that TestPartResultArray contains the given TestPartResult
 // after one Append() operation.
-TEST_F(TestPartResultArrayTest, ContainsGivenResultAfterAppend) {
+TEST_F( TestPartResultArrayTest, ContainsGivenResultAfterAppend )
+{
   TestPartResultArray results;
-  results.Append(r1_);
-  EXPECT_EQ(1, results.size());
-  EXPECT_STREQ("Failure 1", results.GetTestPartResult(0).message());
+  results.Append( r1_ );
+  EXPECT_EQ( 1, results.size() );
+  EXPECT_STREQ( "Failure 1", results.GetTestPartResult( 0 ).message() );
 }
 
 // Tests that TestPartResultArray contains the given TestPartResults
 // after two Append() operations.
-TEST_F(TestPartResultArrayTest, ContainsGivenResultsAfterTwoAppends) {
+TEST_F( TestPartResultArrayTest, ContainsGivenResultsAfterTwoAppends )
+{
   TestPartResultArray results;
-  results.Append(r1_);
-  results.Append(r2_);
-  EXPECT_EQ(2, results.size());
-  EXPECT_STREQ("Failure 1", results.GetTestPartResult(0).message());
-  EXPECT_STREQ("Failure 2", results.GetTestPartResult(1).message());
+  results.Append( r1_ );
+  results.Append( r2_ );
+  EXPECT_EQ( 2, results.size() );
+  EXPECT_STREQ( "Failure 1", results.GetTestPartResult( 0 ).message() );
+  EXPECT_STREQ( "Failure 2", results.GetTestPartResult( 1 ).message() );
 }
 
 typedef TestPartResultArrayTest TestPartResultArrayDeathTest;
 
 // Tests that the program dies when GetTestPartResult() is called with
 // an invalid index.
-TEST_F(TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound) {
+TEST_F( TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound )
+{
   TestPartResultArray results;
-  results.Append(r1_);
+  results.Append( r1_ );
 
-  EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(-1), "");
-  EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(1), "");
+  EXPECT_DEATH_IF_SUPPORTED( results.GetTestPartResult( -1 ), "" );
+  EXPECT_DEATH_IF_SUPPORTED( results.GetTestPartResult( 1 ), "" );
 }
 
 // TODO(mheule@google.com): Add a test for the class HasNewFatalFailureHelper.

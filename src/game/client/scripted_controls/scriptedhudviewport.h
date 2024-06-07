@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -15,18 +15,15 @@ using namespace vgui;
 //==============================================================================
 class CScriptedHudViewport : public vgui::EditablePanel
 {
-	DECLARE_CLASS_SIMPLE( CScriptedHudViewport, vgui::EditablePanel );
+  DECLARE_CLASS_SIMPLE( CScriptedHudViewport, vgui::EditablePanel );
 
-public: 
-	CScriptedHudViewport();
+ public:
+  CScriptedHudViewport();
 
-	virtual void SetParent(vgui::VPANEL parent);
+  virtual void SetParent( vgui::VPANEL parent );
 
-protected:
-
-	virtual void Paint();
-
+ protected:
+  virtual void Paint();
 };
-
 
 #endif

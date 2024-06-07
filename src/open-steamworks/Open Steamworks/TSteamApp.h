@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,24 +22,24 @@
 
 typedef struct TSteamApp
 {
-	char *szName;
-	unsigned int uMaxNameChars;
-	char *szLatestVersionLabel;
-	unsigned int uMaxLatestVersionLabelChars;
-	char *szCurrentVersionLabel;
-	unsigned int uMaxCurrentVersionLabelChars;
-	char* szInstallDirName;
-	unsigned int uMaxInstallDirNameChars;
-	unsigned int uId;
-	unsigned int uLatestVersionId;
-	unsigned int uCurrentVersionId;
-	unsigned int uMinCacheFileSizeMB;
-	unsigned int uMaxCacheFileSizeMB;
-	unsigned int uNumLaunchOptions;
-	unsigned int uNumIcons;
-	unsigned int uNumVersions;
-	unsigned int uNumDependencies;
-	char *szUnkString;
+  char *szName;
+  unsigned int uMaxNameChars;
+  char *szLatestVersionLabel;
+  unsigned int uMaxLatestVersionLabelChars;
+  char *szCurrentVersionLabel;
+  unsigned int uMaxCurrentVersionLabelChars;
+  char *szInstallDirName;
+  unsigned int uMaxInstallDirNameChars;
+  unsigned int uId;
+  unsigned int uLatestVersionId;
+  unsigned int uCurrentVersionId;
+  unsigned int uMinCacheFileSizeMB;
+  unsigned int uMaxCacheFileSizeMB;
+  unsigned int uNumLaunchOptions;
+  unsigned int uNumIcons;
+  unsigned int uNumVersions;
+  unsigned int uNumDependencies;
+  char *szUnkString;
 } TSteamApp;
 
-#endif // TSTEAMAPP_H
+#endif  // TSTEAMAPP_H

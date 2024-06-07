@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -11,6 +11,6 @@
 #pragma once
 #endif
 
-int luaopen_gpGlobals(lua_State *L);
+int luaopen_gpGlobals( lua_State *L );
 
-#endif // LGLOBALVARS_BASE_H
+#endif  // LGLOBALVARS_BASE_H

@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $Workfile:     $
 // $Date:         $
@@ -16,29 +16,22 @@
 #pragma once
 #endif
 
-#pragma warning( disable: 4189 )
-
+#pragma warning( disable : 4189 )
 
 /* type for INetChannelInfo functions */
 typedef INetChannelInfo lua_INetChannelInfo;
-
-
 
 /*
 ** access functions (stack -> C)
 */
 
-LUA_API lua_INetChannelInfo     *(lua_tonetchannel) (lua_State *L, int idx);
-
+LUA_API lua_INetChannelInfo *( lua_tonetchannel )( lua_State *L, int idx );
 
 /*
 ** push functions (C -> stack)
 */
-LUA_API void  (lua_pushnetchannel) (lua_State *L, lua_INetChannelInfo *netchannel);
+LUA_API void( lua_pushnetchannel )( lua_State *L, lua_INetChannelInfo *netchannel );
 
+LUALIB_API lua_INetChannelInfo *( luaL_checknetchannel )( lua_State *L, int narg );
 
-
-LUALIB_API lua_INetChannelInfo *(luaL_checknetchannel) (lua_State *L, int narg);
-
-
-#endif // LINETCHANNELINFO_H
+#endif  // LINETCHANNELINFO_H

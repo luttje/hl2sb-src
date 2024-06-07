@@ -43,75 +43,83 @@
 #include <gtest/gtest.h>
 #include <google/protobuf/testing/file.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace cpp {
-namespace {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace cpp
+{
+namespace
+{
 
-class TestGenerator : public CodeGenerator {
+class TestGenerator : public CodeGenerator
+{
  public:
   TestGenerator() {}
   ~TestGenerator() {}
 
-  virtual bool Generate(const FileDescriptor* file,
-                        const string& parameter,
-                        OutputDirectory* output_directory,
-                        string* error) const {
-    TryInsert("test.pb.h", "includes", output_directory);
-    TryInsert("test.pb.h", "namespace_scope", output_directory);
-    TryInsert("test.pb.h", "global_scope", output_directory);
-    TryInsert("test.pb.h", "class_scope:foo.Bar", output_directory);
-    TryInsert("test.pb.h", "class_scope:foo.Bar.Baz", output_directory);
+  virtual bool Generate( const FileDescriptor* file,
+                         const string& parameter,
+                         OutputDirectory* output_directory,
+                         string* error ) const
+  {
+    TryInsert( "test.pb.h", "includes", output_directory );
+    TryInsert( "test.pb.h", "namespace_scope", output_directory );
+    TryInsert( "test.pb.h", "global_scope", output_directory );
+    TryInsert( "test.pb.h", "class_scope:foo.Bar", output_directory );
+    TryInsert( "test.pb.h", "class_scope:foo.Bar.Baz", output_directory );
 
-    TryInsert("test.pb.cc", "includes", output_directory);
-    TryInsert("test.pb.cc", "namespace_scope", output_directory);
-    TryInsert("test.pb.cc", "global_scope", output_directory);
+    TryInsert( "test.pb.cc", "includes", output_directory );
+    TryInsert( "test.pb.cc", "namespace_scope", output_directory );
+    TryInsert( "test.pb.cc", "global_scope", output_directory );
     return true;
   }
 
-  void TryInsert(const string& filename, const string& insertion_point,
-                 OutputDirectory* output_directory) const {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
-      output_directory->OpenForInsert(filename, insertion_point));
-    io::Printer printer(output.get(), '$');
-    printer.Print("// inserted $name$\n", "name", insertion_point);
+  void TryInsert( const string& filename, const string& insertion_point,
+                  OutputDirectory* output_directory ) const
+  {
+    scoped_ptr< io::ZeroCopyOutputStream > output(
+        output_directory->OpenForInsert( filename, insertion_point ) );
+    io::Printer printer( output.get(), '$' );
+    printer.Print( "// inserted $name$\n", "name", insertion_point );
   }
 };
 
 // This test verifies that all the expected insertion points exist.  It does
 // not verify that they are correctly-placed; that would require actually
 // compiling the output which is a bit more than I care to do for this test.
-TEST(CppPluginTest, PluginTest) {
+TEST( CppPluginTest, PluginTest )
+{
   File::WriteStringToFileOrDie(
       "syntax = \"proto2\";\n"
       "package foo;\n"
       "message Bar {\n"
       "  message Baz {}\n"
       "}\n",
-      TestTempDir() + "/test.proto");
+      TestTempDir() + "/test.proto" );
 
   google::protobuf::compiler::CommandLineInterface cli;
-  cli.SetInputsAreProtoPathRelative(true);
+  cli.SetInputsAreProtoPathRelative( true );
 
   CppGenerator cpp_generator;
   TestGenerator test_generator;
-  cli.RegisterGenerator("--cpp_out", &cpp_generator, "");
-  cli.RegisterGenerator("--test_out", &test_generator, "");
+  cli.RegisterGenerator( "--cpp_out", &cpp_generator, "" );
+  cli.RegisterGenerator( "--test_out", &test_generator, "" );
 
   string proto_path = "-I" + TestTempDir();
   string cpp_out = "--cpp_out=" + TestTempDir();
   string test_out = "--test_out=" + TestTempDir();
 
   const char* argv[] = {
-    "protoc",
-    proto_path.c_str(),
-    cpp_out.c_str(),
-    test_out.c_str(),
-    "test.proto"
-  };
+      "protoc",
+      proto_path.c_str(),
+      cpp_out.c_str(),
+      test_out.c_str(),
+      "test.proto" };
 
-  EXPECT_EQ(0, cli.Run(5, argv));
+  EXPECT_EQ( 0, cli.Run( 5, argv ) );
 }
 
 }  // namespace

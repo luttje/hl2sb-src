@@ -43,20 +43,25 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/descriptor.pb.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace cpp {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace cpp
+{
 
 CppGenerator::CppGenerator() {}
 CppGenerator::~CppGenerator() {}
 
-bool CppGenerator::Generate(const FileDescriptor* file,
-                            const string& parameter,
-                            OutputDirectory* output_directory,
-                            string* error) const {
-  vector<pair<string, string> > options;
-  ParseGeneratorParameter(parameter, &options);
+bool CppGenerator::Generate( const FileDescriptor* file,
+                             const string& parameter,
+                             OutputDirectory* output_directory,
+                             string* error ) const
+{
+  vector< pair< string, string > > options;
+  ParseGeneratorParameter( parameter, &options );
 
   // -----------------------------------------------------------------
   // parse generator options
@@ -80,10 +85,14 @@ bool CppGenerator::Generate(const FileDescriptor* file,
   // __declspec(dllimport) depending on what is being compiled.
   string dllexport_decl;
 
-  for (int i = 0; i < options.size(); i++) {
-    if (options[i].first == "dllexport_decl") {
+  for ( int i = 0; i < options.size(); i++ )
+  {
+    if ( options[i].first == "dllexport_decl" )
+    {
       dllexport_decl = options[i].second;
-    } else {
+    }
+    else
+    {
       *error = "Unknown generator option: " + options[i].first;
       return false;
     }
@@ -91,26 +100,25 @@ bool CppGenerator::Generate(const FileDescriptor* file,
 
   // -----------------------------------------------------------------
 
+  string basename = StripProto( file->name() );
+  basename.append( ".pb" );
 
-  string basename = StripProto(file->name());
-  basename.append(".pb");
-
-  FileGenerator file_generator(file, dllexport_decl);
+  FileGenerator file_generator( file, dllexport_decl );
 
   // Generate header.
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
-      output_directory->Open(basename + ".h"));
-    io::Printer printer(output.get(), '$');
-    file_generator.GenerateHeader(&printer);
+    scoped_ptr< io::ZeroCopyOutputStream > output(
+        output_directory->Open( basename + ".h" ) );
+    io::Printer printer( output.get(), '$' );
+    file_generator.GenerateHeader( &printer );
   }
 
   // Generate cc file.
   {
-    scoped_ptr<io::ZeroCopyOutputStream> output(
-      output_directory->Open(basename + ".cc"));
-    io::Printer printer(output.get(), '$');
-    file_generator.GenerateSource(&printer);
+    scoped_ptr< io::ZeroCopyOutputStream > output(
+        output_directory->Open( basename + ".cc" ) );
+    io::Printer printer( output.get(), '$' );
+    file_generator.GenerateSource( &printer );
   }
 
   return true;

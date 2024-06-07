@@ -45,19 +45,23 @@
 #include <set>
 #include <utility>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
-class FileDescriptor;        // descriptor.h
-class DescriptorPool;        // descriptor.h
-class FileDescriptorProto;   // descriptor.pb.h
-template<typename T> class RepeatedPtrField;  // repeated_field.h
+class FileDescriptor;       // descriptor.h
+class DescriptorPool;       // descriptor.h
+class FileDescriptorProto;  // descriptor.pb.h
+template < typename T >
+class RepeatedPtrField;  // repeated_field.h
 
-namespace compiler {
+namespace compiler
+{
 
-class CodeGenerator;        // code_generator.h
-class OutputDirectory;      // code_generator.h
-class DiskSourceTree;       // importer.h
+class CodeGenerator;    // code_generator.h
+class OutputDirectory;  // code_generator.h
+class DiskSourceTree;   // importer.h
 
 // This class implements the command-line interface to the protocol compiler.
 // It is designed to make it very easy to create a custom protocol compiler
@@ -87,7 +91,8 @@ class DiskSourceTree;       // importer.h
 //   protoc --cpp_out=outdir --foo_out=outdir --proto_path=src src/foo.proto
 //
 // For a full description of the command-line syntax, invoke it with --help.
-class LIBPROTOC_EXPORT CommandLineInterface {
+class LIBPROTOC_EXPORT CommandLineInterface
+{
  public:
   CommandLineInterface();
   ~CommandLineInterface();
@@ -108,9 +113,9 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   //   protoc --foo_out=enable_bar:outdir
   // The text before the colon is passed to CodeGenerator::Generate() as the
   // "parameter".
-  void RegisterGenerator(const string& flag_name,
-                         CodeGenerator* generator,
-                         const string& help_text);
+  void RegisterGenerator( const string& flag_name,
+                          CodeGenerator* generator,
+                          const string& help_text );
 
   // Enables "plugins".  In this mode, if a command-line flag ends with "_out"
   // but does not match any registered generator, the compiler will attempt to
@@ -141,14 +146,14 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // names or relative to the current directory.  If any errors occur, error
   // messages should be written to stderr.  If an error is fatal, the plugin
   // should exit with a non-zero exit code.
-  void AllowPlugins(const string& exe_name_prefix);
+  void AllowPlugins( const string& exe_name_prefix );
 
   // Run the Protocol Compiler with the given command-line parameters.
   // Returns the error code which should be returned by main().
   //
   // It may not be safe to call Run() in a multi-threaded environment because
   // it calls strerror().  I'm not sure why you'd want to do this anyway.
-  int Run(int argc, const char* const argv[]);
+  int Run( int argc, const char* const argv[] );
 
   // Call SetInputsAreCwdRelative(true) if the input files given on the command
   // line should be interpreted relative to the proto import path specified
@@ -158,17 +163,18 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // a directory given by --proto_path or the compiler will fail.  The latter
   // mode is generally more intuitive and easier to use, especially e.g. when
   // defining implicit rules in Makefiles.
-  void SetInputsAreProtoPathRelative(bool enable) {
+  void SetInputsAreProtoPathRelative( bool enable )
+  {
     inputs_are_proto_path_relative_ = enable;
   }
 
   // Provides some text which will be printed when the --version flag is
   // used.  The version of libprotoc will also be printed on the next line
   // after this text.
-  void SetVersionInfo(const string& text) {
+  void SetVersionInfo( const string& text )
+  {
     version_info_ = text;
   }
-
 
  private:
   // -----------------------------------------------------------------
@@ -184,10 +190,10 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // directories in proto_path_.  Returns false if an error occurred.  This
   // is only used if inputs_are_proto_path_relative_ is false.
   bool MakeInputsBeProtoPathRelative(
-    DiskSourceTree* source_tree);
+      DiskSourceTree* source_tree );
 
   // Parse all command-line arguments.
-  bool ParseArguments(int argc, const char* const argv[]);
+  bool ParseArguments( int argc, const char* const argv[] );
 
   // Parses a command-line argument into a name/value pair.  Returns
   // true if the next argument in the argv should be used as the value,
@@ -200,30 +206,30 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   //     name = "--cpp_out", value = "src/foo.pb2.cc"
   //   "foo.proto" ->
   //     name = "", value = "foo.proto"
-  bool ParseArgument(const char* arg, string* name, string* value);
+  bool ParseArgument( const char* arg, string* name, string* value );
 
   // Interprets arguments parsed with ParseArgument.
-  bool InterpretArgument(const string& name, const string& value);
+  bool InterpretArgument( const string& name, const string& value );
 
   // Print the --help text to stderr.
   void PrintHelpText();
 
   // Generate the given output file from the given input.
   struct OutputDirective;  // see below
-  bool GenerateOutput(const vector<const FileDescriptor*>& parsed_files,
-                      const OutputDirective& output_directive,
-                      OutputDirectory* output_directory);
-  bool GeneratePluginOutput(const vector<const FileDescriptor*>& parsed_files,
-                            const string& plugin_name,
-                            const string& parameter,
-                            OutputDirectory* output_directory,
-                            string* error);
+  bool GenerateOutput( const vector< const FileDescriptor* >& parsed_files,
+                       const OutputDirective& output_directive,
+                       OutputDirectory* output_directory );
+  bool GeneratePluginOutput( const vector< const FileDescriptor* >& parsed_files,
+                             const string& plugin_name,
+                             const string& parameter,
+                             OutputDirectory* output_directory,
+                             string* error );
 
   // Implements --encode and --decode.
-  bool EncodeOrDecode(const DescriptorPool* pool);
+  bool EncodeOrDecode( const DescriptorPool* pool );
 
   // Implements the --descriptor_set_out option.
-  bool WriteDescriptorSet(const vector<const FileDescriptor*> parsed_files);
+  bool WriteDescriptorSet( const vector< const FileDescriptor* > parsed_files );
 
   // Get all transitive dependencies of the given file (including the file
   // itself), adding them to the given list of FileDescriptorProtos.  The
@@ -233,8 +239,8 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // added will be inserted into *already_seen.
   static void GetTransitiveDependencies(
       const FileDescriptor* file,
-      set<const FileDescriptor*>* already_seen,
-      RepeatedPtrField<FileDescriptorProto>* output);
+      set< const FileDescriptor* >* already_seen,
+      RepeatedPtrField< FileDescriptorProto >* output );
 
   // -----------------------------------------------------------------
 
@@ -245,11 +251,12 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   string version_info_;
 
   // Map from flag names to registered generators.
-  struct GeneratorInfo {
+  struct GeneratorInfo
+  {
     CodeGenerator* generator;
     string help_text;
   };
-  typedef map<string, GeneratorInfo> GeneratorMap;
+  typedef map< string, GeneratorInfo > GeneratorMap;
   GeneratorMap generators_;
 
   // See AllowPlugins().  If this is empty, plugins aren't allowed.
@@ -258,10 +265,11 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // Maps specific plugin names to files.  When executing a plugin, this map
   // is searched first to find the plugin executable.  If not found here, the
   // PATH (or other OS-specific search strategy) is searched.
-  map<string, string> plugins_;
+  map< string, string > plugins_;
 
   // Stuff parsed from command line.
-  enum Mode {
+  enum Mode
+  {
     MODE_COMPILE,  // Normal mode:  parse .proto files and compile them.
     MODE_ENCODE,   // --encode:  read text from stdin, write binary to stdout.
     MODE_DECODE    // --decode:  read binary from stdin, write text to stdout.
@@ -269,25 +277,27 @@ class LIBPROTOC_EXPORT CommandLineInterface {
 
   Mode mode_;
 
-  enum ErrorFormat {
-    ERROR_FORMAT_GCC,   // GCC error output format (default).
-    ERROR_FORMAT_MSVS   // Visual Studio output (--error_format=msvs).
+  enum ErrorFormat
+  {
+    ERROR_FORMAT_GCC,  // GCC error output format (default).
+    ERROR_FORMAT_MSVS  // Visual Studio output (--error_format=msvs).
   };
 
   ErrorFormat error_format_;
 
-  vector<pair<string, string> > proto_path_;  // Search path for proto files.
-  vector<string> input_files_;                // Names of the input proto files.
+  vector< pair< string, string > > proto_path_;  // Search path for proto files.
+  vector< string > input_files_;                 // Names of the input proto files.
 
   // output_directives_ lists all the files we are supposed to output and what
   // generator to use for each.
-  struct OutputDirective {
-    string name;                // E.g. "--foo_out"
-    CodeGenerator* generator;   // NULL for plugins
+  struct OutputDirective
+  {
+    string name;               // E.g. "--foo_out"
+    CodeGenerator* generator;  // NULL for plugins
     string parameter;
     string output_location;
   };
-  vector<OutputDirective> output_directives_;
+  vector< OutputDirective > output_directives_;
 
   // When using --encode or --decode, this names the type we are encoding or
   // decoding.  (Empty string indicates --decode_raw.)
@@ -308,7 +318,7 @@ class LIBPROTOC_EXPORT CommandLineInterface {
   // See SetInputsAreProtoPathRelative().
   bool inputs_are_proto_path_relative_;
 
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(CommandLineInterface);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( CommandLineInterface );
 };
 
 }  // namespace compiler

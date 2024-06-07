@@ -42,11 +42,14 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
-namespace io {
-  class ErrorCollector;      // tokenizer.h
+namespace io
+{
+class ErrorCollector;  // tokenizer.h
 }
 
 // This class implements protocol buffer text format.  Printing and parsing
@@ -54,66 +57,70 @@ namespace io {
 // of messages.
 //
 // This class is really a namespace that contains only static methods.
-class LIBPROTOBUF_EXPORT TextFormat {
+class LIBPROTOBUF_EXPORT TextFormat
+{
  public:
   // Outputs a textual representation of the given message to the given
   // output stream.
-  static bool Print(const Message& message, io::ZeroCopyOutputStream* output);
+  static bool Print( const Message& message, io::ZeroCopyOutputStream* output );
 
   // Print the fields in an UnknownFieldSet.  They are printed by tag number
   // only.  Embedded messages are heuristically identified by attempting to
   // parse them.
-  static bool PrintUnknownFields(const UnknownFieldSet& unknown_fields,
-                                 io::ZeroCopyOutputStream* output);
+  static bool PrintUnknownFields( const UnknownFieldSet& unknown_fields,
+                                  io::ZeroCopyOutputStream* output );
 
   // Like Print(), but outputs directly to a string.
-  static bool PrintToString(const Message& message, string* output);
+  static bool PrintToString( const Message& message, string* output );
 
   // Like PrintUnknownFields(), but outputs directly to a string.
-  static bool PrintUnknownFieldsToString(const UnknownFieldSet& unknown_fields,
-                                         string* output);
+  static bool PrintUnknownFieldsToString( const UnknownFieldSet& unknown_fields,
+                                          string* output );
 
   // Outputs a textual representation of the value of the field supplied on
   // the message supplied. For non-repeated fields, an index of -1 must
   // be supplied. Note that this method will print the default value for a
   // field if it is not set.
-  static void PrintFieldValueToString(const Message& message,
-                                      const FieldDescriptor* field,
-                                      int index,
-                                      string* output);
+  static void PrintFieldValueToString( const Message& message,
+                                       const FieldDescriptor* field,
+                                       int index,
+                                       string* output );
 
   // Class for those users which require more fine-grained control over how
   // a protobuffer message is printed out.
-  class LIBPROTOBUF_EXPORT Printer {
+  class LIBPROTOBUF_EXPORT Printer
+  {
    public:
     Printer();
     ~Printer();
 
     // Like TextFormat::Print
-    bool Print(const Message& message, io::ZeroCopyOutputStream* output);
+    bool Print( const Message& message, io::ZeroCopyOutputStream* output );
     // Like TextFormat::PrintUnknownFields
-    bool PrintUnknownFields(const UnknownFieldSet& unknown_fields,
-                            io::ZeroCopyOutputStream* output);
+    bool PrintUnknownFields( const UnknownFieldSet& unknown_fields,
+                             io::ZeroCopyOutputStream* output );
     // Like TextFormat::PrintToString
-    bool PrintToString(const Message& message, string* output);
+    bool PrintToString( const Message& message, string* output );
     // Like TextFormat::PrintUnknownFieldsToString
-    bool PrintUnknownFieldsToString(const UnknownFieldSet& unknown_fields,
-                                    string* output);
+    bool PrintUnknownFieldsToString( const UnknownFieldSet& unknown_fields,
+                                     string* output );
     // Like TextFormat::PrintFieldValueToString
-    void PrintFieldValueToString(const Message& message,
-                                 const FieldDescriptor* field,
-                                 int index,
-                                 string* output);
+    void PrintFieldValueToString( const Message& message,
+                                  const FieldDescriptor* field,
+                                  int index,
+                                  string* output );
 
     // Adjust the initial indent level of all output.  Each indent level is
     // equal to two spaces.
-    void SetInitialIndentLevel(int indent_level) {
+    void SetInitialIndentLevel( int indent_level )
+    {
       initial_indent_level_ = indent_level;
     }
 
     // If printing in single line mode, then the entire message will be output
     // on a single line with no line breaks.
-    void SetSingleLineMode(bool single_line_mode) {
+    void SetSingleLineMode( bool single_line_mode )
+    {
       single_line_mode_ = single_line_mode;
     }
 
@@ -123,7 +130,8 @@ class LIBPROTOBUF_EXPORT TextFormat {
     // only to primitive values -- i.e. everything except strings and
     // sub-messages/groups.  Note that at present this format is not recognized
     // by the parser.
-    void SetUseShortRepeatedPrimitives(bool use_short_repeated_primitives) {
+    void SetUseShortRepeatedPrimitives( bool use_short_repeated_primitives )
+    {
       use_short_repeated_primitives_ = use_short_repeated_primitives;
     }
 
@@ -131,7 +139,8 @@ class LIBPROTOBUF_EXPORT TextFormat {
     // is that bytes >= 0x80 in string fields will not be escaped,
     // because they are assumed to be part of UTF-8 multi-byte
     // sequences.
-    void SetUseUtf8StringEscaping(bool as_utf8) {
+    void SetUseUtf8StringEscaping( bool as_utf8 )
+    {
       utf8_string_escaping_ = as_utf8;
     }
 
@@ -142,41 +151,41 @@ class LIBPROTOBUF_EXPORT TextFormat {
 
     // Internal Print method, used for writing to the OutputStream via
     // the TextGenerator class.
-    void Print(const Message& message,
-               TextGenerator& generator);
+    void Print( const Message& message,
+                TextGenerator& generator );
 
     // Print a single field.
-    void PrintField(const Message& message,
-                    const Reflection* reflection,
-                    const FieldDescriptor* field,
-                    TextGenerator& generator);
+    void PrintField( const Message& message,
+                     const Reflection* reflection,
+                     const FieldDescriptor* field,
+                     TextGenerator& generator );
 
     // Print a repeated primitive field in short form.
-    void PrintShortRepeatedField(const Message& message,
-                                 const Reflection* reflection,
-                                 const FieldDescriptor* field,
-                                 TextGenerator& generator);
+    void PrintShortRepeatedField( const Message& message,
+                                  const Reflection* reflection,
+                                  const FieldDescriptor* field,
+                                  TextGenerator& generator );
 
     // Print the name of a field -- i.e. everything that comes before the
     // ':' for a single name/value pair.
-    void PrintFieldName(const Message& message,
-                        const Reflection* reflection,
-                        const FieldDescriptor* field,
-                        TextGenerator& generator);
+    void PrintFieldName( const Message& message,
+                         const Reflection* reflection,
+                         const FieldDescriptor* field,
+                         TextGenerator& generator );
 
     // Outputs a textual representation of the value of the field supplied on
     // the message supplied or the default value if not set.
-    void PrintFieldValue(const Message& message,
-                         const Reflection* reflection,
-                         const FieldDescriptor* field,
-                         int index,
-                         TextGenerator& generator);
+    void PrintFieldValue( const Message& message,
+                          const Reflection* reflection,
+                          const FieldDescriptor* field,
+                          int index,
+                          TextGenerator& generator );
 
     // Print the fields in an UnknownFieldSet.  They are printed by tag number
     // only.  Embedded messages are heuristically identified by attempting to
     // parse them.
-    void PrintUnknownFields(const UnknownFieldSet& unknown_fields,
-                            TextGenerator& generator);
+    void PrintUnknownFields( const UnknownFieldSet& unknown_fields,
+                             TextGenerator& generator );
 
     int initial_indent_level_;
 
@@ -190,54 +199,57 @@ class LIBPROTOBUF_EXPORT TextFormat {
   // Parses a text-format protocol message from the given input stream to
   // the given message object.  This function parses the format written
   // by Print().
-  static bool Parse(io::ZeroCopyInputStream* input, Message* output);
+  static bool Parse( io::ZeroCopyInputStream* input, Message* output );
   // Like Parse(), but reads directly from a string.
-  static bool ParseFromString(const string& input, Message* output);
+  static bool ParseFromString( const string& input, Message* output );
 
   // Like Parse(), but the data is merged into the given message, as if
   // using Message::MergeFrom().
-  static bool Merge(io::ZeroCopyInputStream* input, Message* output);
+  static bool Merge( io::ZeroCopyInputStream* input, Message* output );
   // Like Merge(), but reads directly from a string.
-  static bool MergeFromString(const string& input, Message* output);
+  static bool MergeFromString( const string& input, Message* output );
 
   // Parse the given text as a single field value and store it into the
   // given field of the given message. If the field is a repeated field,
   // the new value will be added to the end
-  static bool ParseFieldValueFromString(const string& input,
-                                        const FieldDescriptor* field,
-                                        Message* message);
+  static bool ParseFieldValueFromString( const string& input,
+                                         const FieldDescriptor* field,
+                                         Message* message );
 
   // For more control over parsing, use this class.
-  class LIBPROTOBUF_EXPORT Parser {
+  class LIBPROTOBUF_EXPORT Parser
+  {
    public:
     Parser();
     ~Parser();
 
     // Like TextFormat::Parse().
-    bool Parse(io::ZeroCopyInputStream* input, Message* output);
+    bool Parse( io::ZeroCopyInputStream* input, Message* output );
     // Like TextFormat::ParseFromString().
-    bool ParseFromString(const string& input, Message* output);
+    bool ParseFromString( const string& input, Message* output );
     // Like TextFormat::Merge().
-    bool Merge(io::ZeroCopyInputStream* input, Message* output);
+    bool Merge( io::ZeroCopyInputStream* input, Message* output );
     // Like TextFormat::MergeFromString().
-    bool MergeFromString(const string& input, Message* output);
+    bool MergeFromString( const string& input, Message* output );
 
     // Set where to report parse errors.  If NULL (the default), errors will
     // be printed to stderr.
-    void RecordErrorsTo(io::ErrorCollector* error_collector) {
+    void RecordErrorsTo( io::ErrorCollector* error_collector )
+    {
       error_collector_ = error_collector;
     }
 
     // Normally parsing fails if, after parsing, output->IsInitialized()
     // returns false.  Call AllowPartialMessage(true) to skip this check.
-    void AllowPartialMessage(bool allow) {
+    void AllowPartialMessage( bool allow )
+    {
       allow_partial_ = allow;
     }
 
     // Like TextFormat::ParseFieldValueFromString
-    bool ParseFieldValueFromString(const string& input,
-                                   const FieldDescriptor* field,
-                                   Message* output);
+    bool ParseFieldValueFromString( const string& input,
+                                    const FieldDescriptor* field,
+                                    Message* output );
 
    private:
     // Forward declaration of an internal class used to parse text
@@ -246,16 +258,16 @@ class LIBPROTOBUF_EXPORT TextFormat {
 
     // Like TextFormat::Merge().  The provided implementation is used
     // to do the parsing.
-    bool MergeUsingImpl(io::ZeroCopyInputStream* input,
-                        Message* output,
-                        ParserImpl* parser_impl);
+    bool MergeUsingImpl( io::ZeroCopyInputStream* input,
+                         Message* output,
+                         ParserImpl* parser_impl );
 
     io::ErrorCollector* error_collector_;
     bool allow_partial_;
   };
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(TextFormat);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( TextFormat );
 };
 
 }  // namespace protobuf

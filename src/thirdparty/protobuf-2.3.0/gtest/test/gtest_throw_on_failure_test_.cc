@@ -37,8 +37,9 @@
 
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+int main( int argc, char** argv )
+{
+  testing::InitGoogleTest( &argc, argv );
 
   // We want to ensure that people can use Google Test assertions in
   // other testing frameworks, as long as they initialize Google Test
@@ -48,7 +49,7 @@ int main(int argc, char** argv) {
 
   // In the throw-on-failure mode with exceptions disabled, this
   // assertion will cause the program to exit with a non-zero code.
-  EXPECT_EQ(2, 3);
+  EXPECT_EQ( 2, 3 );
 
   // When not in the throw-on-failure mode, the control will reach
   // here.

@@ -38,73 +38,74 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main( int argc, char* argv[] )
+{
   string data, packed_data;
 
   {
     protobuf_unittest::TestAllTypesLite message, message2, message3;
-    google::protobuf::TestUtilLite::ExpectClear(message);
-    google::protobuf::TestUtilLite::SetAllFields(&message);
-    message2.CopyFrom(message);
+    google::protobuf::TestUtilLite::ExpectClear( message );
+    google::protobuf::TestUtilLite::SetAllFields( &message );
+    message2.CopyFrom( message );
     data = message.SerializeAsString();
-    message3.ParseFromString(data);
-    google::protobuf::TestUtilLite::ExpectAllFieldsSet(message);
-    google::protobuf::TestUtilLite::ExpectAllFieldsSet(message2);
-    google::protobuf::TestUtilLite::ExpectAllFieldsSet(message3);
-    google::protobuf::TestUtilLite::ModifyRepeatedFields(&message);
-    google::protobuf::TestUtilLite::ExpectRepeatedFieldsModified(message);
+    message3.ParseFromString( data );
+    google::protobuf::TestUtilLite::ExpectAllFieldsSet( message );
+    google::protobuf::TestUtilLite::ExpectAllFieldsSet( message2 );
+    google::protobuf::TestUtilLite::ExpectAllFieldsSet( message3 );
+    google::protobuf::TestUtilLite::ModifyRepeatedFields( &message );
+    google::protobuf::TestUtilLite::ExpectRepeatedFieldsModified( message );
     message.Clear();
-    google::protobuf::TestUtilLite::ExpectClear(message);
+    google::protobuf::TestUtilLite::ExpectClear( message );
   }
 
   {
     protobuf_unittest::TestAllExtensionsLite message, message2, message3;
-    google::protobuf::TestUtilLite::ExpectExtensionsClear(message);
-    google::protobuf::TestUtilLite::SetAllExtensions(&message);
-    message2.CopyFrom(message);
+    google::protobuf::TestUtilLite::ExpectExtensionsClear( message );
+    google::protobuf::TestUtilLite::SetAllExtensions( &message );
+    message2.CopyFrom( message );
     string extensions_data = message.SerializeAsString();
-    GOOGLE_CHECK(extensions_data == data);
-    message3.ParseFromString(extensions_data);
-    google::protobuf::TestUtilLite::ExpectAllExtensionsSet(message);
-    google::protobuf::TestUtilLite::ExpectAllExtensionsSet(message2);
-    google::protobuf::TestUtilLite::ExpectAllExtensionsSet(message3);
-    google::protobuf::TestUtilLite::ModifyRepeatedExtensions(&message);
-    google::protobuf::TestUtilLite::ExpectRepeatedExtensionsModified(message);
+    GOOGLE_CHECK( extensions_data == data );
+    message3.ParseFromString( extensions_data );
+    google::protobuf::TestUtilLite::ExpectAllExtensionsSet( message );
+    google::protobuf::TestUtilLite::ExpectAllExtensionsSet( message2 );
+    google::protobuf::TestUtilLite::ExpectAllExtensionsSet( message3 );
+    google::protobuf::TestUtilLite::ModifyRepeatedExtensions( &message );
+    google::protobuf::TestUtilLite::ExpectRepeatedExtensionsModified( message );
     message.Clear();
-    google::protobuf::TestUtilLite::ExpectExtensionsClear(message);
+    google::protobuf::TestUtilLite::ExpectExtensionsClear( message );
   }
 
   {
     protobuf_unittest::TestPackedTypesLite message, message2, message3;
-    google::protobuf::TestUtilLite::ExpectPackedClear(message);
-    google::protobuf::TestUtilLite::SetPackedFields(&message);
-    message2.CopyFrom(message);
+    google::protobuf::TestUtilLite::ExpectPackedClear( message );
+    google::protobuf::TestUtilLite::SetPackedFields( &message );
+    message2.CopyFrom( message );
     packed_data = message.SerializeAsString();
-    message3.ParseFromString(packed_data);
-    google::protobuf::TestUtilLite::ExpectPackedFieldsSet(message);
-    google::protobuf::TestUtilLite::ExpectPackedFieldsSet(message2);
-    google::protobuf::TestUtilLite::ExpectPackedFieldsSet(message3);
-    google::protobuf::TestUtilLite::ModifyPackedFields(&message);
-    google::protobuf::TestUtilLite::ExpectPackedFieldsModified(message);
+    message3.ParseFromString( packed_data );
+    google::protobuf::TestUtilLite::ExpectPackedFieldsSet( message );
+    google::protobuf::TestUtilLite::ExpectPackedFieldsSet( message2 );
+    google::protobuf::TestUtilLite::ExpectPackedFieldsSet( message3 );
+    google::protobuf::TestUtilLite::ModifyPackedFields( &message );
+    google::protobuf::TestUtilLite::ExpectPackedFieldsModified( message );
     message.Clear();
-    google::protobuf::TestUtilLite::ExpectPackedClear(message);
+    google::protobuf::TestUtilLite::ExpectPackedClear( message );
   }
 
   {
     protobuf_unittest::TestPackedExtensionsLite message, message2, message3;
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsClear(message);
-    google::protobuf::TestUtilLite::SetPackedExtensions(&message);
-    message2.CopyFrom(message);
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsClear( message );
+    google::protobuf::TestUtilLite::SetPackedExtensions( &message );
+    message2.CopyFrom( message );
     string packed_extensions_data = message.SerializeAsString();
-    GOOGLE_CHECK(packed_extensions_data == packed_data);
-    message3.ParseFromString(packed_extensions_data);
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet(message);
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet(message2);
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet(message3);
-    google::protobuf::TestUtilLite::ModifyPackedExtensions(&message);
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsModified(message);
+    GOOGLE_CHECK( packed_extensions_data == packed_data );
+    message3.ParseFromString( packed_extensions_data );
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet( message );
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet( message2 );
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsSet( message3 );
+    google::protobuf::TestUtilLite::ModifyPackedExtensions( &message );
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsModified( message );
     message.Clear();
-    google::protobuf::TestUtilLite::ExpectPackedExtensionsClear(message);
+    google::protobuf::TestUtilLite::ExpectPackedExtensionsClear( message );
   }
 
   cout << "PASS" << endl;

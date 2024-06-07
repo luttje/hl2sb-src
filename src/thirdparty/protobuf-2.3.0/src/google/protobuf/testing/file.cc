@@ -46,11 +46,13 @@
 #endif
 #include <errno.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 #ifdef _WIN32
-#define mkdir(name, mode) mkdir(name)
+#define mkdir( name, mode ) mkdir( name )
 // Windows doesn't have symbolic links.
 #define lstat stat
 #ifndef F_OK
@@ -58,116 +60,136 @@ namespace protobuf {
 #endif
 #endif
 
-bool File::Exists(const string& name) {
-  return access(name.c_str(), F_OK) == 0;
+bool File::Exists( const string& name )
+{
+  return access( name.c_str(), F_OK ) == 0;
 }
 
-bool File::ReadFileToString(const string& name, string* output) {
+bool File::ReadFileToString( const string& name, string* output )
+{
   char buffer[1024];
-  FILE* file = fopen(name.c_str(), "rb");
-  if (file == NULL) return false;
+  FILE* file = fopen( name.c_str(), "rb" );
+  if ( file == NULL ) return false;
 
-  while (true) {
-    size_t n = fread(buffer, 1, sizeof(buffer), file);
-    if (n <= 0) break;
-    output->append(buffer, n);
+  while ( true )
+  {
+    size_t n = fread( buffer, 1, sizeof( buffer ), file );
+    if ( n <= 0 ) break;
+    output->append( buffer, n );
   }
 
-  int error = ferror(file);
-  if (fclose(file) != 0) return false;
+  int error = ferror( file );
+  if ( fclose( file ) != 0 ) return false;
   return error == 0;
 }
 
-void File::ReadFileToStringOrDie(const string& name, string* output) {
-  GOOGLE_CHECK(ReadFileToString(name, output)) << "Could not read: " << name;
+void File::ReadFileToStringOrDie( const string& name, string* output )
+{
+  GOOGLE_CHECK( ReadFileToString( name, output ) ) << "Could not read: " << name;
 }
 
-void File::WriteStringToFileOrDie(const string& contents, const string& name) {
-  FILE* file = fopen(name.c_str(), "wb");
-  GOOGLE_CHECK(file != NULL)
-      << "fopen(" << name << ", \"wb\"): " << strerror(errno);
-  GOOGLE_CHECK_EQ(fwrite(contents.data(), 1, contents.size(), file),
-                  contents.size())
-      << "fwrite(" << name << "): " << strerror(errno);
-  GOOGLE_CHECK(fclose(file) == 0)
-      << "fclose(" << name << "): " << strerror(errno);
+void File::WriteStringToFileOrDie( const string& contents, const string& name )
+{
+  FILE* file = fopen( name.c_str(), "wb" );
+  GOOGLE_CHECK( file != NULL )
+      << "fopen(" << name << ", \"wb\"): " << strerror( errno );
+  GOOGLE_CHECK_EQ( fwrite( contents.data(), 1, contents.size(), file ),
+                   contents.size() )
+      << "fwrite(" << name << "): " << strerror( errno );
+  GOOGLE_CHECK( fclose( file ) == 0 )
+      << "fclose(" << name << "): " << strerror( errno );
 }
 
-bool File::CreateDir(const string& name, int mode) {
-  return mkdir(name.c_str(), mode) == 0;
+bool File::CreateDir( const string& name, int mode )
+{
+  return mkdir( name.c_str(), mode ) == 0;
 }
 
-bool File::RecursivelyCreateDir(const string& path, int mode) {
-  if (CreateDir(path, mode)) return true;
+bool File::RecursivelyCreateDir( const string& path, int mode )
+{
+  if ( CreateDir( path, mode ) ) return true;
 
-  if (Exists(path)) return false;
+  if ( Exists( path ) ) return false;
 
   // Try creating the parent.
-  string::size_type slashpos = path.find_last_of('/');
-  if (slashpos == string::npos) {
+  string::size_type slashpos = path.find_last_of( '/' );
+  if ( slashpos == string::npos )
+  {
     // No parent given.
     return false;
   }
 
-  return RecursivelyCreateDir(path.substr(0, slashpos), mode) &&
-         CreateDir(path, mode);
+  return RecursivelyCreateDir( path.substr( 0, slashpos ), mode ) &&
+         CreateDir( path, mode );
 }
 
-void File::DeleteRecursively(const string& name,
-                             void* dummy1, void* dummy2) {
+void File::DeleteRecursively( const string& name,
+                              void* dummy1, void* dummy2 )
+{
   // We don't care too much about error checking here since this is only used
   // in tests to delete temporary directories that are under /tmp anyway.
 
 #ifdef _MSC_VER
   // This interface is so weird.
   WIN32_FIND_DATA find_data;
-  HANDLE find_handle = FindFirstFile((name + "/*").c_str(), &find_data);
-  if (find_handle == INVALID_HANDLE_VALUE) {
+  HANDLE find_handle = FindFirstFile( ( name + "/*" ).c_str(), &find_data );
+  if ( find_handle == INVALID_HANDLE_VALUE )
+  {
     // Just delete it, whatever it is.
-    DeleteFile(name.c_str());
-    RemoveDirectory(name.c_str());
+    DeleteFile( name.c_str() );
+    RemoveDirectory( name.c_str() );
     return;
   }
 
-  do {
+  do
+  {
     string entry_name = find_data.cFileName;
-    if (entry_name != "." && entry_name != "..") {
+    if ( entry_name != "." && entry_name != ".." )
+    {
       string path = name + "/" + entry_name;
-      if (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        DeleteRecursively(path, NULL, NULL);
-        RemoveDirectory(path.c_str());
-      } else {
-        DeleteFile(path.c_str());
+      if ( find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
+      {
+        DeleteRecursively( path, NULL, NULL );
+        RemoveDirectory( path.c_str() );
+      }
+      else
+      {
+        DeleteFile( path.c_str() );
       }
     }
-  } while(FindNextFile(find_handle, &find_data));
-  FindClose(find_handle);
+  } while ( FindNextFile( find_handle, &find_data ) );
+  FindClose( find_handle );
 
-  RemoveDirectory(name.c_str());
+  RemoveDirectory( name.c_str() );
 #else
   // Use opendir()!  Yay!
   // lstat = Don't follow symbolic links.
   struct stat stats;
-  if (lstat(name.c_str(), &stats) != 0) return;
+  if ( lstat( name.c_str(), &stats ) != 0 ) return;
 
-  if (S_ISDIR(stats.st_mode)) {
-    DIR* dir = opendir(name.c_str());
-    if (dir != NULL) {
-      while (true) {
-        struct dirent* entry = readdir(dir);
-        if (entry == NULL) break;
+  if ( S_ISDIR( stats.st_mode ) )
+  {
+    DIR* dir = opendir( name.c_str() );
+    if ( dir != NULL )
+    {
+      while ( true )
+      {
+        struct dirent* entry = readdir( dir );
+        if ( entry == NULL ) break;
         string entry_name = entry->d_name;
-        if (entry_name != "." && entry_name != "..") {
-          DeleteRecursively(name + "/" + entry_name, NULL, NULL);
+        if ( entry_name != "." && entry_name != ".." )
+        {
+          DeleteRecursively( name + "/" + entry_name, NULL, NULL );
         }
       }
     }
 
-    closedir(dir);
-    rmdir(name.c_str());
-
-  } else if (S_ISREG(stats.st_mode)) {
-    remove(name.c_str());
+    closedir( dir );
+    rmdir( name.c_str() );
+  }
+  else if ( S_ISREG( stats.st_mode ) )
+  {
+    remove( name.c_str() );
   }
 #endif
 }

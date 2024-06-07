@@ -10,9 +10,6 @@
 #ifndef LIVOICESERVER_H
 #define LIVOICESERVER_H
 
-
-int luaopen_g_pVoiceServer(lua_State *L);
-
+int luaopen_g_pVoiceServer( lua_State *L );
 
 #endif
-

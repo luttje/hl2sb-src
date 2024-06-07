@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,52 +22,64 @@
 
 #include "UserItemsCommon.h"
 
-
-
 #define STEAMGAMESERVERITEMS_INTERFACE_VERSION_002 "STEAMGAMESERVERITEMS_INTERFACE_VERSION002"
 #define STEAMGAMESERVERITEMS_INTERFACE_VERSION_003 "STEAMGAMESERVERITEMS_INTERFACE_VERSION003"
 #define STEAMGAMESERVERITEMS_INTERFACE_VERSION_004 "STEAMGAMESERVERITEMS_INTERFACE_VERSION004"
 
-
 #pragma pack( push, 8 )
 struct GSItemCount_t
 {
-	enum { k_iCallback = k_iSteamGameServerItemsCallbacks };
-	CSteamID m_steamID;
-	EItemRequestResult m_eResult;
-	uint32 m_unCount;
+  enum
+  {
+    k_iCallback = k_iSteamGameServerItemsCallbacks
+  };
+  CSteamID m_steamID;
+  EItemRequestResult m_eResult;
+  uint32 m_unCount;
 };
 
 struct GSItemRequest_t
 {
-	enum { k_iCallback = k_iSteamGameServerItemsCallbacks + 1 };
-	CSteamID m_steamID;
-	EItemRequestResult m_eResult;
-	ItemID m_itemID;
+  enum
+  {
+    k_iCallback = k_iSteamGameServerItemsCallbacks + 1
+  };
+  CSteamID m_steamID;
+  EItemRequestResult m_eResult;
+  ItemID m_itemID;
 };
 
 struct GSItemGranted_t
 {
-	enum { k_iCallback = k_iSteamGameServerItemsCallbacks + 7 };
+  enum
+  {
+    k_iCallback = k_iSteamGameServerItemsCallbacks + 7
+  };
 
-	CSteamID m_steamID;
-	ItemID m_itemID;
+  CSteamID m_steamID;
+  ItemID m_itemID;
 };
 
 struct GSItemGetBlob_t
 {
-	enum { k_iCallback = k_iSteamGameServerItemsCallbacks + 8 };
-	ItemID m_itemID;
-	EItemRequestResult m_eResult;
-	uint8 m_itemBlob[1024];
+  enum
+  {
+    k_iCallback = k_iSteamGameServerItemsCallbacks + 8
+  };
+  ItemID m_itemID;
+  EItemRequestResult m_eResult;
+  uint8 m_itemBlob[1024];
 };
 
 struct GSItemSetBlob_t
 {
-	enum { k_iCallback = k_iSteamGameServerItemsCallbacks + 9 };
-	ItemID m_itemID;
-	EItemRequestResult m_eResult;
-	uint32 Unk;
+  enum
+  {
+    k_iCallback = k_iSteamGameServerItemsCallbacks + 9
+  };
+  ItemID m_itemID;
+  EItemRequestResult m_eResult;
+  uint32 Unk;
 };
 #pragma pack( pop )
 
@@ -75,4 +87,4 @@ struct GSItemSetBlob_t
 // --------------------------------------
 // 01
 
-#endif // GAMESERVERITEMSCOMMON_H
+#endif  // GAMESERVERITEMSCOMMON_H

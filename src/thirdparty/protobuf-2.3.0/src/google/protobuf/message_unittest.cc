@@ -56,80 +56,86 @@
 #include <google/protobuf/testing/googletest.h>
 #include <gtest/gtest.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 #ifndef O_BINARY
 #ifdef _O_BINARY
 #define O_BINARY _O_BINARY
 #else
-#define O_BINARY 0     // If this isn't defined, the platform doesn't need it.
+#define O_BINARY 0  // If this isn't defined, the platform doesn't need it.
 #endif
 #endif
 
-TEST(MessageTest, SerializeHelpers) {
+TEST( MessageTest, SerializeHelpers )
+{
   // TODO(kenton):  Test more helpers?  They're all two-liners so it seems
   //   like a waste of time.
 
   protobuf_unittest::TestAllTypes message;
-  TestUtil::SetAllFields(&message);
+  TestUtil::SetAllFields( &message );
   stringstream stream;
 
-  string str1("foo");
-  string str2("bar");
+  string str1( "foo" );
+  string str2( "bar" );
 
-  EXPECT_TRUE(message.SerializeToString(&str1));
-  EXPECT_TRUE(message.AppendToString(&str2));
-  EXPECT_TRUE(message.SerializeToOstream(&stream));
+  EXPECT_TRUE( message.SerializeToString( &str1 ) );
+  EXPECT_TRUE( message.AppendToString( &str2 ) );
+  EXPECT_TRUE( message.SerializeToOstream( &stream ) );
 
-  EXPECT_EQ(str1.size() + 3, str2.size());
-  EXPECT_EQ("bar", str2.substr(0, 3));
+  EXPECT_EQ( str1.size() + 3, str2.size() );
+  EXPECT_EQ( "bar", str2.substr( 0, 3 ) );
   // Don't use EXPECT_EQ because we don't want to dump raw binary data to
   // stdout.
-  EXPECT_TRUE(str2.substr(3) == str1);
+  EXPECT_TRUE( str2.substr( 3 ) == str1 );
 
   // GCC gives some sort of error if we try to just do stream.str() == str1.
   string temp = stream.str();
-  EXPECT_TRUE(temp == str1);
+  EXPECT_TRUE( temp == str1 );
 
-  EXPECT_TRUE(message.SerializeAsString() == str1);
-
+  EXPECT_TRUE( message.SerializeAsString() == str1 );
 }
 
-TEST(MessageTest, SerializeToBrokenOstream) {
+TEST( MessageTest, SerializeToBrokenOstream )
+{
   ofstream out;
   protobuf_unittest::TestAllTypes message;
-  message.set_optional_int32(123);
+  message.set_optional_int32( 123 );
 
-  EXPECT_FALSE(message.SerializeToOstream(&out));
+  EXPECT_FALSE( message.SerializeToOstream( &out ) );
 }
 
-TEST(MessageTest, ParseFromFileDescriptor) {
+TEST( MessageTest, ParseFromFileDescriptor )
+{
   string filename = TestSourceDir() +
                     "/google/protobuf/testdata/golden_message";
-  int file = open(filename.c_str(), O_RDONLY | O_BINARY);
+  int file = open( filename.c_str(), O_RDONLY | O_BINARY );
 
   unittest::TestAllTypes message;
-  EXPECT_TRUE(message.ParseFromFileDescriptor(file));
-  TestUtil::ExpectAllFieldsSet(message);
+  EXPECT_TRUE( message.ParseFromFileDescriptor( file ) );
+  TestUtil::ExpectAllFieldsSet( message );
 
-  EXPECT_GE(close(file), 0);
+  EXPECT_GE( close( file ), 0 );
 }
 
-TEST(MessageTest, ParsePackedFromFileDescriptor) {
+TEST( MessageTest, ParsePackedFromFileDescriptor )
+{
   string filename =
       TestSourceDir() +
       "/google/protobuf/testdata/golden_packed_fields_message";
-  int file = open(filename.c_str(), O_RDONLY | O_BINARY);
+  int file = open( filename.c_str(), O_RDONLY | O_BINARY );
 
   unittest::TestPackedTypes message;
-  EXPECT_TRUE(message.ParseFromFileDescriptor(file));
-  TestUtil::ExpectPackedFieldsSet(message);
+  EXPECT_TRUE( message.ParseFromFileDescriptor( file ) );
+  TestUtil::ExpectPackedFieldsSet( message );
 
-  EXPECT_GE(close(file), 0);
+  EXPECT_GE( close( file ), 0 );
 }
 
-TEST(MessageTest, ParseHelpers) {
+TEST( MessageTest, ParseHelpers )
+{
   // TODO(kenton):  Test more helpers?  They're all two-liners so it seems
   //   like a waste of time.
   string data;
@@ -137,144 +143,155 @@ TEST(MessageTest, ParseHelpers) {
   {
     // Set up.
     protobuf_unittest::TestAllTypes message;
-    TestUtil::SetAllFields(&message);
-    message.SerializeToString(&data);
+    TestUtil::SetAllFields( &message );
+    message.SerializeToString( &data );
   }
 
   {
     // Test ParseFromString.
     protobuf_unittest::TestAllTypes message;
-    EXPECT_TRUE(message.ParseFromString(data));
-    TestUtil::ExpectAllFieldsSet(message);
+    EXPECT_TRUE( message.ParseFromString( data ) );
+    TestUtil::ExpectAllFieldsSet( message );
   }
 
   {
     // Test ParseFromIstream.
     protobuf_unittest::TestAllTypes message;
-    stringstream stream(data);
-    EXPECT_TRUE(message.ParseFromIstream(&stream));
-    EXPECT_TRUE(stream.eof());
-    TestUtil::ExpectAllFieldsSet(message);
+    stringstream stream( data );
+    EXPECT_TRUE( message.ParseFromIstream( &stream ) );
+    EXPECT_TRUE( stream.eof() );
+    TestUtil::ExpectAllFieldsSet( message );
   }
 
   {
     // Test ParseFromBoundedZeroCopyStream.
-    string data_with_junk(data);
-    data_with_junk.append("some junk on the end");
-    io::ArrayInputStream stream(data_with_junk.data(), data_with_junk.size());
+    string data_with_junk( data );
+    data_with_junk.append( "some junk on the end" );
+    io::ArrayInputStream stream( data_with_junk.data(), data_with_junk.size() );
     protobuf_unittest::TestAllTypes message;
-    EXPECT_TRUE(message.ParseFromBoundedZeroCopyStream(&stream, data.size()));
-    TestUtil::ExpectAllFieldsSet(message);
+    EXPECT_TRUE( message.ParseFromBoundedZeroCopyStream( &stream, data.size() ) );
+    TestUtil::ExpectAllFieldsSet( message );
   }
 
   {
     // Test that ParseFromBoundedZeroCopyStream fails (but doesn't crash) if
     // EOF is reached before the expected number of bytes.
-    io::ArrayInputStream stream(data.data(), data.size());
+    io::ArrayInputStream stream( data.data(), data.size() );
     protobuf_unittest::TestAllTypes message;
     EXPECT_FALSE(
-      message.ParseFromBoundedZeroCopyStream(&stream, data.size() + 1));
+        message.ParseFromBoundedZeroCopyStream( &stream, data.size() + 1 ) );
   }
 }
 
-TEST(MessageTest, ParseFailsIfNotInitialized) {
+TEST( MessageTest, ParseFailsIfNotInitialized )
+{
   unittest::TestRequired message;
-  vector<string> errors;
+  vector< string > errors;
 
   {
     ScopedMemoryLog log;
-    EXPECT_FALSE(message.ParseFromString(""));
-    errors = log.GetMessages(ERROR);
+    EXPECT_FALSE( message.ParseFromString( "" ) );
+    errors = log.GetMessages( ERROR );
   }
 
-  ASSERT_EQ(1, errors.size());
-  EXPECT_EQ("Can't parse message of type \"protobuf_unittest.TestRequired\" "
-            "because it is missing required fields: a, b, c",
-            errors[0]);
+  ASSERT_EQ( 1, errors.size() );
+  EXPECT_EQ(
+      "Can't parse message of type \"protobuf_unittest.TestRequired\" "
+      "because it is missing required fields: a, b, c",
+      errors[0] );
 }
 
-TEST(MessageTest, BypassInitializationCheckOnParse) {
+TEST( MessageTest, BypassInitializationCheckOnParse )
+{
   unittest::TestRequired message;
-  io::ArrayInputStream raw_input(NULL, 0);
-  io::CodedInputStream input(&raw_input);
-  EXPECT_TRUE(message.MergePartialFromCodedStream(&input));
+  io::ArrayInputStream raw_input( NULL, 0 );
+  io::CodedInputStream input( &raw_input );
+  EXPECT_TRUE( message.MergePartialFromCodedStream( &input ) );
 }
 
-TEST(MessageTest, InitializationErrorString) {
+TEST( MessageTest, InitializationErrorString )
+{
   unittest::TestRequired message;
-  EXPECT_EQ("a, b, c", message.InitializationErrorString());
+  EXPECT_EQ( "a, b, c", message.InitializationErrorString() );
 }
 
 #ifdef GTEST_HAS_DEATH_TEST  // death tests do not work on Windows yet.
 
-TEST(MessageTest, SerializeFailsIfNotInitialized) {
+TEST( MessageTest, SerializeFailsIfNotInitialized )
+{
   unittest::TestRequired message;
   string data;
-  EXPECT_DEBUG_DEATH(EXPECT_TRUE(message.SerializeToString(&data)),
-    "Can't serialize message of type \"protobuf_unittest.TestRequired\" because "
-    "it is missing required fields: a, b, c");
+  EXPECT_DEBUG_DEATH( EXPECT_TRUE( message.SerializeToString( &data ) ),
+                      "Can't serialize message of type \"protobuf_unittest.TestRequired\" because "
+                      "it is missing required fields: a, b, c" );
 }
 
-TEST(MessageTest, CheckInitialized) {
+TEST( MessageTest, CheckInitialized )
+{
   unittest::TestRequired message;
-  EXPECT_DEATH(message.CheckInitialized(),
-    "Message of type \"protobuf_unittest.TestRequired\" is missing required "
-    "fields: a, b, c");
+  EXPECT_DEATH( message.CheckInitialized(),
+                "Message of type \"protobuf_unittest.TestRequired\" is missing required "
+                "fields: a, b, c" );
 }
 
 #endif  // GTEST_HAS_DEATH_TEST
 
-TEST(MessageTest, BypassInitializationCheckOnSerialize) {
+TEST( MessageTest, BypassInitializationCheckOnSerialize )
+{
   unittest::TestRequired message;
-  io::ArrayOutputStream raw_output(NULL, 0);
-  io::CodedOutputStream output(&raw_output);
-  EXPECT_TRUE(message.SerializePartialToCodedStream(&output));
+  io::ArrayOutputStream raw_output( NULL, 0 );
+  io::CodedOutputStream output( &raw_output );
+  EXPECT_TRUE( message.SerializePartialToCodedStream( &output ) );
 }
 
-TEST(MessageTest, FindInitializationErrors) {
+TEST( MessageTest, FindInitializationErrors )
+{
   unittest::TestRequired message;
-  vector<string> errors;
-  message.FindInitializationErrors(&errors);
-  ASSERT_EQ(3, errors.size());
-  EXPECT_EQ("a", errors[0]);
-  EXPECT_EQ("b", errors[1]);
-  EXPECT_EQ("c", errors[2]);
+  vector< string > errors;
+  message.FindInitializationErrors( &errors );
+  ASSERT_EQ( 3, errors.size() );
+  EXPECT_EQ( "a", errors[0] );
+  EXPECT_EQ( "b", errors[1] );
+  EXPECT_EQ( "c", errors[2] );
 }
 
-TEST(MessageTest, ParseFailsOnInvalidMessageEnd) {
+TEST( MessageTest, ParseFailsOnInvalidMessageEnd )
+{
   unittest::TestAllTypes message;
 
   // Control case.
-  EXPECT_TRUE(message.ParseFromArray("", 0));
+  EXPECT_TRUE( message.ParseFromArray( "", 0 ) );
 
   // The byte is a valid varint, but not a valid tag (zero).
-  EXPECT_FALSE(message.ParseFromArray("\0", 1));
+  EXPECT_FALSE( message.ParseFromArray( "\0", 1 ) );
 
   // The byte is a malformed varint.
-  EXPECT_FALSE(message.ParseFromArray("\200", 1));
+  EXPECT_FALSE( message.ParseFromArray( "\200", 1 ) );
 
   // The byte is an endgroup tag, but we aren't parsing a group.
-  EXPECT_FALSE(message.ParseFromArray("\014", 1));
+  EXPECT_FALSE( message.ParseFromArray( "\014", 1 ) );
 }
 
-TEST(MessageFactoryTest, GeneratedFactoryLookup) {
+TEST( MessageFactoryTest, GeneratedFactoryLookup )
+{
   EXPECT_EQ(
-    MessageFactory::generated_factory()->GetPrototype(
-      protobuf_unittest::TestAllTypes::descriptor()),
-    &protobuf_unittest::TestAllTypes::default_instance());
+      MessageFactory::generated_factory()->GetPrototype(
+          protobuf_unittest::TestAllTypes::descriptor() ),
+      &protobuf_unittest::TestAllTypes::default_instance() );
 }
 
-TEST(MessageFactoryTest, GeneratedFactoryUnknownType) {
+TEST( MessageFactoryTest, GeneratedFactoryUnknownType )
+{
   // Construct a new descriptor.
   DescriptorPool pool;
   FileDescriptorProto file;
-  file.set_name("foo.proto");
-  file.add_message_type()->set_name("Foo");
-  const Descriptor* descriptor = pool.BuildFile(file)->message_type(0);
+  file.set_name( "foo.proto" );
+  file.add_message_type()->set_name( "Foo" );
+  const Descriptor* descriptor = pool.BuildFile( file )->message_type( 0 );
 
   // Trying to construct it should return NULL.
   EXPECT_TRUE(
-    MessageFactory::generated_factory()->GetPrototype(descriptor) == NULL);
+      MessageFactory::generated_factory()->GetPrototype( descriptor ) == NULL );
 }
 
 }  // namespace protobuf

@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -25,16 +25,15 @@
 
 abstract_class ISteamContentServer002
 {
-public:
-	virtual bool LogOn( uint32 uContentServerID ) = 0;
-	virtual bool LogOff() = 0;
+ public:
+  virtual bool LogOn( uint32 uContentServerID ) = 0;
+  virtual bool LogOff() = 0;
 
-	virtual bool BLoggedOn() = 0;
+  virtual bool BLoggedOn() = 0;
 
-	virtual void SendClientContentAuthRequest( CSteamID steamId, uint32 unContentID, uint64 ulSessionToken, bool bTokenPresent ) = 0;
+  virtual void SendClientContentAuthRequest( CSteamID steamId, uint32 unContentID, uint64 ulSessionToken, bool bTokenPresent ) = 0;
 
-	virtual bool BCheckTicket( CSteamID steamId, uint32 uContentID, const void *pvTicketData, uint32 cubTicketLength ) = 0;
+  virtual bool BCheckTicket( CSteamID steamId, uint32 uContentID, const void *pvTicketData, uint32 cubTicketLength ) = 0;
 };
 
-
-#endif // ISTEAMCONTENTSERVER001_H
+#endif  // ISTEAMCONTENTSERVER001_H

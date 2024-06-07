@@ -54,92 +54,107 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-
-class GeneratorResponseOutputDirectory : public OutputDirectory {
+class GeneratorResponseOutputDirectory : public OutputDirectory
+{
  public:
-  GeneratorResponseOutputDirectory(CodeGeneratorResponse* response)
-      : response_(response) {}
+  GeneratorResponseOutputDirectory( CodeGeneratorResponse* response )
+      : response_( response ) {}
   virtual ~GeneratorResponseOutputDirectory() {}
 
   // implements OutputDirectory --------------------------------------
 
-  virtual io::ZeroCopyOutputStream* Open(const string& filename) {
+  virtual io::ZeroCopyOutputStream* Open( const string& filename )
+  {
     CodeGeneratorResponse::File* file = response_->add_file();
-    file->set_name(filename);
-    return new io::StringOutputStream(file->mutable_content());
+    file->set_name( filename );
+    return new io::StringOutputStream( file->mutable_content() );
   }
 
   virtual io::ZeroCopyOutputStream* OpenForInsert(
-      const string& filename, const string& insertion_point) {
+      const string& filename, const string& insertion_point )
+  {
     CodeGeneratorResponse::File* file = response_->add_file();
-    file->set_name(filename);
-    file->set_insertion_point(insertion_point);
-    return new io::StringOutputStream(file->mutable_content());
+    file->set_name( filename );
+    file->set_insertion_point( insertion_point );
+    return new io::StringOutputStream( file->mutable_content() );
   }
 
  private:
   CodeGeneratorResponse* response_;
 };
 
-int PluginMain(int argc, char* argv[], const CodeGenerator* generator) {
-
-  if (argc > 1) {
+int PluginMain( int argc, char* argv[], const CodeGenerator* generator )
+{
+  if ( argc > 1 )
+  {
     cerr << argv[0] << ": Unknown option: " << argv[1] << endl;
     return 1;
   }
 
 #ifdef _WIN32
-  _setmode(STDIN_FILENO, _O_BINARY);
-  _setmode(STDOUT_FILENO, _O_BINARY);
+  _setmode( STDIN_FILENO, _O_BINARY );
+  _setmode( STDOUT_FILENO, _O_BINARY );
 #endif
 
   CodeGeneratorRequest request;
-  if (!request.ParseFromFileDescriptor(STDIN_FILENO)) {
+  if ( !request.ParseFromFileDescriptor( STDIN_FILENO ) )
+  {
     cerr << argv[0] << ": protoc sent unparseable request to plugin." << endl;
     return 1;
   }
 
   DescriptorPool pool;
-  for (int i = 0; i < request.proto_file_size(); i++) {
-    const FileDescriptor* file = pool.BuildFile(request.proto_file(i));
-    if (file == NULL) {
+  for ( int i = 0; i < request.proto_file_size(); i++ )
+  {
+    const FileDescriptor* file = pool.BuildFile( request.proto_file( i ) );
+    if ( file == NULL )
+    {
       // BuildFile() already wrote an error message.
       return 1;
     }
   }
 
   CodeGeneratorResponse response;
-  GeneratorResponseOutputDirectory output_directory(&response);
+  GeneratorResponseOutputDirectory output_directory( &response );
 
-  for (int i = 0; i < request.file_to_generate_size(); i++) {
+  for ( int i = 0; i < request.file_to_generate_size(); i++ )
+  {
     const FileDescriptor* file =
-        pool.FindFileByName(request.file_to_generate(i));
-    if (file == NULL) {
+        pool.FindFileByName( request.file_to_generate( i ) );
+    if ( file == NULL )
+    {
       cerr << argv[0] << ": protoc asked plugin to generate a file but "
-              "did not provide a descriptor for the file: "
-           << request.file_to_generate(i) << endl;
+                         "did not provide a descriptor for the file: "
+           << request.file_to_generate( i ) << endl;
       return 1;
     }
 
     string error;
     bool succeeded = generator->Generate(
-        file, request.parameter(), &output_directory, &error);
+        file, request.parameter(), &output_directory, &error );
 
-    if (!succeeded && error.empty()) {
-      error = "Code generator returned false but provided no error "
-              "description.";
+    if ( !succeeded && error.empty() )
+    {
+      error =
+          "Code generator returned false but provided no error "
+          "description.";
     }
-    if (!error.empty()) {
-      response.set_error(file->name() + ": " + error);
+    if ( !error.empty() )
+    {
+      response.set_error( file->name() + ": " + error );
       break;
     }
   }
 
-  if (!response.SerializeToFileDescriptor(STDOUT_FILENO)) {
+  if ( !response.SerializeToFileDescriptor( STDOUT_FILENO ) )
+  {
     cerr << argv[0] << ": Error writing to stdout." << endl;
     return 1;
   }

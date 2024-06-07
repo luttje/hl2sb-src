@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ========//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-int luaopen_dbg(lua_State *L);
+int luaopen_dbg( lua_State *L );
 
 //-----------------------------------------------------------------------------
 

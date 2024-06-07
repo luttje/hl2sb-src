@@ -2,7 +2,7 @@
 #ifndef RENDERMECHANISM_H
 #define RENDERMECHANISM_H
 
-#if defined(DX_TO_GL_ABSTRACTION)
+#if defined( DX_TO_GL_ABSTRACTION )
 
 #undef PROTECTED_THINGS_ENABLE
 
@@ -11,7 +11,7 @@
 #include "tier0/basetypes.h"
 #include "tier0/platform.h"
 
-#if defined(LINUX) || defined(_WIN32)
+#if defined( LINUX ) || defined( _WIN32 )
 
 #include "togl/linuxwin/glmdebug.h"
 #include "togl/linuxwin/glbase.h"
@@ -29,9 +29,9 @@
 #include "togl/linuxwin/dxabstract_types.h"
 #include "togl/linuxwin/dxabstract.h"
 
-#elif defined(OSX)
+#elif defined( OSX )
 #include "togl/osx/glmdebug.h"
-//#include "togl/osx/glbase.h"
+// #include "togl/osx/glbase.h"
 #include "togl/osx/glentrypoints.h"
 #include "togl/osx/glmdisplay.h"
 #include "togl/osx/glmdisplaydb.h"
@@ -49,22 +49,22 @@
 #endif
 
 #else
-	//USE_ACTUAL_DX
-	#ifdef WIN32
-		#ifdef _X360
-			#include "d3d9.h"
-			#include "d3dx9.h"
-		#else
-			#include <windows.h>
-			#include "../../dx9sdk/include/d3d9.h"
-			#include "../../dx9sdk/include/d3dx9.h"
-		#endif
-		typedef HWND VD3DHWND;
-	#endif
+// USE_ACTUAL_DX
+#ifdef WIN32
+#ifdef _X360
+#include "d3d9.h"
+#include "d3dx9.h"
+#else
+#include <windows.h>
+#include "../../dx9sdk/include/d3d9.h"
+#include "../../dx9sdk/include/d3dx9.h"
+#endif
+typedef HWND VD3DHWND;
+#endif
 
-	#define	GLMPRINTF(args)	
-	#define	GLMPRINTSTR(args)
-	#define	GLMPRINTTEXT(args)
-#endif // defined(DX_TO_GL_ABSTRACTION)
+#define GLMPRINTF( args )
+#define GLMPRINTSTR( args )
+#define GLMPRINTTEXT( args )
+#endif  // defined(DX_TO_GL_ABSTRACTION)
 
-#endif // RENDERMECHANISM_H
+#endif  // RENDERMECHANISM_H

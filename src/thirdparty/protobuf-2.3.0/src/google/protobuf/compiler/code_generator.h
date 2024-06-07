@@ -43,13 +43,19 @@
 #include <vector>
 #include <utility>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
-namespace io { class ZeroCopyOutputStream; }
+namespace io
+{
+class ZeroCopyOutputStream;
+}
 class FileDescriptor;
 
-namespace compiler {
+namespace compiler
+{
 
 // Defined in this file.
 class CodeGenerator;
@@ -58,7 +64,8 @@ class OutputDirectory;
 // The abstract interface to a class which generates code implementing a
 // particular proto file in a particular language.  A number of these may
 // be registered with CommandLineInterface to support various languages.
-class LIBPROTOC_EXPORT CodeGenerator {
+class LIBPROTOC_EXPORT CodeGenerator
+{
  public:
   inline CodeGenerator() {}
   virtual ~CodeGenerator();
@@ -74,19 +81,20 @@ class LIBPROTOC_EXPORT CodeGenerator {
   //
   // Returns true if successful.  Otherwise, sets *error to a description of
   // the problem (e.g. "invalid parameter") and returns false.
-  virtual bool Generate(const FileDescriptor* file,
-                        const string& parameter,
-                        OutputDirectory* output_directory,
-                        string* error) const = 0;
+  virtual bool Generate( const FileDescriptor* file,
+                         const string& parameter,
+                         OutputDirectory* output_directory,
+                         string* error ) const = 0;
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(CodeGenerator);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( CodeGenerator );
 };
 
 // CodeGenerators generate one or more files in a given directory.  This
 // abstract interface represents the directory to which the CodeGenerator is
 // to write.
-class LIBPROTOC_EXPORT OutputDirectory {
+class LIBPROTOC_EXPORT OutputDirectory
+{
  public:
   inline OutputDirectory() {}
   virtual ~OutputDirectory();
@@ -101,7 +109,7 @@ class LIBPROTOC_EXPORT OutputDirectory {
   // generate the files "foo/bar.pb.h" and "foo/bar.pb.cc"; note that
   // "foo/" is included in these filenames.  The filename is not allowed to
   // contain "." or ".." components.
-  virtual io::ZeroCopyOutputStream* Open(const string& filename) = 0;
+  virtual io::ZeroCopyOutputStream* Open( const string& filename ) = 0;
 
   // Creates a ZeroCopyOutputStream which will insert code into the given file
   // at the given insertion point.  See plugin.proto (plugin.pb.h) for more
@@ -110,10 +118,10 @@ class LIBPROTOC_EXPORT OutputDirectory {
   //
   // WARNING:  This feature is currently EXPERIMENTAL and is subject to change.
   virtual io::ZeroCopyOutputStream* OpenForInsert(
-      const string& filename, const string& insertion_point);
+      const string& filename, const string& insertion_point );
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(OutputDirectory);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( OutputDirectory );
 };
 
 // Several code generators treat the parameter argument as holding a
@@ -122,8 +130,8 @@ class LIBPROTOC_EXPORT OutputDirectory {
 //   "foo=bar,baz,qux=corge"
 // parses to the pairs:
 //   ("foo", "bar"), ("baz", ""), ("qux", "corge")
-extern void ParseGeneratorParameter(const string&,
-            vector<pair<string, string> >*);
+extern void ParseGeneratorParameter( const string&,
+                                     vector< pair< string, string > >* );
 
 }  // namespace compiler
 }  // namespace protobuf

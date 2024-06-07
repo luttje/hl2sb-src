@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -11,7 +11,6 @@
 #pragma once
 #endif
 
-LUALIB_API int luaopen_CBaseEntity(lua_State *L);
+LUALIB_API int luaopen_CBaseEntity( lua_State *L );
 
-
-#endif // LBASEENTITY_H
+#endif  // LBASEENTITY_H

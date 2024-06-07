@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -13,6 +13,6 @@
 #pragma once
 #endif
 
-int luaopen_engine(lua_State *L);
+int luaopen_engine( lua_State *L );
 
-#endif // LEIFACE_H
+#endif  // LEIFACE_H

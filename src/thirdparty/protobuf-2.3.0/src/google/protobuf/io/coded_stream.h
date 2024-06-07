@@ -113,44 +113,47 @@
 
 #ifdef _PS3
 // PS3 is always big endian
-#define BIG_ENDIAN      4321
-#define LITTLE_ENDIAN   1234
-#define BYTE_ORDER      BIG_ENDIAN
+#define BIG_ENDIAN 4321
+#define LITTLE_ENDIAN 1234
+#define BYTE_ORDER BIG_ENDIAN
 #else
-	#ifndef _MSC_VER
-		// sys/param.h sets BYTE_ORDER on linux/osx
-		#include <sys/param.h>
-	#else
-		// All our known win32 platforms are little endian
-		#define BIG_ENDIAN      4321
-		#define LITTLE_ENDIAN   1234
-		#define BYTE_ORDER      LITTLE_ENDIAN
-	#endif // _MSC_VER
-#endif // _PS3
+#ifndef _MSC_VER
+// sys/param.h sets BYTE_ORDER on linux/osx
+#include <sys/param.h>
+#else
+// All our known win32 platforms are little endian
+#define BIG_ENDIAN 4321
+#define LITTLE_ENDIAN 1234
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif  // _MSC_VER
+#endif  // _PS3
 
 #ifndef BYTE_ORDER
 #error;
 #endif
 
 #include <google/protobuf/stubs/common.h>
-#include <google/protobuf/stubs/common.h>          // for GOOGLE_PREDICT_TRUE macro
+#include <google/protobuf/stubs/common.h>  // for GOOGLE_PREDICT_TRUE macro
 
-namespace google {
+namespace google
+{
 
-namespace protobuf {
+namespace protobuf
+{
 
 class DescriptorPool;
 class MessageFactory;
 
-namespace io {
+namespace io
+{
 
 // Defined in this file.
 class CodedInputStream;
 class CodedOutputStream;
 
 // Defined in other files.
-class ZeroCopyInputStream;           // zero_copy_stream.h
-class ZeroCopyOutputStream;          // zero_copy_stream.h
+class ZeroCopyInputStream;   // zero_copy_stream.h
+class ZeroCopyOutputStream;  // zero_copy_stream.h
 
 // Class which reads and decodes binary data which is composed of varint-
 // encoded integers and fixed-width pieces.  Wraps a ZeroCopyInputStream.
@@ -159,15 +162,16 @@ class ZeroCopyOutputStream;          // zero_copy_stream.h
 // Most methods of CodedInputStream that return a bool return false if an
 // underlying I/O error occurs or if the data is malformed.  Once such a
 // failure occurs, the CodedInputStream is broken and is no longer useful.
-class LIBPROTOBUF_EXPORT CodedInputStream {
+class LIBPROTOBUF_EXPORT CodedInputStream
+{
  public:
   // Create a CodedInputStream that reads from the given ZeroCopyInputStream.
-  explicit CodedInputStream(ZeroCopyInputStream* input);
+  explicit CodedInputStream( ZeroCopyInputStream* input );
 
   // Create a CodedInputStream that reads from the given flat array.  This is
   // faster than using an ArrayInputStream.  PushLimit(size) is implied by
   // this constructor.
-  explicit CodedInputStream(const uint8* buffer, int size);
+  explicit CodedInputStream( const uint8* buffer, int size );
 
   // Destroy the CodedInputStream and position the underlying
   // ZeroCopyInputStream at the first unread byte.  If an error occurred while
@@ -176,10 +180,9 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // successfully and the stream's byte limit.
   ~CodedInputStream();
 
-
   // Skips a number of bytes.  Returns false if an underlying read error
   // occurs.
-  bool Skip(int count);
+  bool Skip( int count );
 
   // Sets *data to point directly at the unread part of the CodedInputStream's
   // underlying buffer, and *size to the size of that buffer, but does not
@@ -188,15 +191,15 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // this data, it should then call Skip() to skip over the consumed bytes.
   // This may be useful for implementing external fast parsing routines for
   // types of data not covered by the CodedInputStream interface.
-  bool GetDirectBufferPointer(const void** data, int* size);
+  bool GetDirectBufferPointer( const void** data, int* size );
 
   // Like GetDirectBufferPointer, but this method is inlined, and does not
   // attempt to Refresh() if the buffer is currently empty.
-  inline void GetDirectBufferPointerInline(const void** data,
-                                           int* size) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+  inline void GetDirectBufferPointerInline( const void** data,
+                                            int* size ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
   // Read raw bytes, copying them into the given buffer.
-  bool ReadRaw(void* buffer, int size);
+  bool ReadRaw( void* buffer, int size );
 
   // Like ReadRaw, but reads into a string.
   //
@@ -205,33 +208,32 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // upfront.  This prevents denial-of-service attacks in which a client
   // could claim that a string is going to be MAX_INT bytes long in order to
   // crash the server because it can't allocate this much space at once.
-  bool ReadString(string* buffer, int size);
+  bool ReadString( string* buffer, int size );
   // Like the above, with inlined optimizations. This should only be used
   // by the protobuf implementation.
-  inline bool InternalReadStringInline(string* buffer,
-                                       int size) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
-
+  inline bool InternalReadStringInline( string* buffer,
+                                        int size ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
   // Read a 32-bit little-endian integer.
-  bool ReadLittleEndian32(uint32* value);
+  bool ReadLittleEndian32( uint32* value );
   // Read a 64-bit little-endian integer.
-  bool ReadLittleEndian64(uint64* value);
+  bool ReadLittleEndian64( uint64* value );
 
   // These methods read from an externally provided buffer. The caller is
   // responsible for ensuring that the buffer has sufficient space.
   // Read a 32-bit little-endian integer.
-  static const uint8* ReadLittleEndian32FromArray(const uint8* buffer,
-                                                   uint32* value);
+  static const uint8* ReadLittleEndian32FromArray( const uint8* buffer,
+                                                   uint32* value );
   // Read a 64-bit little-endian integer.
-  static const uint8* ReadLittleEndian64FromArray(const uint8* buffer,
-                                                   uint64* value);
+  static const uint8* ReadLittleEndian64FromArray( const uint8* buffer,
+                                                   uint64* value );
 
   // Read an unsigned integer with Varint encoding, truncating to 32 bits.
   // Reading a 32-bit value is equivalent to reading a 64-bit one and casting
   // it to uint32, but may be more efficient.
-  bool ReadVarint32(uint32* value);
+  bool ReadVarint32( uint32* value );
   // Read an unsigned integer with Varint encoding.
-  bool ReadVarint64(uint64* value);
+  bool ReadVarint64( uint64* value );
 
   // Read a tag.  This calls ReadVarint32() and returns the result, or returns
   // zero (which is not a valid tag) if ReadVarint32() fails.  Also, it updates
@@ -248,7 +250,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // parameter.
   // Always inline because this collapses to a small number of instructions
   // when given a constant parameter, but GCC doesn't want to inline by default.
-  bool ExpectTag(uint32 expected) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+  bool ExpectTag( uint32 expected ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
   // Like above, except this reads from the specified buffer. The caller is
   // responsible for ensuring that the buffer is large enough to read a varint
@@ -259,7 +261,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // was not.
   static const uint8* ExpectTagFromArray(
       const uint8* buffer,
-      uint32 expected) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+      uint32 expected ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
   // Usually returns true if no more bytes can be read.  Always returns false
   // if more bytes can be read.  If ExpectAtEnd() returns true, a subsequent
@@ -276,7 +278,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // of the enclosing message.  The enclosing message would like to check that
   // tag to make sure it had the right number, so it calls LastTagWas() on
   // return from the embedded parser to check.
-  bool LastTagWas(uint32 expected);
+  bool LastTagWas( uint32 expected );
 
   // When parsing message (but NOT a group), this method must be called
   // immediately after MergeFromCodedStream() returns (if it returns true)
@@ -309,11 +311,11 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   //
   // The value returned by PushLimit() is opaque to the caller, and must
   // be passed unchanged to the corresponding call to PopLimit().
-  Limit PushLimit(int byte_limit);
+  Limit PushLimit( int byte_limit );
 
   // Pops the last limit pushed by PushLimit().  The input must be the value
   // returned by that call to PushLimit().
-  void PopLimit(Limit limit);
+  void PopLimit( Limit limit );
 
   // Returns the number of bytes left until the nearest limit on the
   // stack is hit, or -1 if no limits are in place.
@@ -353,7 +355,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   //   that, then call Message::ParseFromCodedStream() instead.  Then
   //   you can adjust the limit.  Yes, it's more work, but you're doing
   //   something unusual.
-  void SetTotalBytesLimit(int total_bytes_limit, int warning_threshold);
+  void SetTotalBytesLimit( int total_bytes_limit, int warning_threshold );
 
   // Recursion Limit -------------------------------------------------
   // To prevent corrupt or malicious messages from causing stack overflows,
@@ -362,7 +364,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // is the only object that is passed down the stack during parsing.
 
   // Sets the maximum recursion depth.  The default is 64.
-  void SetRecursionLimit(int limit);
+  void SetRecursionLimit( int limit );
 
   // Increments the current recursion depth.  Returns true if the depth is
   // under the limit, false if it has gone over.
@@ -439,7 +441,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   //
   // Note that this feature is ignored when parsing "lite" messages as they do
   // not have descriptors.
-  void SetExtensionRegistry(DescriptorPool* pool, MessageFactory* factory);
+  void SetExtensionRegistry( DescriptorPool* pool, MessageFactory* factory );
 
   // Get the DescriptorPool set via SetExtensionRegistry(), or NULL if no pool
   // has been provided.
@@ -450,20 +452,20 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   MessageFactory* GetExtensionFactory();
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(CodedInputStream);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( CodedInputStream );
 
   ZeroCopyInputStream* input_;
   const uint8* buffer_;
-  const uint8* buffer_end_;     // pointer to the end of the buffer.
-  int total_bytes_read_;  // total bytes read from input_, including
-                          // the current buffer
+  const uint8* buffer_end_;  // pointer to the end of the buffer.
+  int total_bytes_read_;     // total bytes read from input_, including
+                             // the current buffer
 
   // If total_bytes_read_ surpasses INT_MAX, we record the extra bytes here
   // so that we can BackUp() on destruction.
   int overflow_bytes_;
 
   // LastTagWas() stuff.
-  uint32 last_tag_;         // result of last ReadTag().
+  uint32 last_tag_;  // result of last ReadTag().
 
   // This is set true by ReadTag{Fallback/Slow}() if it is called when exactly
   // at EOF, or by ExpectAtEnd() when it returns true.  This happens when we
@@ -474,7 +476,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   bool aliasing_enabled_;
 
   // Limits
-  Limit current_limit_;   // if position = -1, no limit is applied
+  Limit current_limit_;  // if position = -1, no limit is applied
 
   // For simplicity, if the current buffer crosses a limit (either a normal
   // limit created by PushLimit() or the total bytes limit), buffer_size_
@@ -503,7 +505,7 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // Private member functions.
 
   // Advance the buffer by a given number of bytes.
-  void Advance(int amount);
+  void Advance( int amount );
 
   // Back up input_ to the current buffer position.
   void BackUpInputToCurrentPosition();
@@ -526,18 +528,18 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
   // not large enough. Making the slow path out-of-line speeds up the common
   // case by 10-15%. The slow path is fairly uncommon: it only triggers when a
   // message crosses multiple buffers.
-  bool ReadVarint32Fallback(uint32* value);
-  bool ReadVarint64Fallback(uint64* value);
-  bool ReadVarint32Slow(uint32* value);
-  bool ReadVarint64Slow(uint64* value);
-  bool ReadLittleEndian32Fallback(uint32* value);
-  bool ReadLittleEndian64Fallback(uint64* value);
+  bool ReadVarint32Fallback( uint32* value );
+  bool ReadVarint64Fallback( uint64* value );
+  bool ReadVarint32Slow( uint32* value );
+  bool ReadVarint64Slow( uint64* value );
+  bool ReadLittleEndian32Fallback( uint32* value );
+  bool ReadLittleEndian64Fallback( uint64* value );
   // Fallback/slow methods for reading tags. These do not update last_tag_,
   // but will set legitimate_message_end_ if we are at the end of the input
   // stream.
   uint32 ReadTagFallback();
   uint32 ReadTagSlow();
-  bool ReadStringFallback(string* buffer, int size);
+  bool ReadStringFallback( string* buffer, int size );
 
   // Return the size of the buffer.
   int BufferSize() const;
@@ -594,10 +596,11 @@ class LIBPROTOBUF_EXPORT CodedInputStream {
 //   }
 //
 //   delete coded_output;
-class LIBPROTOBUF_EXPORT CodedOutputStream {
+class LIBPROTOBUF_EXPORT CodedOutputStream
+{
  public:
   // Create an CodedOutputStream that writes to the given ZeroCopyOutputStream.
-  explicit CodedOutputStream(ZeroCopyOutputStream* output);
+  explicit CodedOutputStream( ZeroCopyOutputStream* output );
 
   // Destroy the CodedOutputStream and position the underlying
   // ZeroCopyOutputStream immediately after the last byte written.
@@ -606,7 +609,7 @@ class LIBPROTOBUF_EXPORT CodedOutputStream {
   // Skips a number of bytes, leaving the bytes unmodified in the underlying
   // buffer.  Returns false if an underlying write error occurs.  This is
   // mainly useful with GetDirectBufferPointer().
-  bool Skip(int count);
+  bool Skip( int count );
 
   // Sets *data to point directly at the unwritten part of the
   // CodedOutputStream's underlying buffer, and *size to the size of that
@@ -616,7 +619,7 @@ class LIBPROTOBUF_EXPORT CodedOutputStream {
   // the consumed bytes.  This may be useful for implementing external fast
   // serialization routines for types of data not covered by the
   // CodedOutputStream interface.
-  bool GetDirectBufferPointer(void** data, int* size);
+  bool GetDirectBufferPointer( void** data, int* size );
 
   // If there are at least "size" bytes available in the current buffer,
   // returns a pointer directly into the buffer and advances over these bytes.
@@ -625,76 +628,78 @@ class LIBPROTOBUF_EXPORT CodedOutputStream {
   // there are not enough bytes available, returns NULL.  The return pointer is
   // invalidated as soon as any other non-const method of CodedOutputStream
   // is called.
-  inline uint8* GetDirectBufferForNBytesAndAdvance(int size);
+  inline uint8* GetDirectBufferForNBytesAndAdvance( int size );
 
   // Write raw bytes, copying them from the given buffer.
-  void WriteRaw(const void* buffer, int size);
+  void WriteRaw( const void* buffer, int size );
   // Like WriteRaw()  but writing directly to the target array.
   // This is _not_ inlined, as the compiler often optimizes memcpy into inline
   // copy loops. Since this gets called by every field with string or bytes
   // type, inlining may lead to a significant amount of code bloat, with only a
   // minor performance gain.
-  static uint8* WriteRawToArray(const void* buffer, int size, uint8* target);
+  static uint8* WriteRawToArray( const void* buffer, int size, uint8* target );
 
   // Equivalent to WriteRaw(str.data(), str.size()).
-  void WriteString(const string& str);
+  void WriteString( const string& str );
   // Like WriteString()  but writing directly to the target array.
-  static uint8* WriteStringToArray(const string& str, uint8* target);
-
+  static uint8* WriteStringToArray( const string& str, uint8* target );
 
   // Write a 32-bit little-endian integer.
-  void WriteLittleEndian32(uint32 value);
+  void WriteLittleEndian32( uint32 value );
   // Like WriteLittleEndian32()  but writing directly to the target array.
-  static uint8* WriteLittleEndian32ToArray(uint32 value, uint8* target);
+  static uint8* WriteLittleEndian32ToArray( uint32 value, uint8* target );
   // Write a 64-bit little-endian integer.
-  void WriteLittleEndian64(uint64 value);
+  void WriteLittleEndian64( uint64 value );
   // Like WriteLittleEndian64()  but writing directly to the target array.
-  static uint8* WriteLittleEndian64ToArray(uint64 value, uint8* target);
+  static uint8* WriteLittleEndian64ToArray( uint64 value, uint8* target );
 
   // Write an unsigned integer with Varint encoding.  Writing a 32-bit value
   // is equivalent to casting it to uint64 and writing it as a 64-bit value,
   // but may be more efficient.
-  void WriteVarint32(uint32 value);
+  void WriteVarint32( uint32 value );
   // Like WriteVarint32()  but writing directly to the target array.
-  static uint8* WriteVarint32ToArray(uint32 value, uint8* target);
+  static uint8* WriteVarint32ToArray( uint32 value, uint8* target );
   // Write an unsigned integer with Varint encoding.
-  void WriteVarint64(uint64 value);
+  void WriteVarint64( uint64 value );
   // Like WriteVarint64()  but writing directly to the target array.
-  static uint8* WriteVarint64ToArray(uint64 value, uint8* target);
+  static uint8* WriteVarint64ToArray( uint64 value, uint8* target );
 
   // Equivalent to WriteVarint32() except when the value is negative,
   // in which case it must be sign-extended to a full 10 bytes.
-  void WriteVarint32SignExtended(int32 value);
+  void WriteVarint32SignExtended( int32 value );
   // Like WriteVarint32SignExtended()  but writing directly to the target array.
-  static uint8* WriteVarint32SignExtendedToArray(int32 value, uint8* target);
+  static uint8* WriteVarint32SignExtendedToArray( int32 value, uint8* target );
 
   // This is identical to WriteVarint32(), but optimized for writing tags.
   // In particular, if the input is a compile-time constant, this method
   // compiles down to a couple instructions.
   // Always inline because otherwise the aformentioned optimization can't work,
   // but GCC by default doesn't want to inline this.
-  void WriteTag(uint32 value);
+  void WriteTag( uint32 value );
   // Like WriteTag()  but writing directly to the target array.
   static uint8* WriteTagToArray(
-      uint32 value, uint8* target) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+      uint32 value, uint8* target ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
   // Returns the number of bytes needed to encode the given value as a varint.
-  static int VarintSize32(uint32 value);
+  static int VarintSize32( uint32 value );
   // Returns the number of bytes needed to encode the given value as a varint.
-  static int VarintSize64(uint64 value);
+  static int VarintSize64( uint64 value );
 
   // If negative, 10 bytes.  Otheriwse, same as VarintSize32().
-  static int VarintSize32SignExtended(int32 value);
+  static int VarintSize32SignExtended( int32 value );
 
   // Returns the total number of bytes written since this object was created.
   inline int ByteCount() const;
 
   // Returns true if there was an underlying I/O error since this object was
   // created.
-  bool HadError() const { return had_error_; }
+  bool HadError() const
+  {
+    return had_error_;
+  }
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(CodedOutputStream);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( CodedOutputStream );
 
   ZeroCopyOutputStream* output_;
   uint8* buffer_;
@@ -703,13 +708,13 @@ class LIBPROTOBUF_EXPORT CodedOutputStream {
   bool had_error_;   // Whether an error occurred during output.
 
   // Advance the buffer by a given number of bytes.
-  void Advance(int amount);
+  void Advance( int amount );
 
   // Called when the buffer runs out to request more data.  Implies an
   // Advance(buffer_size_).
   bool Refresh();
 
-  static uint8* WriteVarint32FallbackToArray(uint32 value, uint8* target);
+  static uint8* WriteVarint32FallbackToArray( uint32 value, uint8* target );
 
   // Always-inlined versions of WriteVarint* functions so that code can be
   // reused, while still controlling size. For instance, WriteVarint32ToArray()
@@ -719,385 +724,481 @@ class LIBPROTOBUF_EXPORT CodedOutputStream {
   // out-of-line, so it should just invoke this directly to avoid any extra
   // function call overhead.
   static uint8* WriteVarint32FallbackToArrayInline(
-      uint32 value, uint8* target) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+      uint32 value, uint8* target ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
   static uint8* WriteVarint64ToArrayInline(
-      uint64 value, uint8* target) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
+      uint64 value, uint8* target ) GOOGLE_ATTRIBUTE_ALWAYS_INLINE;
 
-  static int VarintSize32Fallback(uint32 value);
+  static int VarintSize32Fallback( uint32 value );
 };
 
 // inline methods ====================================================
 // The vast majority of varints are only one byte.  These inline
 // methods optimize for that case.
 
-inline bool CodedInputStream::ReadVarint32(uint32* value) {
-  if (GOOGLE_PREDICT_TRUE(buffer_ < buffer_end_) && *buffer_ < 0x80) {
+inline bool CodedInputStream::ReadVarint32( uint32* value )
+{
+  if ( GOOGLE_PREDICT_TRUE( buffer_ < buffer_end_ ) && *buffer_ < 0x80 )
+  {
     *value = *buffer_;
-    Advance(1);
+    Advance( 1 );
     return true;
-  } else {
-    return ReadVarint32Fallback(value);
+  }
+  else
+  {
+    return ReadVarint32Fallback( value );
   }
 }
 
-inline bool CodedInputStream::ReadVarint64(uint64* value) {
-  if (GOOGLE_PREDICT_TRUE(buffer_ < buffer_end_) && *buffer_ < 0x80) {
+inline bool CodedInputStream::ReadVarint64( uint64* value )
+{
+  if ( GOOGLE_PREDICT_TRUE( buffer_ < buffer_end_ ) && *buffer_ < 0x80 )
+  {
     *value = *buffer_;
-    Advance(1);
+    Advance( 1 );
     return true;
-  } else {
-    return ReadVarint64Fallback(value);
+  }
+  else
+  {
+    return ReadVarint64Fallback( value );
   }
 }
 
 // static
 inline const uint8* CodedInputStream::ReadLittleEndian32FromArray(
     const uint8* buffer,
-    uint32* value) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  memcpy(value, buffer, sizeof(*value));
-  return buffer + sizeof(*value);
+    uint32* value )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  memcpy( value, buffer, sizeof( *value ) );
+  return buffer + sizeof( *value );
 #else
-  *value = (static_cast<uint32>(buffer[0])      ) |
-           (static_cast<uint32>(buffer[1]) <<  8) |
-           (static_cast<uint32>(buffer[2]) << 16) |
-           (static_cast<uint32>(buffer[3]) << 24);
-  return buffer + sizeof(*value);
+  *value = ( static_cast< uint32 >( buffer[0] ) ) |
+           ( static_cast< uint32 >( buffer[1] ) << 8 ) |
+           ( static_cast< uint32 >( buffer[2] ) << 16 ) |
+           ( static_cast< uint32 >( buffer[3] ) << 24 );
+  return buffer + sizeof( *value );
 #endif
 }
 // static
 inline const uint8* CodedInputStream::ReadLittleEndian64FromArray(
     const uint8* buffer,
-    uint64* value) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  memcpy(value, buffer, sizeof(*value));
-  return buffer + sizeof(*value);
+    uint64* value )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  memcpy( value, buffer, sizeof( *value ) );
+  return buffer + sizeof( *value );
 #else
-  uint32 part0 = (static_cast<uint32>(buffer[0])      ) |
-                 (static_cast<uint32>(buffer[1]) <<  8) |
-                 (static_cast<uint32>(buffer[2]) << 16) |
-                 (static_cast<uint32>(buffer[3]) << 24);
-  uint32 part1 = (static_cast<uint32>(buffer[4])      ) |
-                 (static_cast<uint32>(buffer[5]) <<  8) |
-                 (static_cast<uint32>(buffer[6]) << 16) |
-                 (static_cast<uint32>(buffer[7]) << 24);
-  *value = static_cast<uint64>(part0) |
-          (static_cast<uint64>(part1) << 32);
-  return buffer + sizeof(*value);
+  uint32 part0 = ( static_cast< uint32 >( buffer[0] ) ) |
+                 ( static_cast< uint32 >( buffer[1] ) << 8 ) |
+                 ( static_cast< uint32 >( buffer[2] ) << 16 ) |
+                 ( static_cast< uint32 >( buffer[3] ) << 24 );
+  uint32 part1 = ( static_cast< uint32 >( buffer[4] ) ) |
+                 ( static_cast< uint32 >( buffer[5] ) << 8 ) |
+                 ( static_cast< uint32 >( buffer[6] ) << 16 ) |
+                 ( static_cast< uint32 >( buffer[7] ) << 24 );
+  *value = static_cast< uint64 >( part0 ) |
+           ( static_cast< uint64 >( part1 ) << 32 );
+  return buffer + sizeof( *value );
 #endif
 }
 
-inline bool CodedInputStream::ReadLittleEndian32(uint32* value) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  if (GOOGLE_PREDICT_TRUE(BufferSize() >= sizeof(*value))) {
-    memcpy(value, buffer_, sizeof(*value));
-    Advance(sizeof(*value));
+inline bool CodedInputStream::ReadLittleEndian32( uint32* value )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  if ( GOOGLE_PREDICT_TRUE( BufferSize() >= sizeof( *value ) ) )
+  {
+    memcpy( value, buffer_, sizeof( *value ) );
+    Advance( sizeof( *value ) );
     return true;
-  } else {
-    return ReadLittleEndian32Fallback(value);
+  }
+  else
+  {
+    return ReadLittleEndian32Fallback( value );
   }
 #else
-  return ReadLittleEndian32Fallback(value);
+  return ReadLittleEndian32Fallback( value );
 #endif
 }
 
-inline bool CodedInputStream::ReadLittleEndian64(uint64* value) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  if (GOOGLE_PREDICT_TRUE(BufferSize() >= sizeof(*value))) {
-    memcpy(value, buffer_, sizeof(*value));
-    Advance(sizeof(*value));
+inline bool CodedInputStream::ReadLittleEndian64( uint64* value )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  if ( GOOGLE_PREDICT_TRUE( BufferSize() >= sizeof( *value ) ) )
+  {
+    memcpy( value, buffer_, sizeof( *value ) );
+    Advance( sizeof( *value ) );
     return true;
-  } else {
-    return ReadLittleEndian64Fallback(value);
+  }
+  else
+  {
+    return ReadLittleEndian64Fallback( value );
   }
 #else
-  return ReadLittleEndian64Fallback(value);
+  return ReadLittleEndian64Fallback( value );
 #endif
 }
 
-inline uint32 CodedInputStream::ReadTag() {
-  if (GOOGLE_PREDICT_TRUE(buffer_ < buffer_end_) && buffer_[0] < 0x80) {
+inline uint32 CodedInputStream::ReadTag()
+{
+  if ( GOOGLE_PREDICT_TRUE( buffer_ < buffer_end_ ) && buffer_[0] < 0x80 )
+  {
     last_tag_ = buffer_[0];
-    Advance(1);
+    Advance( 1 );
     return last_tag_;
-  } else {
+  }
+  else
+  {
     last_tag_ = ReadTagFallback();
     return last_tag_;
   }
 }
 
-inline bool CodedInputStream::LastTagWas(uint32 expected) {
+inline bool CodedInputStream::LastTagWas( uint32 expected )
+{
   return last_tag_ == expected;
 }
 
-inline bool CodedInputStream::ConsumedEntireMessage() {
+inline bool CodedInputStream::ConsumedEntireMessage()
+{
   return legitimate_message_end_;
 }
 
-inline bool CodedInputStream::ExpectTag(uint32 expected) {
-  if (expected < (1 << 7)) {
-    if (GOOGLE_PREDICT_TRUE(buffer_ < buffer_end_) && buffer_[0] == expected) {
-      Advance(1);
+inline bool CodedInputStream::ExpectTag( uint32 expected )
+{
+  if ( expected < ( 1 << 7 ) )
+  {
+    if ( GOOGLE_PREDICT_TRUE( buffer_ < buffer_end_ ) && buffer_[0] == expected )
+    {
+      Advance( 1 );
       return true;
-    } else {
+    }
+    else
+    {
       return false;
     }
-  } else if (expected < (1 << 14)) {
-    if (GOOGLE_PREDICT_TRUE(BufferSize() >= 2) &&
-        buffer_[0] == static_cast<uint8>(expected | 0x80) &&
-        buffer_[1] == static_cast<uint8>(expected >> 7)) {
-      Advance(2);
+  }
+  else if ( expected < ( 1 << 14 ) )
+  {
+    if ( GOOGLE_PREDICT_TRUE( BufferSize() >= 2 ) &&
+         buffer_[0] == static_cast< uint8 >( expected | 0x80 ) &&
+         buffer_[1] == static_cast< uint8 >( expected >> 7 ) )
+    {
+      Advance( 2 );
       return true;
-    } else {
+    }
+    else
+    {
       return false;
     }
-  } else {
+  }
+  else
+  {
     // Don't bother optimizing for larger values.
     return false;
   }
 }
 
 inline const uint8* CodedInputStream::ExpectTagFromArray(
-    const uint8* buffer, uint32 expected) {
-  if (expected < (1 << 7)) {
-    if (buffer[0] == expected) {
+    const uint8* buffer, uint32 expected )
+{
+  if ( expected < ( 1 << 7 ) )
+  {
+    if ( buffer[0] == expected )
+    {
       return buffer + 1;
     }
-  } else if (expected < (1 << 14)) {
-    if (buffer[0] == static_cast<uint8>(expected | 0x80) &&
-        buffer[1] == static_cast<uint8>(expected >> 7)) {
+  }
+  else if ( expected < ( 1 << 14 ) )
+  {
+    if ( buffer[0] == static_cast< uint8 >( expected | 0x80 ) &&
+         buffer[1] == static_cast< uint8 >( expected >> 7 ) )
+    {
       return buffer + 2;
     }
   }
   return NULL;
 }
 
-inline void CodedInputStream::GetDirectBufferPointerInline(const void** data,
-                                                           int* size) {
+inline void CodedInputStream::GetDirectBufferPointerInline( const void** data,
+                                                            int* size )
+{
   *data = buffer_;
   *size = buffer_end_ - buffer_;
 }
 
-inline bool CodedInputStream::ExpectAtEnd() {
+inline bool CodedInputStream::ExpectAtEnd()
+{
   // If we are at a limit we know no more bytes can be read.  Otherwise, it's
   // hard to say without calling Refresh(), and we'd rather not do that.
 
-  if (buffer_ == buffer_end_ && buffer_size_after_limit_ != 0) {
+  if ( buffer_ == buffer_end_ && buffer_size_after_limit_ != 0 )
+  {
     last_tag_ = 0;                   // Pretend we called ReadTag()...
     legitimate_message_end_ = true;  // ... and it hit EOF.
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
 
-inline uint8* CodedOutputStream::GetDirectBufferForNBytesAndAdvance(int size) {
-  if (buffer_size_ < size) {
+inline uint8* CodedOutputStream::GetDirectBufferForNBytesAndAdvance( int size )
+{
+  if ( buffer_size_ < size )
+  {
     return NULL;
-  } else {
+  }
+  else
+  {
     uint8* result = buffer_;
-    Advance(size);
+    Advance( size );
     return result;
   }
 }
 
-inline uint8* CodedOutputStream::WriteVarint32ToArray(uint32 value,
-                                                        uint8* target) {
-  if (value < 0x80) {
+inline uint8* CodedOutputStream::WriteVarint32ToArray( uint32 value,
+                                                       uint8* target )
+{
+  if ( value < 0x80 )
+  {
     *target = value;
     return target + 1;
-  } else {
-    return WriteVarint32FallbackToArray(value, target);
+  }
+  else
+  {
+    return WriteVarint32FallbackToArray( value, target );
   }
 }
 
-inline void CodedOutputStream::WriteVarint32SignExtended(int32 value) {
-  if (value < 0) {
-    WriteVarint64(static_cast<uint64>(value));
-  } else {
-    WriteVarint32(static_cast<uint32>(value));
+inline void CodedOutputStream::WriteVarint32SignExtended( int32 value )
+{
+  if ( value < 0 )
+  {
+    WriteVarint64( static_cast< uint64 >( value ) );
+  }
+  else
+  {
+    WriteVarint32( static_cast< uint32 >( value ) );
   }
 }
 
 inline uint8* CodedOutputStream::WriteVarint32SignExtendedToArray(
-    int32 value, uint8* target) {
-  if (value < 0) {
-    return WriteVarint64ToArray(static_cast<uint64>(value), target);
-  } else {
-    return WriteVarint32ToArray(static_cast<uint32>(value), target);
+    int32 value, uint8* target )
+{
+  if ( value < 0 )
+  {
+    return WriteVarint64ToArray( static_cast< uint64 >( value ), target );
+  }
+  else
+  {
+    return WriteVarint32ToArray( static_cast< uint32 >( value ), target );
   }
 }
 
-inline uint8* CodedOutputStream::WriteLittleEndian32ToArray(uint32 value,
-                                                            uint8* target) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  memcpy(target, &value, sizeof(value));
+inline uint8* CodedOutputStream::WriteLittleEndian32ToArray( uint32 value,
+                                                             uint8* target )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  memcpy( target, &value, sizeof( value ) );
 #else
-  target[0] = static_cast<uint8>(value);
-  target[1] = static_cast<uint8>(value >>  8);
-  target[2] = static_cast<uint8>(value >> 16);
-  target[3] = static_cast<uint8>(value >> 24);
+  target[0] = static_cast< uint8 >( value );
+  target[1] = static_cast< uint8 >( value >> 8 );
+  target[2] = static_cast< uint8 >( value >> 16 );
+  target[3] = static_cast< uint8 >( value >> 24 );
 #endif
-  return target + sizeof(value);
+  return target + sizeof( value );
 }
 
-inline uint8* CodedOutputStream::WriteLittleEndian64ToArray(uint64 value,
-                                                            uint8* target) {
-#if !defined(PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST) && \
-    defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN
-  memcpy(target, &value, sizeof(value));
+inline uint8* CodedOutputStream::WriteLittleEndian64ToArray( uint64 value,
+                                                             uint8* target )
+{
+#if !defined( PROTOBUF_DISABLE_LITTLE_ENDIAN_OPT_FOR_TEST ) && \
+    defined( __BYTE_ORDER ) && __BYTE_ORDER == __LITTLE_ENDIAN
+  memcpy( target, &value, sizeof( value ) );
 #else
-  uint32 part0 = static_cast<uint32>(value);
-  uint32 part1 = static_cast<uint32>(value >> 32);
+  uint32 part0 = static_cast< uint32 >( value );
+  uint32 part1 = static_cast< uint32 >( value >> 32 );
 
-  target[0] = static_cast<uint8>(part0);
-  target[1] = static_cast<uint8>(part0 >>  8);
-  target[2] = static_cast<uint8>(part0 >> 16);
-  target[3] = static_cast<uint8>(part0 >> 24);
-  target[4] = static_cast<uint8>(part1);
-  target[5] = static_cast<uint8>(part1 >>  8);
-  target[6] = static_cast<uint8>(part1 >> 16);
-  target[7] = static_cast<uint8>(part1 >> 24);
+  target[0] = static_cast< uint8 >( part0 );
+  target[1] = static_cast< uint8 >( part0 >> 8 );
+  target[2] = static_cast< uint8 >( part0 >> 16 );
+  target[3] = static_cast< uint8 >( part0 >> 24 );
+  target[4] = static_cast< uint8 >( part1 );
+  target[5] = static_cast< uint8 >( part1 >> 8 );
+  target[6] = static_cast< uint8 >( part1 >> 16 );
+  target[7] = static_cast< uint8 >( part1 >> 24 );
 #endif
-  return target + sizeof(value);
+  return target + sizeof( value );
 }
 
-inline void CodedOutputStream::WriteTag(uint32 value) {
-  WriteVarint32(value);
+inline void CodedOutputStream::WriteTag( uint32 value )
+{
+  WriteVarint32( value );
 }
 
 inline uint8* CodedOutputStream::WriteTagToArray(
-    uint32 value, uint8* target) {
-  if (value < (1 << 7)) {
+    uint32 value, uint8* target )
+{
+  if ( value < ( 1 << 7 ) )
+  {
     target[0] = value;
     return target + 1;
-  } else if (value < (1 << 14)) {
-    target[0] = static_cast<uint8>(value | 0x80);
-    target[1] = static_cast<uint8>(value >> 7);
+  }
+  else if ( value < ( 1 << 14 ) )
+  {
+    target[0] = static_cast< uint8 >( value | 0x80 );
+    target[1] = static_cast< uint8 >( value >> 7 );
     return target + 2;
-  } else {
-    return WriteVarint32FallbackToArray(value, target);
+  }
+  else
+  {
+    return WriteVarint32FallbackToArray( value, target );
   }
 }
 
-inline int CodedOutputStream::VarintSize32(uint32 value) {
-  if (value < (1 << 7)) {
+inline int CodedOutputStream::VarintSize32( uint32 value )
+{
+  if ( value < ( 1 << 7 ) )
+  {
     return 1;
-  } else  {
-    return VarintSize32Fallback(value);
+  }
+  else
+  {
+    return VarintSize32Fallback( value );
   }
 }
 
-inline int CodedOutputStream::VarintSize32SignExtended(int32 value) {
-  if (value < 0) {
-    return 10;     // TODO(kenton):  Make this a symbolic constant.
-  } else {
-    return VarintSize32(static_cast<uint32>(value));
+inline int CodedOutputStream::VarintSize32SignExtended( int32 value )
+{
+  if ( value < 0 )
+  {
+    return 10;  // TODO(kenton):  Make this a symbolic constant.
+  }
+  else
+  {
+    return VarintSize32( static_cast< uint32 >( value ) );
   }
 }
 
-inline void CodedOutputStream::WriteString(const string& str) {
-  WriteRaw(str.data(), str.size());
+inline void CodedOutputStream::WriteString( const string& str )
+{
+  WriteRaw( str.data(), str.size() );
 }
 
 inline uint8* CodedOutputStream::WriteStringToArray(
-    const string& str, uint8* target) {
-  return WriteRawToArray(str.data(), str.size(), target);
+    const string& str, uint8* target )
+{
+  return WriteRawToArray( str.data(), str.size(), target );
 }
 
-inline int CodedOutputStream::ByteCount() const {
+inline int CodedOutputStream::ByteCount() const
+{
   return total_bytes_ - buffer_size_;
 }
 
-inline void CodedInputStream::Advance(int amount) {
+inline void CodedInputStream::Advance( int amount )
+{
   buffer_ += amount;
 }
 
-inline void CodedOutputStream::Advance(int amount) {
+inline void CodedOutputStream::Advance( int amount )
+{
   buffer_ += amount;
   buffer_size_ -= amount;
 }
 
-inline void CodedInputStream::SetRecursionLimit(int limit) {
+inline void CodedInputStream::SetRecursionLimit( int limit )
+{
   recursion_limit_ = limit;
 }
 
-inline bool CodedInputStream::IncrementRecursionDepth() {
+inline bool CodedInputStream::IncrementRecursionDepth()
+{
   ++recursion_depth_;
   return recursion_depth_ <= recursion_limit_;
 }
 
-inline void CodedInputStream::DecrementRecursionDepth() {
-  if (recursion_depth_ > 0) --recursion_depth_;
+inline void CodedInputStream::DecrementRecursionDepth()
+{
+  if ( recursion_depth_ > 0 ) --recursion_depth_;
 }
 
-inline void CodedInputStream::SetExtensionRegistry(DescriptorPool* pool,
-                                                   MessageFactory* factory) {
+inline void CodedInputStream::SetExtensionRegistry( DescriptorPool* pool,
+                                                    MessageFactory* factory )
+{
   extension_pool_ = pool;
   extension_factory_ = factory;
 }
 
-inline const DescriptorPool* CodedInputStream::GetExtensionPool() {
+inline const DescriptorPool* CodedInputStream::GetExtensionPool()
+{
   return extension_pool_;
 }
 
-inline MessageFactory* CodedInputStream::GetExtensionFactory() {
+inline MessageFactory* CodedInputStream::GetExtensionFactory()
+{
   return extension_factory_;
 }
 
-inline int CodedInputStream::BufferSize() const {
+inline int CodedInputStream::BufferSize() const
+{
   return buffer_end_ - buffer_;
 }
 
-inline CodedInputStream::CodedInputStream(ZeroCopyInputStream* input)
-  : input_(input),
-    buffer_(NULL),
-    buffer_end_(NULL),
-    total_bytes_read_(0),
-    overflow_bytes_(0),
-    last_tag_(0),
-    legitimate_message_end_(false),
-    aliasing_enabled_(false),
-    current_limit_(INT_MAX),
-    buffer_size_after_limit_(0),
-    total_bytes_limit_(kDefaultTotalBytesLimit),
-    total_bytes_warning_threshold_(kDefaultTotalBytesWarningThreshold),
-    recursion_depth_(0),
-    recursion_limit_(kDefaultRecursionLimit),
-    extension_pool_(NULL),
-    extension_factory_(NULL) {
+inline CodedInputStream::CodedInputStream( ZeroCopyInputStream* input )
+    : input_( input ),
+      buffer_( NULL ),
+      buffer_end_( NULL ),
+      total_bytes_read_( 0 ),
+      overflow_bytes_( 0 ),
+      last_tag_( 0 ),
+      legitimate_message_end_( false ),
+      aliasing_enabled_( false ),
+      current_limit_( INT_MAX ),
+      buffer_size_after_limit_( 0 ),
+      total_bytes_limit_( kDefaultTotalBytesLimit ),
+      total_bytes_warning_threshold_( kDefaultTotalBytesWarningThreshold ),
+      recursion_depth_( 0 ),
+      recursion_limit_( kDefaultRecursionLimit ),
+      extension_pool_( NULL ),
+      extension_factory_( NULL )
+{
   // Eagerly Refresh() so buffer space is immediately available.
   Refresh();
 }
 
-inline CodedInputStream::CodedInputStream(const uint8* buffer, int size)
-  : input_(NULL),
-    buffer_(buffer),
-    buffer_end_(buffer + size),
-    total_bytes_read_(size),
-    overflow_bytes_(0),
-    last_tag_(0),
-    legitimate_message_end_(false),
-    aliasing_enabled_(false),
-    current_limit_(size),
-    buffer_size_after_limit_(0),
-    total_bytes_limit_(kDefaultTotalBytesLimit),
-    total_bytes_warning_threshold_(kDefaultTotalBytesWarningThreshold),
-    recursion_depth_(0),
-    recursion_limit_(kDefaultRecursionLimit),
-    extension_pool_(NULL),
-    extension_factory_(NULL) {
+inline CodedInputStream::CodedInputStream( const uint8* buffer, int size )
+    : input_( NULL ),
+      buffer_( buffer ),
+      buffer_end_( buffer + size ),
+      total_bytes_read_( size ),
+      overflow_bytes_( 0 ),
+      last_tag_( 0 ),
+      legitimate_message_end_( false ),
+      aliasing_enabled_( false ),
+      current_limit_( size ),
+      buffer_size_after_limit_( 0 ),
+      total_bytes_limit_( kDefaultTotalBytesLimit ),
+      total_bytes_warning_threshold_( kDefaultTotalBytesWarningThreshold ),
+      recursion_depth_( 0 ),
+      recursion_limit_( kDefaultRecursionLimit ),
+      extension_pool_( NULL ),
+      extension_factory_( NULL )
+{
   // Note that setting current_limit_ == size is important to prevent some
   // code paths from trying to access input_ and segfaulting.
 }
 
-inline CodedInputStream::~CodedInputStream() {
-  if (input_ != NULL) {
+inline CodedInputStream::~CodedInputStream()
+{
+  if ( input_ != NULL )
+  {
     BackUpInputToCurrentPosition();
   }
 }

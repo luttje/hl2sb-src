@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,20 +22,18 @@
 
 typedef enum ESteamNotify
 {
-	eSteamNotifyTicketsWillExpire = 0,
-	eSteamNotifyAccountInfoChanged = 1,
-	eSteamNotifyContentDescriptionChanged = 2,
-	eSteamNotifyPleaseShutdown = 3,
-	eSteamNotifyNewContentServer = 4,
-	eSteamNotifySubscriptionStatusChanged = 5,
-	eSteamNotifyContentServerConnectionLost = 6,
-	eSteamNotifyCacheLoadingCompleted = 7,
-	eSteamNotifyCacheNeedsDecryption = 8,
-	eSteamNotifyCacheNeedsRepair = 9,
-	eSteamNotifyAppDownloading = 10,
-	eSteamNotifyAppDownloadingPaused = 11,
+  eSteamNotifyTicketsWillExpire = 0,
+  eSteamNotifyAccountInfoChanged = 1,
+  eSteamNotifyContentDescriptionChanged = 2,
+  eSteamNotifyPleaseShutdown = 3,
+  eSteamNotifyNewContentServer = 4,
+  eSteamNotifySubscriptionStatusChanged = 5,
+  eSteamNotifyContentServerConnectionLost = 6,
+  eSteamNotifyCacheLoadingCompleted = 7,
+  eSteamNotifyCacheNeedsDecryption = 8,
+  eSteamNotifyCacheNeedsRepair = 9,
+  eSteamNotifyAppDownloading = 10,
+  eSteamNotifyAppDownloadingPaused = 11,
 } ESteamNotify;
 
-
-
-#endif // ESTEAMNOTIFICATIONCALLBACKEVENT_H
+#endif  // ESTEAMNOTIFICATIONCALLBACKEVENT_H

@@ -37,21 +37,25 @@
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/stubs/strutil.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace cpp {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace cpp
+{
 
-namespace {
+namespace
+{
 
-void SetMessageVariables(const FieldDescriptor* descriptor,
-                         map<string, string>* variables) {
-  SetCommonFieldVariables(descriptor, variables);
-  (*variables)["type"] = FieldMessageTypeName(descriptor);
-  (*variables)["stream_writer"] = (*variables)["declared_type"] +
-      (HasFastArraySerialization(descriptor->message_type()->file()) ?
-       "MaybeToArray" :
-       "");
+void SetMessageVariables( const FieldDescriptor* descriptor,
+                          map< string, string >* variables )
+{
+  SetCommonFieldVariables( descriptor, variables );
+  ( *variables )["type"] = FieldMessageTypeName( descriptor );
+  ( *variables )["stream_writer"] = ( *variables )["declared_type"] +
+                                    ( HasFastArraySerialization( descriptor->message_type()->file() ) ? "MaybeToArray" : "" );
 }
 
 }  // namespace
@@ -59,209 +63,239 @@ void SetMessageVariables(const FieldDescriptor* descriptor,
 // ===================================================================
 
 MessageFieldGenerator::
-MessageFieldGenerator(const FieldDescriptor* descriptor)
-  : descriptor_(descriptor) {
-  SetMessageVariables(descriptor, &variables_);
+    MessageFieldGenerator( const FieldDescriptor* descriptor )
+    : descriptor_( descriptor )
+{
+  SetMessageVariables( descriptor, &variables_ );
 }
 
 MessageFieldGenerator::~MessageFieldGenerator() {}
 
 void MessageFieldGenerator::
-GeneratePrivateMembers(io::Printer* printer) const {
-  printer->Print(variables_, "$type$* $name$_;\n");
+    GeneratePrivateMembers( io::Printer* printer ) const
+{
+  printer->Print( variables_, "$type$* $name$_;\n" );
 }
 
 void MessageFieldGenerator::
-GenerateAccessorDeclarations(io::Printer* printer) const {
-  printer->Print(variables_,
-    "inline const $type$& $name$() const$deprecation$;\n"
-    "inline $type$* mutable_$name$()$deprecation$;\n");
+    GenerateAccessorDeclarations( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "inline const $type$& $name$() const$deprecation$;\n"
+                  "inline $type$* mutable_$name$()$deprecation$;\n" );
 }
 
 void MessageFieldGenerator::
-GenerateInlineAccessorDefinitions(io::Printer* printer) const {
-  printer->Print(variables_,
-    "inline const $type$& $classname$::$name$() const {\n"
-    "  return $name$_ != NULL ? *$name$_ : *default_instance_->$name$_;\n"
-    "}\n"
-    "inline $type$* $classname$::mutable_$name$() {\n"
-    "  _set_bit($index$);\n"
-    "  if ($name$_ == NULL) $name$_ = new $type$;\n"
-    "  return $name$_;\n"
-    "}\n");
+    GenerateInlineAccessorDefinitions( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "inline const $type$& $classname$::$name$() const {\n"
+                  "  return $name$_ != NULL ? *$name$_ : *default_instance_->$name$_;\n"
+                  "}\n"
+                  "inline $type$* $classname$::mutable_$name$() {\n"
+                  "  _set_bit($index$);\n"
+                  "  if ($name$_ == NULL) $name$_ = new $type$;\n"
+                  "  return $name$_;\n"
+                  "}\n" );
 }
 
 void MessageFieldGenerator::
-GenerateClearingCode(io::Printer* printer) const {
-  printer->Print(variables_,
-    "if ($name$_ != NULL) $name$_->$type$::Clear();\n");
+    GenerateClearingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "if ($name$_ != NULL) $name$_->$type$::Clear();\n" );
 }
 
 void MessageFieldGenerator::
-GenerateMergingCode(io::Printer* printer) const {
-  printer->Print(variables_,
-    "mutable_$name$()->$type$::MergeFrom(from.$name$());\n");
+    GenerateMergingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "mutable_$name$()->$type$::MergeFrom(from.$name$());\n" );
 }
 
 void MessageFieldGenerator::
-GenerateSwappingCode(io::Printer* printer) const {
-  printer->Print(variables_, "std::swap($name$_, other->$name$_);\n");
+    GenerateSwappingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_, "std::swap($name$_, other->$name$_);\n" );
 }
 
 void MessageFieldGenerator::
-GenerateConstructorCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_ = NULL;\n");
+    GenerateConstructorCode( io::Printer* printer ) const
+{
+  printer->Print( variables_, "$name$_ = NULL;\n" );
 }
 
 void MessageFieldGenerator::
-GenerateMergeFromCodedStream(io::Printer* printer) const {
-  if (descriptor_->type() == FieldDescriptor::TYPE_MESSAGE) {
-    printer->Print(variables_,
-      "DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(\n"
-      "     input, mutable_$name$()));\n");
-  } else {
-    printer->Print(variables_,
-      "DO_(::google::protobuf::internal::WireFormatLite::ReadGroupNoVirtual(\n"
-      "      $number$, input, mutable_$name$()));\n");
+    GenerateMergeFromCodedStream( io::Printer* printer ) const
+{
+  if ( descriptor_->type() == FieldDescriptor::TYPE_MESSAGE )
+  {
+    printer->Print( variables_,
+                    "DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(\n"
+                    "     input, mutable_$name$()));\n" );
+  }
+  else
+  {
+    printer->Print( variables_,
+                    "DO_(::google::protobuf::internal::WireFormatLite::ReadGroupNoVirtual(\n"
+                    "      $number$, input, mutable_$name$()));\n" );
   }
 }
 
 void MessageFieldGenerator::
-GenerateSerializeWithCachedSizes(io::Printer* printer) const {
-  printer->Print(variables_,
-    "::google::protobuf::internal::WireFormatLite::Write$stream_writer$(\n"
-    "  $number$, this->$name$(), output);\n");
+    GenerateSerializeWithCachedSizes( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "::google::protobuf::internal::WireFormatLite::Write$stream_writer$(\n"
+                  "  $number$, this->$name$(), output);\n" );
 }
 
 void MessageFieldGenerator::
-GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
-  printer->Print(variables_,
-    "target = ::google::protobuf::internal::WireFormatLite::\n"
-    "  Write$declared_type$NoVirtualToArray(\n"
-    "    $number$, this->$name$(), target);\n");
+    GenerateSerializeWithCachedSizesToArray( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "target = ::google::protobuf::internal::WireFormatLite::\n"
+                  "  Write$declared_type$NoVirtualToArray(\n"
+                  "    $number$, this->$name$(), target);\n" );
 }
 
 void MessageFieldGenerator::
-GenerateByteSize(io::Printer* printer) const {
-  printer->Print(variables_,
-    "total_size += $tag_size$ +\n"
-    "  ::google::protobuf::internal::WireFormatLite::$declared_type$SizeNoVirtual(\n"
-    "    this->$name$());\n");
+    GenerateByteSize( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "total_size += $tag_size$ +\n"
+                  "  ::google::protobuf::internal::WireFormatLite::$declared_type$SizeNoVirtual(\n"
+                  "    this->$name$());\n" );
 }
 
 // ===================================================================
 
 RepeatedMessageFieldGenerator::
-RepeatedMessageFieldGenerator(const FieldDescriptor* descriptor)
-  : descriptor_(descriptor) {
-  SetMessageVariables(descriptor, &variables_);
+    RepeatedMessageFieldGenerator( const FieldDescriptor* descriptor )
+    : descriptor_( descriptor )
+{
+  SetMessageVariables( descriptor, &variables_ );
 }
 
 RepeatedMessageFieldGenerator::~RepeatedMessageFieldGenerator() {}
 
 void RepeatedMessageFieldGenerator::
-GeneratePrivateMembers(io::Printer* printer) const {
-  printer->Print(variables_,
-    "::google::protobuf::RepeatedPtrField< $type$ > $name$_;\n");
+    GeneratePrivateMembers( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "::google::protobuf::RepeatedPtrField< $type$ > $name$_;\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateAccessorDeclarations(io::Printer* printer) const {
-  printer->Print(variables_,
-    "inline const $type$& $name$(int index) const$deprecation$;\n"
-    "inline $type$* mutable_$name$(int index)$deprecation$;\n"
-    "inline $type$* add_$name$()$deprecation$;\n");
-  printer->Print(variables_,
-    "inline const ::google::protobuf::RepeatedPtrField< $type$ >&\n"
-    "    $name$() const$deprecation$;\n"
-    "inline ::google::protobuf::RepeatedPtrField< $type$ >*\n"
-    "    mutable_$name$()$deprecation$;\n");
+    GenerateAccessorDeclarations( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "inline const $type$& $name$(int index) const$deprecation$;\n"
+                  "inline $type$* mutable_$name$(int index)$deprecation$;\n"
+                  "inline $type$* add_$name$()$deprecation$;\n" );
+  printer->Print( variables_,
+                  "inline const ::google::protobuf::RepeatedPtrField< $type$ >&\n"
+                  "    $name$() const$deprecation$;\n"
+                  "inline ::google::protobuf::RepeatedPtrField< $type$ >*\n"
+                  "    mutable_$name$()$deprecation$;\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateInlineAccessorDefinitions(io::Printer* printer) const {
-  printer->Print(variables_,
-    "inline const $type$& $classname$::$name$(int index) const {\n"
-    "  return $name$_.Get(index);\n"
-    "}\n"
-    "inline $type$* $classname$::mutable_$name$(int index) {\n"
-    "  return $name$_.Mutable(index);\n"
-    "}\n"
-    "inline $type$* $classname$::add_$name$() {\n"
-    "  return $name$_.Add();\n"
-    "}\n");
-  printer->Print(variables_,
-    "inline const ::google::protobuf::RepeatedPtrField< $type$ >&\n"
-    "$classname$::$name$() const {\n"
-    "  return $name$_;\n"
-    "}\n"
-    "inline ::google::protobuf::RepeatedPtrField< $type$ >*\n"
-    "$classname$::mutable_$name$() {\n"
-    "  return &$name$_;\n"
-    "}\n");
+    GenerateInlineAccessorDefinitions( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "inline const $type$& $classname$::$name$(int index) const {\n"
+                  "  return $name$_.Get(index);\n"
+                  "}\n"
+                  "inline $type$* $classname$::mutable_$name$(int index) {\n"
+                  "  return $name$_.Mutable(index);\n"
+                  "}\n"
+                  "inline $type$* $classname$::add_$name$() {\n"
+                  "  return $name$_.Add();\n"
+                  "}\n" );
+  printer->Print( variables_,
+                  "inline const ::google::protobuf::RepeatedPtrField< $type$ >&\n"
+                  "$classname$::$name$() const {\n"
+                  "  return $name$_;\n"
+                  "}\n"
+                  "inline ::google::protobuf::RepeatedPtrField< $type$ >*\n"
+                  "$classname$::mutable_$name$() {\n"
+                  "  return &$name$_;\n"
+                  "}\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateClearingCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_.Clear();\n");
+    GenerateClearingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_, "$name$_.Clear();\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateMergingCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_.MergeFrom(from.$name$_);\n");
+    GenerateMergingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_, "$name$_.MergeFrom(from.$name$_);\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateSwappingCode(io::Printer* printer) const {
-  printer->Print(variables_, "$name$_.Swap(&other->$name$_);\n");
+    GenerateSwappingCode( io::Printer* printer ) const
+{
+  printer->Print( variables_, "$name$_.Swap(&other->$name$_);\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateConstructorCode(io::Printer* printer) const {
+    GenerateConstructorCode( io::Printer* printer ) const
+{
   // Not needed for repeated fields.
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateMergeFromCodedStream(io::Printer* printer) const {
-  if (descriptor_->type() == FieldDescriptor::TYPE_MESSAGE) {
-    printer->Print(variables_,
-      "DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(\n"
-      "      input, add_$name$()));\n");
-  } else {
-    printer->Print(variables_,
-      "DO_(::google::protobuf::internal::WireFormatLite::ReadGroupNoVirtual(\n"
-      "      $number$, input, add_$name$()));\n");
+    GenerateMergeFromCodedStream( io::Printer* printer ) const
+{
+  if ( descriptor_->type() == FieldDescriptor::TYPE_MESSAGE )
+  {
+    printer->Print( variables_,
+                    "DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(\n"
+                    "      input, add_$name$()));\n" );
+  }
+  else
+  {
+    printer->Print( variables_,
+                    "DO_(::google::protobuf::internal::WireFormatLite::ReadGroupNoVirtual(\n"
+                    "      $number$, input, add_$name$()));\n" );
   }
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateSerializeWithCachedSizes(io::Printer* printer) const {
-  printer->Print(variables_,
-    "for (int i = 0; i < this->$name$_size(); i++) {\n"
-    "  ::google::protobuf::internal::WireFormatLite::Write$stream_writer$(\n"
-    "    $number$, this->$name$(i), output);\n"
-    "}\n");
+    GenerateSerializeWithCachedSizes( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "for (int i = 0; i < this->$name$_size(); i++) {\n"
+                  "  ::google::protobuf::internal::WireFormatLite::Write$stream_writer$(\n"
+                  "    $number$, this->$name$(i), output);\n"
+                  "}\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateSerializeWithCachedSizesToArray(io::Printer* printer) const {
-  printer->Print(variables_,
-    "for (int i = 0; i < this->$name$_size(); i++) {\n"
-    "  target = ::google::protobuf::internal::WireFormatLite::\n"
-    "    Write$declared_type$NoVirtualToArray(\n"
-    "      $number$, this->$name$(i), target);\n"
-    "}\n");
+    GenerateSerializeWithCachedSizesToArray( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "for (int i = 0; i < this->$name$_size(); i++) {\n"
+                  "  target = ::google::protobuf::internal::WireFormatLite::\n"
+                  "    Write$declared_type$NoVirtualToArray(\n"
+                  "      $number$, this->$name$(i), target);\n"
+                  "}\n" );
 }
 
 void RepeatedMessageFieldGenerator::
-GenerateByteSize(io::Printer* printer) const {
-  printer->Print(variables_,
-    "total_size += $tag_size$ * this->$name$_size();\n"
-    "for (int i = 0; i < this->$name$_size(); i++) {\n"
-    "  total_size +=\n"
-    "    ::google::protobuf::internal::WireFormatLite::$declared_type$SizeNoVirtual(\n"
-    "      this->$name$(i));\n"
-    "}\n");
+    GenerateByteSize( io::Printer* printer ) const
+{
+  printer->Print( variables_,
+                  "total_size += $tag_size$ * this->$name$_size();\n"
+                  "for (int i = 0; i < this->$name$_size(); i++) {\n"
+                  "  total_size +=\n"
+                  "    ::google::protobuf::internal::WireFormatLite::$declared_type$SizeNoVirtual(\n"
+                  "      this->$name$(i));\n"
+                  "}\n" );
 }
 
 }  // namespace cpp

@@ -34,9 +34,9 @@
 
 #include <gtest/gtest.h>
 
-
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+int main( int argc, char **argv )
+{
+  testing::InitGoogleTest( &argc, argv );
 
   // An ad-hoc assertion outside of all tests.
   //
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
   //    assertion is executed before RUN_ALL_TESTS() is called, even
   //    though --gtest_output=xml is specified.  This makes sure the
   //    bug is fixed and doesn't regress.
-  EXPECT_EQ(1, 1);
+  EXPECT_EQ( 1, 1 );
 
   return RUN_ALL_TESTS();
 }

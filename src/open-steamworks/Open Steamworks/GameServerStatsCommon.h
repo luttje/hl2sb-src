@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -31,10 +31,13 @@
 //-----------------------------------------------------------------------------
 struct GSStatsReceived_t
 {
-	enum { k_iCallback = k_iSteamGameServerStatsCallbacks };
+  enum
+  {
+    k_iCallback = k_iSteamGameServerStatsCallbacks
+  };
 
-	EResult		m_eResult;		// Success / error fetching the stats
-	CSteamID	m_steamIDUser;	// The user for whom the stats are retrieved for
+  EResult m_eResult;       // Success / error fetching the stats
+  CSteamID m_steamIDUser;  // The user for whom the stats are retrieved for
 };
 
 //-----------------------------------------------------------------------------
@@ -42,10 +45,13 @@ struct GSStatsReceived_t
 //-----------------------------------------------------------------------------
 struct GSStatsStored_t
 {
-	enum { k_iCallback = k_iSteamGameServerStatsCallbacks + 1 };
+  enum
+  {
+    k_iCallback = k_iSteamGameServerStatsCallbacks + 1
+  };
 
-	EResult		m_eResult;		// success / error
-	CSteamID	m_steamIDUser;	// The user for whom the stats were stored
+  EResult m_eResult;       // success / error
+  CSteamID m_steamIDUser;  // The user for whom the stats were stored
 };
 
 //-----------------------------------------------------------------------------
@@ -54,12 +60,14 @@ struct GSStatsStored_t
 //-----------------------------------------------------------------------------
 struct GSStatsUnloaded_t
 {
-	enum { k_iCallback = k_iSteamUserStatsCallbacks + 8 };
+  enum
+  {
+    k_iCallback = k_iSteamUserStatsCallbacks + 8
+  };
 
-	CSteamID	m_steamIDUser;	// User whose stats have been unloaded
+  CSteamID m_steamIDUser;  // User whose stats have been unloaded
 };
 
 #pragma pack( pop )
 
-
-#endif // GAMESERVERSTATSCOMMON_H
+#endif  // GAMESERVERSTATSCOMMON_H

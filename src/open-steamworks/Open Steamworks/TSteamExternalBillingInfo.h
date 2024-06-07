@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,8 +22,8 @@
 
 typedef struct TSteamExternalBillingInfo
 {
-	char szAccountName[ STEAM_EXTERNAL_ACCOUNTNAME_SIZE + 1 ];
-	char szPassword[ STEAM_EXTERNAL_ACCOUNTPASSWORD_SIZE + 1 ];
+  char szAccountName[STEAM_EXTERNAL_ACCOUNTNAME_SIZE + 1];
+  char szPassword[STEAM_EXTERNAL_ACCOUNTPASSWORD_SIZE + 1];
 } TSteamExternalBillingInfo;
 
-#endif // TSTEAMEXTERNALBILLINGINFO_H
+#endif  // TSTEAMEXTERNALBILLINGINFO_H

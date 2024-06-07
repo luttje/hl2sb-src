@@ -40,21 +40,25 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/stubs/strutil.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace java {
-
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace java
+{
 
 JavaGenerator::JavaGenerator() {}
 JavaGenerator::~JavaGenerator() {}
 
-bool JavaGenerator::Generate(const FileDescriptor* file,
-                             const string& parameter,
-                             OutputDirectory* output_directory,
-                             string* error) const {
-  vector<pair<string, string> > options;
-  ParseGeneratorParameter(parameter, &options);
+bool JavaGenerator::Generate( const FileDescriptor* file,
+                              const string& parameter,
+                              OutputDirectory* output_directory,
+                              string* error ) const
+{
+  vector< pair< string, string > > options;
+  ParseGeneratorParameter( parameter, &options );
 
   // -----------------------------------------------------------------
   // parse generator options
@@ -63,53 +67,58 @@ bool JavaGenerator::Generate(const FileDescriptor* file,
   // per line.
   string output_list_file;
 
-  for (int i = 0; i < options.size(); i++) {
-    if (options[i].first == "output_list_file") {
+  for ( int i = 0; i < options.size(); i++ )
+  {
+    if ( options[i].first == "output_list_file" )
+    {
       output_list_file = options[i].second;
-    } else {
+    }
+    else
+    {
       *error = "Unknown generator option: " + options[i].first;
       return false;
     }
   }
 
-
   // -----------------------------------------------------------------
 
-
-  FileGenerator file_generator(file);
-  if (!file_generator.Validate(error)) {
+  FileGenerator file_generator( file );
+  if ( !file_generator.Validate( error ) )
+  {
     return false;
   }
 
   string package_dir =
-    StringReplace(file_generator.java_package(), ".", "/", true);
-  if (!package_dir.empty()) package_dir += "/";
+      StringReplace( file_generator.java_package(), ".", "/", true );
+  if ( !package_dir.empty() ) package_dir += "/";
 
-  vector<string> all_files;
+  vector< string > all_files;
 
   string java_filename = package_dir;
   java_filename += file_generator.classname();
   java_filename += ".java";
-  all_files.push_back(java_filename);
+  all_files.push_back( java_filename );
 
   // Generate main java file.
-  scoped_ptr<io::ZeroCopyOutputStream> output(
-    output_directory->Open(java_filename));
-  io::Printer printer(output.get(), '$');
-  file_generator.Generate(&printer);
+  scoped_ptr< io::ZeroCopyOutputStream > output(
+      output_directory->Open( java_filename ) );
+  io::Printer printer( output.get(), '$' );
+  file_generator.Generate( &printer );
 
   // Generate sibling files.
-  file_generator.GenerateSiblings(package_dir, output_directory, &all_files);
+  file_generator.GenerateSiblings( package_dir, output_directory, &all_files );
 
   // Generate output list if requested.
-  if (!output_list_file.empty()) {
+  if ( !output_list_file.empty() )
+  {
     // Generate output list.  This is just a simple text file placed in a
     // deterministic location which lists the .java files being generated.
-    scoped_ptr<io::ZeroCopyOutputStream> srclist_raw_output(
-      output_directory->Open(output_list_file));
-    io::Printer srclist_printer(srclist_raw_output.get(), '$');
-    for (int i = 0; i < all_files.size(); i++) {
-      srclist_printer.Print("$filename$\n", "filename", all_files[i]);
+    scoped_ptr< io::ZeroCopyOutputStream > srclist_raw_output(
+        output_directory->Open( output_list_file ) );
+    io::Printer srclist_printer( srclist_raw_output.get(), '$' );
+    for ( int i = 0; i < all_files.size(); i++ )
+    {
+      srclist_printer.Print( "$filename$\n", "filename", all_files[i] );
     }
   }
 

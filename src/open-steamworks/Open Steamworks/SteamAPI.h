@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -14,13 +14,11 @@
 //
 //=============================================================================
 
-
 #ifndef STEAMAPI_H
 #define STEAMAPI_H
 #ifdef _WIN32
 #pragma once
 #endif
-
 
 // includes
 #include "SteamTypes.h"
@@ -28,10 +26,7 @@
 // extern function declarations
 #include "Steam.h"
 
-
 // inline interface utils
 #include "Interface_OSW.h"
 
-
-
-#endif // STEAMAPI_H
+#endif  // STEAMAPI_H

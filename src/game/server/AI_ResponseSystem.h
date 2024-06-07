@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -17,18 +17,18 @@
 
 abstract_class IResponseFilter
 {
-public:
-	virtual bool IsValidResponse( ResponseType_t type, const char *pszValue ) = 0;
+ public:
+  virtual bool IsValidResponse( ResponseType_t type, const char *pszValue ) = 0;
 };
 
 abstract_class IResponseSystem
 {
-public:
-	virtual ~IResponseSystem() {}
+ public:
+  virtual ~IResponseSystem() {}
 
-	virtual bool FindBestResponse( const AI_CriteriaSet& set, AI_Response& response, IResponseFilter *pFilter = NULL ) = 0;
-	virtual void GetAllResponses( CUtlVector<AI_Response *> *pResponses ) = 0;
-	virtual void PrecacheResponses( bool bEnable ) = 0;
+  virtual bool FindBestResponse( const AI_CriteriaSet &set, AI_Response &response, IResponseFilter *pFilter = NULL ) = 0;
+  virtual void GetAllResponses( CUtlVector< AI_Response * > * pResponses ) = 0;
+  virtual void PrecacheResponses( bool bEnable ) = 0;
 };
 
 IResponseSystem *PrecacheCustomResponseSystem( const char *scriptfile );
@@ -38,4 +38,4 @@ void DestroyCustomResponseSystems();
 class ISaveRestoreBlockHandler *GetDefaultResponseSystemSaveRestoreBlockHandler();
 class ISaveRestoreOps *GetResponseSystemSaveRestoreOps();
 
-#endif // AI_RESPONSESYSTEM_H
+#endif  // AI_RESPONSESYSTEM_H

@@ -47,31 +47,34 @@
 // appropriate under the circumstances. But in low memory conditions, it can be
 // told to instantiate without PrecalcPrimeTable instance at all and use only
 // OnTheFlyPrimeTable.
-class HybridPrimeTable : public PrimeTable {
+class HybridPrimeTable : public PrimeTable
+{
  public:
-  HybridPrimeTable(bool force_on_the_fly, int max_precalculated)
-      : on_the_fly_impl_(new OnTheFlyPrimeTable),
-        precalc_impl_(force_on_the_fly ? NULL :
-                          new PreCalculatedPrimeTable(max_precalculated)),
-        max_precalculated_(max_precalculated) {}
-  virtual ~HybridPrimeTable() {
+  HybridPrimeTable( bool force_on_the_fly, int max_precalculated )
+      : on_the_fly_impl_( new OnTheFlyPrimeTable ),
+        precalc_impl_( force_on_the_fly ? NULL : new PreCalculatedPrimeTable( max_precalculated ) ),
+        max_precalculated_( max_precalculated ) {}
+  virtual ~HybridPrimeTable()
+  {
     delete on_the_fly_impl_;
     delete precalc_impl_;
   }
 
-  virtual bool IsPrime(int n) const {
-    if (precalc_impl_ != NULL && n < max_precalculated_)
-      return precalc_impl_->IsPrime(n);
+  virtual bool IsPrime( int n ) const
+  {
+    if ( precalc_impl_ != NULL && n < max_precalculated_ )
+      return precalc_impl_->IsPrime( n );
     else
-      return on_the_fly_impl_->IsPrime(n);
+      return on_the_fly_impl_->IsPrime( n );
   }
 
-  virtual int GetNextPrime(int p) const {
+  virtual int GetNextPrime( int p ) const
+  {
     int next_prime = -1;
-    if (precalc_impl_ != NULL && p < max_precalculated_)
-      next_prime = precalc_impl_->GetNextPrime(p);
+    if ( precalc_impl_ != NULL && p < max_precalculated_ )
+      next_prime = precalc_impl_->GetNextPrime( p );
 
-    return next_prime != -1 ? next_prime : on_the_fly_impl_->GetNextPrime(p);
+    return next_prime != -1 ? next_prime : on_the_fly_impl_->GetNextPrime( p );
   }
 
  private:
@@ -80,19 +83,21 @@ class HybridPrimeTable : public PrimeTable {
   int max_precalculated_;
 };
 
-using ::testing::TestWithParam;
 using ::testing::Bool;
-using ::testing::Values;
 using ::testing::Combine;
+using ::testing::TestWithParam;
+using ::testing::Values;
 
 // To test all code paths for HybridPrimeTable we must test it with numbers
 // both within and outside PreCalculatedPrimeTable's capacity and also with
 // PreCalculatedPrimeTable disabled. We do this by defining fixture which will
 // accept different combinations of parameters for instantiating a
 // HybridPrimeTable instance.
-class PrimeTableTest : public TestWithParam< ::std::tr1::tuple<bool, int> > {
+class PrimeTableTest : public TestWithParam< ::std::tr1::tuple< bool, int > >
+{
  protected:
-  virtual void SetUp() {
+  virtual void SetUp()
+  {
     // This can be written as
     //
     // bool force_on_the_fly;
@@ -101,48 +106,52 @@ class PrimeTableTest : public TestWithParam< ::std::tr1::tuple<bool, int> > {
     //
     // once the Google C++ Style Guide allows use of ::std::tr1::tie.
     //
-    bool force_on_the_fly = ::std::tr1::get<0>(GetParam());
-    int max_precalculated = ::std::tr1::get<1>(GetParam());
-    table_ = new HybridPrimeTable(force_on_the_fly, max_precalculated);
+    bool force_on_the_fly = ::std::tr1::get< 0 >( GetParam() );
+    int max_precalculated = ::std::tr1::get< 1 >( GetParam() );
+    table_ = new HybridPrimeTable( force_on_the_fly, max_precalculated );
   }
-  virtual void TearDown() {
+  virtual void TearDown()
+  {
     delete table_;
     table_ = NULL;
   }
   HybridPrimeTable* table_;
 };
 
-TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
+TEST_P( PrimeTableTest, ReturnsFalseForNonPrimes )
+{
   // Inside the test body, you can refer to the test parameter by GetParam().
   // In this case, the test parameter is a PrimeTable interface pointer which
   // we can use directly.
   // Please note that you can also save it in the fixture's SetUp() method
   // or constructor and use saved copy in the tests.
 
-  EXPECT_FALSE(table_->IsPrime(-5));
-  EXPECT_FALSE(table_->IsPrime(0));
-  EXPECT_FALSE(table_->IsPrime(1));
-  EXPECT_FALSE(table_->IsPrime(4));
-  EXPECT_FALSE(table_->IsPrime(6));
-  EXPECT_FALSE(table_->IsPrime(100));
+  EXPECT_FALSE( table_->IsPrime( -5 ) );
+  EXPECT_FALSE( table_->IsPrime( 0 ) );
+  EXPECT_FALSE( table_->IsPrime( 1 ) );
+  EXPECT_FALSE( table_->IsPrime( 4 ) );
+  EXPECT_FALSE( table_->IsPrime( 6 ) );
+  EXPECT_FALSE( table_->IsPrime( 100 ) );
 }
 
-TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
-  EXPECT_TRUE(table_->IsPrime(2));
-  EXPECT_TRUE(table_->IsPrime(3));
-  EXPECT_TRUE(table_->IsPrime(5));
-  EXPECT_TRUE(table_->IsPrime(7));
-  EXPECT_TRUE(table_->IsPrime(11));
-  EXPECT_TRUE(table_->IsPrime(131));
+TEST_P( PrimeTableTest, ReturnsTrueForPrimes )
+{
+  EXPECT_TRUE( table_->IsPrime( 2 ) );
+  EXPECT_TRUE( table_->IsPrime( 3 ) );
+  EXPECT_TRUE( table_->IsPrime( 5 ) );
+  EXPECT_TRUE( table_->IsPrime( 7 ) );
+  EXPECT_TRUE( table_->IsPrime( 11 ) );
+  EXPECT_TRUE( table_->IsPrime( 131 ) );
 }
 
-TEST_P(PrimeTableTest, CanGetNextPrime) {
-  EXPECT_EQ(2, table_->GetNextPrime(0));
-  EXPECT_EQ(3, table_->GetNextPrime(2));
-  EXPECT_EQ(5, table_->GetNextPrime(3));
-  EXPECT_EQ(7, table_->GetNextPrime(5));
-  EXPECT_EQ(11, table_->GetNextPrime(7));
-  EXPECT_EQ(131, table_->GetNextPrime(128));
+TEST_P( PrimeTableTest, CanGetNextPrime )
+{
+  EXPECT_EQ( 2, table_->GetNextPrime( 0 ) );
+  EXPECT_EQ( 3, table_->GetNextPrime( 2 ) );
+  EXPECT_EQ( 5, table_->GetNextPrime( 3 ) );
+  EXPECT_EQ( 7, table_->GetNextPrime( 5 ) );
+  EXPECT_EQ( 11, table_->GetNextPrime( 7 ) );
+  EXPECT_EQ( 131, table_->GetNextPrime( 128 ) );
 }
 
 // In order to run value-parameterized tests, you need to instantiate them,
@@ -156,9 +165,9 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // will put some of the tested numbers beyond the capability of the
 // PrecalcPrimeTable instance and some inside it (10). Combine will produce all
 // possible combinations.
-INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
-                        PrimeTableTest,
-                        Combine(Bool(), Values(1, 10)));
+INSTANTIATE_TEST_CASE_P( MeaningfulTestParameters,
+                         PrimeTableTest,
+                         Combine( Bool(), Values( 1, 10 ) ) );
 
 #else
 
@@ -168,6 +177,6 @@ INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
 // link that library at all and consequently complain about missing entry
 // point defined in that library (fatal error LNK1561: entry point must
 // be defined). This dummy test keeps gtest_main linked in.
-TEST(DummyTest, CombineIsNotSupportedOnThisPlatform) {}
+TEST( DummyTest, CombineIsNotSupportedOnThisPlatform ) {}
 
 #endif  // GTEST_HAS_COMBINE

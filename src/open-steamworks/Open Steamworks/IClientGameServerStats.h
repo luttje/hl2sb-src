@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -23,25 +23,23 @@
 #include "SteamTypes.h"
 #include "GameServerStatsCommon.h"
 
-
-
 //-----------------------------------------------------------------------------
 // Purpose: Functions for authenticating users via Steam to play on a game server
 //-----------------------------------------------------------------------------
 abstract_class IClientGameServerStats
 {
-public:
-	virtual SteamAPICall_t RequestUserStats( CSteamID steamIDUser, CGameID gameID ) = 0;
-	virtual bool GetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, int32 *pData ) = 0;
-	virtual bool GetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float *pData ) = 0;
-	virtual bool GetUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName, bool *pbAchieved, uint32* puUnk = NULL ) = 0;
-	virtual bool SetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, int32 nData ) = 0;
-	virtual bool SetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float fData ) = 0;
-	virtual bool UpdateUserAvgRateStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float flCountThisSession, double dSessionLength ) = 0;
-	virtual bool SetUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName ) = 0;
-	virtual bool ClearUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName ) = 0;
-	virtual SteamAPICall_t StoreUserStats( CSteamID steamIDUser, CGameID gameID ) = 0;
-	virtual void SetMaxStatsLoaded( uint32 uMax ) = 0;
+ public:
+  virtual SteamAPICall_t RequestUserStats( CSteamID steamIDUser, CGameID gameID ) = 0;
+  virtual bool GetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, int32 *pData ) = 0;
+  virtual bool GetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float *pData ) = 0;
+  virtual bool GetUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName, bool *pbAchieved, uint32 *puUnk = NULL ) = 0;
+  virtual bool SetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, int32 nData ) = 0;
+  virtual bool SetUserStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float fData ) = 0;
+  virtual bool UpdateUserAvgRateStat( CSteamID steamIDUser, CGameID gameID, const char *pchName, float flCountThisSession, double dSessionLength ) = 0;
+  virtual bool SetUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName ) = 0;
+  virtual bool ClearUserAchievement( CSteamID steamIDUser, CGameID gameID, const char *pchName ) = 0;
+  virtual SteamAPICall_t StoreUserStats( CSteamID steamIDUser, CGameID gameID ) = 0;
+  virtual void SetMaxStatsLoaded( uint32 uMax ) = 0;
 };
 
-#endif // ICLIENTGAMESERVERSTATS_H
+#endif  // ICLIENTGAMESERVERSTATS_H

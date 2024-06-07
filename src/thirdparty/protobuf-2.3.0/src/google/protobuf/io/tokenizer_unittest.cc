@@ -45,10 +45,14 @@
 #include <google/protobuf/testing/googletest.h>
 #include <gtest/gtest.h>
 
-namespace google {
-namespace protobuf {
-namespace io {
-namespace {
+namespace google
+{
+namespace protobuf
+{
+namespace io
+{
+namespace
+{
 
 // ===================================================================
 // Data-Driven Test Infrastructure
@@ -73,75 +77,96 @@ namespace {
 // which failed will be printed.  The case type must be printable using
 // ostream::operator<<.
 
-#define TEST_1D(FIXTURE, NAME, CASES)                                      \
-  class FIXTURE##_##NAME##_DD : public FIXTURE {                           \
-   protected:                                                              \
-    template <typename CaseType>                                           \
-    void DoSingleCase(const CaseType& CASES##_case);                       \
-  };                                                                       \
-                                                                           \
-  TEST_F(FIXTURE##_##NAME##_DD, NAME) {                                    \
-    for (int i = 0; i < GOOGLE_ARRAYSIZE(CASES); i++) {                           \
-      SCOPED_TRACE(testing::Message()                                      \
-        << #CASES " case #" << i << ": " << CASES[i]);                     \
-      DoSingleCase(CASES[i]);                                              \
-    }                                                                      \
-  }                                                                        \
-                                                                           \
-  template <typename CaseType>                                             \
-  void FIXTURE##_##NAME##_DD::DoSingleCase(const CaseType& CASES##_case)
+#define TEST_1D( FIXTURE, NAME, CASES )                             \
+  class FIXTURE##_##NAME##_DD : public FIXTURE                      \
+  {                                                                 \
+   protected:                                                       \
+    template < typename CaseType >                                  \
+    void DoSingleCase( const CaseType& CASES##_case );              \
+  };                                                                \
+                                                                    \
+  TEST_F( FIXTURE##_##NAME##_DD, NAME )                             \
+  {                                                                 \
+    for ( int i = 0; i < GOOGLE_ARRAYSIZE( CASES ); i++ )           \
+    {                                                               \
+      SCOPED_TRACE( testing::Message()                              \
+                    << #CASES " case #" << i << ": " << CASES[i] ); \
+      DoSingleCase( CASES[i] );                                     \
+    }                                                               \
+  }                                                                 \
+                                                                    \
+  template < typename CaseType >                                    \
+  void FIXTURE##_##NAME##_DD::DoSingleCase( const CaseType& CASES##_case )
 
-#define TEST_2D(FIXTURE, NAME, CASES1, CASES2)                             \
-  class FIXTURE##_##NAME##_DD : public FIXTURE {                           \
-   protected:                                                              \
-    template <typename CaseType1, typename CaseType2>                      \
-    void DoSingleCase(const CaseType1& CASES1##_case,                      \
-                      const CaseType2& CASES2##_case);                     \
-  };                                                                       \
-                                                                           \
-  TEST_F(FIXTURE##_##NAME##_DD, NAME) {                                    \
-    for (int i = 0; i < GOOGLE_ARRAYSIZE(CASES1); i++) {                          \
-      for (int j = 0; j < GOOGLE_ARRAYSIZE(CASES2); j++) {                        \
-        SCOPED_TRACE(testing::Message()                                    \
-          << #CASES1 " case #" << i << ": " << CASES1[i] << ", "           \
-          << #CASES2 " case #" << j << ": " << CASES2[j]);                 \
-        DoSingleCase(CASES1[i], CASES2[j]);                                \
-      }                                                                    \
-    }                                                                      \
-  }                                                                        \
-                                                                           \
-  template <typename CaseType1, typename CaseType2>                        \
-  void FIXTURE##_##NAME##_DD::DoSingleCase(const CaseType1& CASES1##_case, \
-                                           const CaseType2& CASES2##_case)
+#define TEST_2D( FIXTURE, NAME, CASES1, CASES2 )                             \
+  class FIXTURE##_##NAME##_DD : public FIXTURE                               \
+  {                                                                          \
+   protected:                                                                \
+    template < typename CaseType1, typename CaseType2 >                      \
+    void DoSingleCase( const CaseType1& CASES1##_case,                       \
+                       const CaseType2& CASES2##_case );                     \
+  };                                                                         \
+                                                                             \
+  TEST_F( FIXTURE##_##NAME##_DD, NAME )                                      \
+  {                                                                          \
+    for ( int i = 0; i < GOOGLE_ARRAYSIZE( CASES1 ); i++ )                   \
+    {                                                                        \
+      for ( int j = 0; j < GOOGLE_ARRAYSIZE( CASES2 ); j++ )                 \
+      {                                                                      \
+        SCOPED_TRACE( testing::Message()                                     \
+                      << #CASES1 " case #" << i << ": " << CASES1[i] << ", " \
+                      << #CASES2 " case #" << j << ": " << CASES2[j] );      \
+        DoSingleCase( CASES1[i], CASES2[j] );                                \
+      }                                                                      \
+    }                                                                        \
+  }                                                                          \
+                                                                             \
+  template < typename CaseType1, typename CaseType2 >                        \
+  void FIXTURE##_##NAME##_DD::DoSingleCase( const CaseType1& CASES1##_case,  \
+                                            const CaseType2& CASES2##_case )
 
 // -------------------------------------------------------------------
 
 // An input stream that is basically like an ArrayInputStream but sometimes
 // returns empty buffers, just to throw us off.
-class TestInputStream : public ZeroCopyInputStream {
+class TestInputStream : public ZeroCopyInputStream
+{
  public:
-  TestInputStream(const void* data, int size, int block_size)
-    : array_stream_(data, size, block_size), counter_(0) {}
+  TestInputStream( const void* data, int size, int block_size )
+      : array_stream_( data, size, block_size ), counter_( 0 ) {}
   ~TestInputStream() {}
 
   // implements ZeroCopyInputStream ----------------------------------
-  bool Next(const void** data, int* size) {
+  bool Next( const void** data, int* size )
+  {
     // We'll return empty buffers starting with the first buffer, and every
     // 3 and 5 buffers after that.
-    if (counter_ % 3 == 0 || counter_ % 5 == 0) {
+    if ( counter_ % 3 == 0 || counter_ % 5 == 0 )
+    {
       *data = NULL;
       *size = 0;
       ++counter_;
       return true;
-    } else {
+    }
+    else
+    {
       ++counter_;
-      return array_stream_.Next(data, size);
+      return array_stream_.Next( data, size );
     }
   }
 
-  void BackUp(int count)  { return array_stream_.BackUp(count); }
-  bool Skip(int count)    { return array_stream_.Skip(count);   }
-  int64 ByteCount() const { return array_stream_.ByteCount();   }
+  void BackUp( int count )
+  {
+    return array_stream_.BackUp( count );
+  }
+  bool Skip( int count )
+  {
+    return array_stream_.Skip( count );
+  }
+  int64 ByteCount() const
+  {
+    return array_stream_.ByteCount();
+  }
 
  private:
   ArrayInputStream array_stream_;
@@ -152,7 +177,8 @@ class TestInputStream : public ZeroCopyInputStream {
 
 // An error collector which simply concatenates all its errors into a big
 // block of text which can be checked.
-class TestErrorCollector : public ErrorCollector {
+class TestErrorCollector : public ErrorCollector
+{
  public:
   TestErrorCollector() {}
   ~TestErrorCollector() {}
@@ -160,9 +186,10 @@ class TestErrorCollector : public ErrorCollector {
   string text_;
 
   // implements ErrorCollector ---------------------------------------
-  void AddError(int line, int column, const string& message) {
-    strings::SubstituteAndAppend(&text_, "$0:$1: $2\n",
-                                 line, column, message);
+  void AddError( int line, int column, const string& message )
+  {
+    strings::SubstituteAndAppend( &text_, "$0:$1: $2\n",
+                                  line, column, message );
   }
 };
 
@@ -172,14 +199,16 @@ class TestErrorCollector : public ErrorCollector {
 // we test cases where reads cross buffer boundaries as well as cases
 // where they don't.  This is sort of a brute-force approach to this,
 // but it's easy to write and easy to understand.
-const int kBlockSizes[] = {1, 2, 3, 5, 7, 13, 32, 1024};
+const int kBlockSizes[] = { 1, 2, 3, 5, 7, 13, 32, 1024 };
 
-class TokenizerTest : public testing::Test {
+class TokenizerTest : public testing::Test
+{
  protected:
   // For easy testing.
-  uint64 ParseInteger(const string& text) {
+  uint64 ParseInteger( const string& text )
+  {
     uint64 result;
-    EXPECT_TRUE(Tokenizer::ParseInteger(text, kuint64max, &result));
+    EXPECT_TRUE( Tokenizer::ParseInteger( text, kuint64max, &result ) );
     return result;
   }
 };
@@ -188,128 +217,132 @@ class TokenizerTest : public testing::Test {
 
 // These tests causes gcc 3.3.5 (and earlier?) to give the cryptic error:
 //   "sorry, unimplemented: `method_call_expr' not supported by dump_expr"
-#if !defined(__GNUC__) || __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 3)
+#if !defined( __GNUC__ ) || __GNUC__ > 3 || ( __GNUC__ == 3 && __GNUC_MINOR__ > 3 )
 
 // In each test case, the entire input text should parse as a single token
 // of the given type.
-struct SimpleTokenCase {
+struct SimpleTokenCase
+{
   string input;
   Tokenizer::TokenType type;
 };
 
-inline ostream& operator<<(ostream& out,
-                           const SimpleTokenCase& test_case) {
-  return out << CEscape(test_case.input);
+inline ostream& operator<<( ostream& out,
+                            const SimpleTokenCase& test_case )
+{
+  return out << CEscape( test_case.input );
 }
 
 SimpleTokenCase kSimpleTokenCases[] = {
-  // Test identifiers.
-  { "hello",       Tokenizer::TYPE_IDENTIFIER },
+    // Test identifiers.
+    { "hello", Tokenizer::TYPE_IDENTIFIER },
 
-  // Test integers.
-  { "123",         Tokenizer::TYPE_INTEGER },
-  { "0xab6",       Tokenizer::TYPE_INTEGER },
-  { "0XAB6",       Tokenizer::TYPE_INTEGER },
-  { "0X1234567",   Tokenizer::TYPE_INTEGER },
-  { "0x89abcdef",  Tokenizer::TYPE_INTEGER },
-  { "0x89ABCDEF",  Tokenizer::TYPE_INTEGER },
-  { "01234567",    Tokenizer::TYPE_INTEGER },
+    // Test integers.
+    { "123", Tokenizer::TYPE_INTEGER },
+    { "0xab6", Tokenizer::TYPE_INTEGER },
+    { "0XAB6", Tokenizer::TYPE_INTEGER },
+    { "0X1234567", Tokenizer::TYPE_INTEGER },
+    { "0x89abcdef", Tokenizer::TYPE_INTEGER },
+    { "0x89ABCDEF", Tokenizer::TYPE_INTEGER },
+    { "01234567", Tokenizer::TYPE_INTEGER },
 
-  // Test floats.
-  { "123.45",      Tokenizer::TYPE_FLOAT },
-  { "1.",          Tokenizer::TYPE_FLOAT },
-  { "1e3",         Tokenizer::TYPE_FLOAT },
-  { "1E3",         Tokenizer::TYPE_FLOAT },
-  { "1e-3",        Tokenizer::TYPE_FLOAT },
-  { "1e+3",        Tokenizer::TYPE_FLOAT },
-  { "1.e3",        Tokenizer::TYPE_FLOAT },
-  { "1.2e3",       Tokenizer::TYPE_FLOAT },
-  { ".1",          Tokenizer::TYPE_FLOAT },
-  { ".1e3",        Tokenizer::TYPE_FLOAT },
-  { ".1e-3",       Tokenizer::TYPE_FLOAT },
-  { ".1e+3",       Tokenizer::TYPE_FLOAT },
+    // Test floats.
+    { "123.45", Tokenizer::TYPE_FLOAT },
+    { "1.", Tokenizer::TYPE_FLOAT },
+    { "1e3", Tokenizer::TYPE_FLOAT },
+    { "1E3", Tokenizer::TYPE_FLOAT },
+    { "1e-3", Tokenizer::TYPE_FLOAT },
+    { "1e+3", Tokenizer::TYPE_FLOAT },
+    { "1.e3", Tokenizer::TYPE_FLOAT },
+    { "1.2e3", Tokenizer::TYPE_FLOAT },
+    { ".1", Tokenizer::TYPE_FLOAT },
+    { ".1e3", Tokenizer::TYPE_FLOAT },
+    { ".1e-3", Tokenizer::TYPE_FLOAT },
+    { ".1e+3", Tokenizer::TYPE_FLOAT },
 
-  // Test strings.
-  { "'hello'",     Tokenizer::TYPE_STRING },
-  { "\"foo\"",     Tokenizer::TYPE_STRING },
-  { "'a\"b'",      Tokenizer::TYPE_STRING },
-  { "\"a'b\"",     Tokenizer::TYPE_STRING },
-  { "'a\\'b'",     Tokenizer::TYPE_STRING },
-  { "\"a\\\"b\"",  Tokenizer::TYPE_STRING },
-  { "'\\xf'",      Tokenizer::TYPE_STRING },
-  { "'\\0'",       Tokenizer::TYPE_STRING },
+    // Test strings.
+    { "'hello'", Tokenizer::TYPE_STRING },
+    { "\"foo\"", Tokenizer::TYPE_STRING },
+    { "'a\"b'", Tokenizer::TYPE_STRING },
+    { "\"a'b\"", Tokenizer::TYPE_STRING },
+    { "'a\\'b'", Tokenizer::TYPE_STRING },
+    { "\"a\\\"b\"", Tokenizer::TYPE_STRING },
+    { "'\\xf'", Tokenizer::TYPE_STRING },
+    { "'\\0'", Tokenizer::TYPE_STRING },
 
-  // Test symbols.
-  { "+",           Tokenizer::TYPE_SYMBOL },
-  { ".",           Tokenizer::TYPE_SYMBOL },
+    // Test symbols.
+    { "+", Tokenizer::TYPE_SYMBOL },
+    { ".", Tokenizer::TYPE_SYMBOL },
 };
 
-TEST_2D(TokenizerTest, SimpleTokens, kSimpleTokenCases, kBlockSizes) {
+TEST_2D( TokenizerTest, SimpleTokens, kSimpleTokenCases, kBlockSizes )
+{
   // Set up the tokenizer.
-  TestInputStream input(kSimpleTokenCases_case.input.data(),
-                        kSimpleTokenCases_case.input.size(),
-                        kBlockSizes_case);
+  TestInputStream input( kSimpleTokenCases_case.input.data(),
+                         kSimpleTokenCases_case.input.size(),
+                         kBlockSizes_case );
   TestErrorCollector error_collector;
-  Tokenizer tokenizer(&input, &error_collector);
+  Tokenizer tokenizer( &input, &error_collector );
 
   // Before Next() is called, the initial token should always be TYPE_START.
-  EXPECT_EQ(Tokenizer::TYPE_START, tokenizer.current().type);
-  EXPECT_EQ("", tokenizer.current().text);
-  EXPECT_EQ(0, tokenizer.current().line);
-  EXPECT_EQ(0, tokenizer.current().column);
+  EXPECT_EQ( Tokenizer::TYPE_START, tokenizer.current().type );
+  EXPECT_EQ( "", tokenizer.current().text );
+  EXPECT_EQ( 0, tokenizer.current().line );
+  EXPECT_EQ( 0, tokenizer.current().column );
 
   // Parse the token.
-  ASSERT_TRUE(tokenizer.Next());
+  ASSERT_TRUE( tokenizer.Next() );
 
   // Check that it has the right type.
-  EXPECT_EQ(kSimpleTokenCases_case.type, tokenizer.current().type);
+  EXPECT_EQ( kSimpleTokenCases_case.type, tokenizer.current().type );
   // Check that it contains the complete input text.
-  EXPECT_EQ(kSimpleTokenCases_case.input, tokenizer.current().text);
+  EXPECT_EQ( kSimpleTokenCases_case.input, tokenizer.current().text );
   // Check that it is located at the beginning of the input
-  EXPECT_EQ(0, tokenizer.current().line);
-  EXPECT_EQ(0, tokenizer.current().column);
+  EXPECT_EQ( 0, tokenizer.current().line );
+  EXPECT_EQ( 0, tokenizer.current().column );
 
   // There should be no more input.
-  EXPECT_FALSE(tokenizer.Next());
+  EXPECT_FALSE( tokenizer.Next() );
 
   // After Next() returns false, the token should have type TYPE_END.
-  EXPECT_EQ(Tokenizer::TYPE_END, tokenizer.current().type);
-  EXPECT_EQ("", tokenizer.current().text);
-  EXPECT_EQ(0, tokenizer.current().line);
-  EXPECT_EQ(kSimpleTokenCases_case.input.size(), tokenizer.current().column);
+  EXPECT_EQ( Tokenizer::TYPE_END, tokenizer.current().type );
+  EXPECT_EQ( "", tokenizer.current().text );
+  EXPECT_EQ( 0, tokenizer.current().line );
+  EXPECT_EQ( kSimpleTokenCases_case.input.size(), tokenizer.current().column );
 
   // There should be no errors.
-  EXPECT_TRUE(error_collector.text_.empty());
+  EXPECT_TRUE( error_collector.text_.empty() );
 }
 
-TEST_1D(TokenizerTest, FloatSuffix, kBlockSizes) {
+TEST_1D( TokenizerTest, FloatSuffix, kBlockSizes )
+{
   // Test the "allow_f_after_float" option.
 
   // Set up the tokenizer.
   const char* text = "1f 2.5f 6e3f 7F";
-  TestInputStream input(text, strlen(text), kBlockSizes_case);
+  TestInputStream input( text, strlen( text ), kBlockSizes_case );
   TestErrorCollector error_collector;
-  Tokenizer tokenizer(&input, &error_collector);
-  tokenizer.set_allow_f_after_float(true);
+  Tokenizer tokenizer( &input, &error_collector );
+  tokenizer.set_allow_f_after_float( true );
 
   // Advance through tokens and check that they are parsed as expected.
-  ASSERT_TRUE(tokenizer.Next());
-  EXPECT_EQ(tokenizer.current().text, "1f");
-  EXPECT_EQ(tokenizer.current().type, Tokenizer::TYPE_FLOAT);
-  ASSERT_TRUE(tokenizer.Next());
-  EXPECT_EQ(tokenizer.current().text, "2.5f");
-  EXPECT_EQ(tokenizer.current().type, Tokenizer::TYPE_FLOAT);
-  ASSERT_TRUE(tokenizer.Next());
-  EXPECT_EQ(tokenizer.current().text, "6e3f");
-  EXPECT_EQ(tokenizer.current().type, Tokenizer::TYPE_FLOAT);
-  ASSERT_TRUE(tokenizer.Next());
-  EXPECT_EQ(tokenizer.current().text, "7F");
-  EXPECT_EQ(tokenizer.current().type, Tokenizer::TYPE_FLOAT);
+  ASSERT_TRUE( tokenizer.Next() );
+  EXPECT_EQ( tokenizer.current().text, "1f" );
+  EXPECT_EQ( tokenizer.current().type, Tokenizer::TYPE_FLOAT );
+  ASSERT_TRUE( tokenizer.Next() );
+  EXPECT_EQ( tokenizer.current().text, "2.5f" );
+  EXPECT_EQ( tokenizer.current().type, Tokenizer::TYPE_FLOAT );
+  ASSERT_TRUE( tokenizer.Next() );
+  EXPECT_EQ( tokenizer.current().text, "6e3f" );
+  EXPECT_EQ( tokenizer.current().type, Tokenizer::TYPE_FLOAT );
+  ASSERT_TRUE( tokenizer.Next() );
+  EXPECT_EQ( tokenizer.current().text, "7F" );
+  EXPECT_EQ( tokenizer.current().type, Tokenizer::TYPE_FLOAT );
 
   // There should be no more input.
-  EXPECT_FALSE(tokenizer.Next());
+  EXPECT_FALSE( tokenizer.Next() );
   // There should be no errors.
-  EXPECT_TRUE(error_collector.text_.empty());
+  EXPECT_TRUE( error_collector.text_.empty() );
 }
 
 #endif
@@ -318,7 +351,8 @@ TEST_1D(TokenizerTest, FloatSuffix, kBlockSizes) {
 
 // In each case, the input is parsed to produce a list of tokens.  The
 // last token in "output" must have type TYPE_END.
-struct MultiTokenCase {
+struct MultiTokenCase
+{
   string input;
   Tokenizer::Token output[10];  // The compiler wants a constant array
                                 // size for initialization to work.  There
@@ -326,165 +360,176 @@ struct MultiTokenCase {
                                 // needed.
 };
 
-inline ostream& operator<<(ostream& out,
-                           const MultiTokenCase& test_case) {
-  return out << CEscape(test_case.input);
+inline ostream& operator<<( ostream& out,
+                            const MultiTokenCase& test_case )
+{
+  return out << CEscape( test_case.input );
 }
 
 MultiTokenCase kMultiTokenCases[] = {
-  // Test empty input.
-  { "", {
-    { Tokenizer::TYPE_END       , ""     , 0,  0 },
-  }},
+    // Test empty input.
+    { "", {
+              { Tokenizer::TYPE_END, "", 0, 0 },
+          } },
 
-  // Test all token types at the same time.
-  { "foo 1 1.2 + 'bar'", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo"  , 0,  0 },
-    { Tokenizer::TYPE_INTEGER   , "1"    , 0,  4 },
-    { Tokenizer::TYPE_FLOAT     , "1.2"  , 0,  6 },
-    { Tokenizer::TYPE_SYMBOL    , "+"    , 0, 10 },
-    { Tokenizer::TYPE_STRING    , "'bar'", 0, 12 },
-    { Tokenizer::TYPE_END       , ""     , 0, 17 },
-  }},
+    // Test all token types at the same time.
+    { "foo 1 1.2 + 'bar'", {
+                               { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+                               { Tokenizer::TYPE_INTEGER, "1", 0, 4 },
+                               { Tokenizer::TYPE_FLOAT, "1.2", 0, 6 },
+                               { Tokenizer::TYPE_SYMBOL, "+", 0, 10 },
+                               { Tokenizer::TYPE_STRING, "'bar'", 0, 12 },
+                               { Tokenizer::TYPE_END, "", 0, 17 },
+                           } },
 
-  // Test that consecutive symbols are parsed as separate tokens.
-  { "!@+%", {
-    { Tokenizer::TYPE_SYMBOL    , "!"    , 0, 0 },
-    { Tokenizer::TYPE_SYMBOL    , "@"    , 0, 1 },
-    { Tokenizer::TYPE_SYMBOL    , "+"    , 0, 2 },
-    { Tokenizer::TYPE_SYMBOL    , "%"    , 0, 3 },
-    { Tokenizer::TYPE_END       , ""     , 0, 4 },
-  }},
+    // Test that consecutive symbols are parsed as separate tokens.
+    { "!@+%", {
+                  { Tokenizer::TYPE_SYMBOL, "!", 0, 0 },
+                  { Tokenizer::TYPE_SYMBOL, "@", 0, 1 },
+                  { Tokenizer::TYPE_SYMBOL, "+", 0, 2 },
+                  { Tokenizer::TYPE_SYMBOL, "%", 0, 3 },
+                  { Tokenizer::TYPE_END, "", 0, 4 },
+              } },
 
-  // Test that newlines affect line numbers correctly.
-  { "foo bar\nrab oof", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 0,  4 },
-    { Tokenizer::TYPE_IDENTIFIER, "rab", 1,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "oof", 1,  4 },
-    { Tokenizer::TYPE_END       , ""   , 1,  7 },
-  }},
+    // Test that newlines affect line numbers correctly.
+    { "foo bar\nrab oof", {
+                              { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+                              { Tokenizer::TYPE_IDENTIFIER, "bar", 0, 4 },
+                              { Tokenizer::TYPE_IDENTIFIER, "rab", 1, 0 },
+                              { Tokenizer::TYPE_IDENTIFIER, "oof", 1, 4 },
+                              { Tokenizer::TYPE_END, "", 1, 7 },
+                          } },
 
-  // Test that tabs affect column numbers correctly.
-  { "foo\tbar  \tbaz", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 0,  8 },
-    { Tokenizer::TYPE_IDENTIFIER, "baz", 0, 16 },
-    { Tokenizer::TYPE_END       , ""   , 0, 19 },
-  }},
+    // Test that tabs affect column numbers correctly.
+    { "foo\tbar  \tbaz", {
+                             { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+                             { Tokenizer::TYPE_IDENTIFIER, "bar", 0, 8 },
+                             { Tokenizer::TYPE_IDENTIFIER, "baz", 0, 16 },
+                             { Tokenizer::TYPE_END, "", 0, 19 },
+                         } },
 
-  // Test that line comments are ignored.
-  { "foo // This is a comment\n"
-    "bar // This is another comment", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 1,  0 },
-    { Tokenizer::TYPE_END       , ""   , 1, 30 },
-  }},
+    // Test that line comments are ignored.
+    { "foo // This is a comment\n"
+      "bar // This is another comment",
+      {
+          { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+          { Tokenizer::TYPE_IDENTIFIER, "bar", 1, 0 },
+          { Tokenizer::TYPE_END, "", 1, 30 },
+      } },
 
-  // Test that block comments are ignored.
-  { "foo /* This is a block comment */ bar", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 0, 34 },
-    { Tokenizer::TYPE_END       , ""   , 0, 37 },
-  }},
+    // Test that block comments are ignored.
+    { "foo /* This is a block comment */ bar", {
+                                                   { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+                                                   { Tokenizer::TYPE_IDENTIFIER, "bar", 0, 34 },
+                                                   { Tokenizer::TYPE_END, "", 0, 37 },
+                                               } },
 
-  // Test that sh-style comments are not ignored by default.
-  { "foo # bar\n"
-    "baz", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_SYMBOL    , "#"  , 0,  4 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 0,  6 },
-    { Tokenizer::TYPE_IDENTIFIER, "baz", 1,  0 },
-    { Tokenizer::TYPE_END       , ""   , 1, 3 },
-  }},
+    // Test that sh-style comments are not ignored by default.
+    { "foo # bar\n"
+      "baz",
+      {
+          { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+          { Tokenizer::TYPE_SYMBOL, "#", 0, 4 },
+          { Tokenizer::TYPE_IDENTIFIER, "bar", 0, 6 },
+          { Tokenizer::TYPE_IDENTIFIER, "baz", 1, 0 },
+          { Tokenizer::TYPE_END, "", 1, 3 },
+      } },
 
-  // Bytes with the high-order bit set should not be seen as control characters.
-  { "\300", {
-    { Tokenizer::TYPE_SYMBOL, "\300", 0, 0 },
-    { Tokenizer::TYPE_END   , ""    , 0, 1 },
-  }},
+    // Bytes with the high-order bit set should not be seen as control characters.
+    { "\300", {
+                  { Tokenizer::TYPE_SYMBOL, "\300", 0, 0 },
+                  { Tokenizer::TYPE_END, "", 0, 1 },
+              } },
 
-  // Test all whitespace chars
-  { "foo\n\t\r\v\fbar", {
-    { Tokenizer::TYPE_IDENTIFIER, "foo", 0,  0 },
-    { Tokenizer::TYPE_IDENTIFIER, "bar", 1, 11 },
-    { Tokenizer::TYPE_END       , ""   , 1, 14 },
-  }},
+    // Test all whitespace chars
+    { "foo\n\t\r\v\fbar", {
+                              { Tokenizer::TYPE_IDENTIFIER, "foo", 0, 0 },
+                              { Tokenizer::TYPE_IDENTIFIER, "bar", 1, 11 },
+                              { Tokenizer::TYPE_END, "", 1, 14 },
+                          } },
 };
 
-TEST_2D(TokenizerTest, MultipleTokens, kMultiTokenCases, kBlockSizes) {
+TEST_2D( TokenizerTest, MultipleTokens, kMultiTokenCases, kBlockSizes )
+{
   // Set up the tokenizer.
-  TestInputStream input(kMultiTokenCases_case.input.data(),
-                        kMultiTokenCases_case.input.size(),
-                        kBlockSizes_case);
+  TestInputStream input( kMultiTokenCases_case.input.data(),
+                         kMultiTokenCases_case.input.size(),
+                         kBlockSizes_case );
   TestErrorCollector error_collector;
-  Tokenizer tokenizer(&input, &error_collector);
+  Tokenizer tokenizer( &input, &error_collector );
 
   // Before Next() is called, the initial token should always be TYPE_START.
-  EXPECT_EQ(Tokenizer::TYPE_START, tokenizer.current().type);
-  EXPECT_EQ("", tokenizer.current().text);
-  EXPECT_EQ(0, tokenizer.current().line);
-  EXPECT_EQ(0, tokenizer.current().column);
+  EXPECT_EQ( Tokenizer::TYPE_START, tokenizer.current().type );
+  EXPECT_EQ( "", tokenizer.current().text );
+  EXPECT_EQ( 0, tokenizer.current().line );
+  EXPECT_EQ( 0, tokenizer.current().column );
 
   // Loop through all expected tokens.
   int i = 0;
   Tokenizer::Token token;
-  do {
+  do
+  {
     token = kMultiTokenCases_case.output[i++];
 
-    SCOPED_TRACE(testing::Message() << "Token #" << i << ": " << token.text);
+    SCOPED_TRACE( testing::Message() << "Token #" << i << ": " << token.text );
 
     // Next() should only return false when it hits the end token.
-    if (token.type != Tokenizer::TYPE_END) {
-      ASSERT_TRUE(tokenizer.Next());
-    } else {
-      ASSERT_FALSE(tokenizer.Next());
+    if ( token.type != Tokenizer::TYPE_END )
+    {
+      ASSERT_TRUE( tokenizer.Next() );
+    }
+    else
+    {
+      ASSERT_FALSE( tokenizer.Next() );
     }
 
     // Check that the token matches the expected one.
-    EXPECT_EQ(token.type, tokenizer.current().type);
-    EXPECT_EQ(token.text, tokenizer.current().text);
-    EXPECT_EQ(token.line, tokenizer.current().line);
-    EXPECT_EQ(token.column, tokenizer.current().column);
+    EXPECT_EQ( token.type, tokenizer.current().type );
+    EXPECT_EQ( token.text, tokenizer.current().text );
+    EXPECT_EQ( token.line, tokenizer.current().line );
+    EXPECT_EQ( token.column, tokenizer.current().column );
 
-  } while (token.type != Tokenizer::TYPE_END);
+  } while ( token.type != Tokenizer::TYPE_END );
 
   // There should be no errors.
-  EXPECT_TRUE(error_collector.text_.empty());
+  EXPECT_TRUE( error_collector.text_.empty() );
 }
 
 // This test causes gcc 3.3.5 (and earlier?) to give the cryptic error:
 //   "sorry, unimplemented: `method_call_expr' not supported by dump_expr"
-#if !defined(__GNUC__) || __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 3)
+#if !defined( __GNUC__ ) || __GNUC__ > 3 || ( __GNUC__ == 3 && __GNUC_MINOR__ > 3 )
 
-TEST_1D(TokenizerTest, ShCommentStyle, kBlockSizes) {
+TEST_1D( TokenizerTest, ShCommentStyle, kBlockSizes )
+{
   // Test the "comment_style" option.
 
-  const char* text = "foo # bar\n"
-                     "baz // qux\n"
-                     "corge /* grault */\n"
-                     "garply";
-  const char* const kTokens[] = {"foo",  // "# bar" is ignored
-                                 "baz", "/", "/", "qux",
-                                 "corge", "/", "*", "grault", "*", "/",
-                                 "garply"};
+  const char* text =
+      "foo # bar\n"
+      "baz // qux\n"
+      "corge /* grault */\n"
+      "garply";
+  const char* const kTokens[] = { "foo",  // "# bar" is ignored
+                                  "baz", "/", "/", "qux",
+                                  "corge", "/", "*", "grault", "*", "/",
+                                  "garply" };
 
   // Set up the tokenizer.
-  TestInputStream input(text, strlen(text), kBlockSizes_case);
+  TestInputStream input( text, strlen( text ), kBlockSizes_case );
   TestErrorCollector error_collector;
-  Tokenizer tokenizer(&input, &error_collector);
-  tokenizer.set_comment_style(Tokenizer::SH_COMMENT_STYLE);
+  Tokenizer tokenizer( &input, &error_collector );
+  tokenizer.set_comment_style( Tokenizer::SH_COMMENT_STYLE );
 
   // Advance through tokens and check that they are parsed as expected.
-  for (int i = 0; i < GOOGLE_ARRAYSIZE(kTokens); i++) {
-    EXPECT_TRUE(tokenizer.Next());
-    EXPECT_EQ(tokenizer.current().text, kTokens[i]);
+  for ( int i = 0; i < GOOGLE_ARRAYSIZE( kTokens ); i++ )
+  {
+    EXPECT_TRUE( tokenizer.Next() );
+    EXPECT_EQ( tokenizer.current().text, kTokens[i] );
   }
 
   // There should be no more input.
-  EXPECT_FALSE(tokenizer.Next());
+  EXPECT_FALSE( tokenizer.Next() );
   // There should be no errors.
-  EXPECT_TRUE(error_collector.text_.empty());
+  EXPECT_TRUE( error_collector.text_.empty() );
 }
 
 #endif
@@ -493,125 +538,130 @@ TEST_1D(TokenizerTest, ShCommentStyle, kBlockSizes) {
 
 // Test parse helpers.  It's not really worth setting up a full data-driven
 // test here.
-TEST_F(TokenizerTest, ParseInteger) {
-  EXPECT_EQ(0, ParseInteger("0"));
-  EXPECT_EQ(123, ParseInteger("123"));
-  EXPECT_EQ(0xabcdef12u, ParseInteger("0xabcdef12"));
-  EXPECT_EQ(0xabcdef12u, ParseInteger("0xABCDEF12"));
-  EXPECT_EQ(kuint64max, ParseInteger("0xFFFFFFFFFFFFFFFF"));
-  EXPECT_EQ(01234567, ParseInteger("01234567"));
-  EXPECT_EQ(0X123, ParseInteger("0X123"));
+TEST_F( TokenizerTest, ParseInteger )
+{
+  EXPECT_EQ( 0, ParseInteger( "0" ) );
+  EXPECT_EQ( 123, ParseInteger( "123" ) );
+  EXPECT_EQ( 0xabcdef12u, ParseInteger( "0xabcdef12" ) );
+  EXPECT_EQ( 0xabcdef12u, ParseInteger( "0xABCDEF12" ) );
+  EXPECT_EQ( kuint64max, ParseInteger( "0xFFFFFFFFFFFFFFFF" ) );
+  EXPECT_EQ( 01234567, ParseInteger( "01234567" ) );
+  EXPECT_EQ( 0X123, ParseInteger( "0X123" ) );
 
   // Test invalid integers that may still be tokenized as integers.
-  EXPECT_EQ(0, ParseInteger("0x"));
+  EXPECT_EQ( 0, ParseInteger( "0x" ) );
 
   uint64 i;
 #ifdef GTEST_HAS_DEATH_TEST  // death tests do not work on Windows yet
   // Test invalid integers that will never be tokenized as integers.
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseInteger("zxy", kuint64max, &i),
-    "passed text that could not have been tokenized as an integer");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseInteger("1.2", kuint64max, &i),
-    "passed text that could not have been tokenized as an integer");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseInteger("08", kuint64max, &i),
-    "passed text that could not have been tokenized as an integer");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseInteger("0xg", kuint64max, &i),
-    "passed text that could not have been tokenized as an integer");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseInteger("-1", kuint64max, &i),
-    "passed text that could not have been tokenized as an integer");
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseInteger( "zxy", kuint64max, &i ),
+                      "passed text that could not have been tokenized as an integer" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseInteger( "1.2", kuint64max, &i ),
+                      "passed text that could not have been tokenized as an integer" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseInteger( "08", kuint64max, &i ),
+                      "passed text that could not have been tokenized as an integer" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseInteger( "0xg", kuint64max, &i ),
+                      "passed text that could not have been tokenized as an integer" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseInteger( "-1", kuint64max, &i ),
+                      "passed text that could not have been tokenized as an integer" );
 #endif  // GTEST_HAS_DEATH_TEST
 
   // Test overflows.
-  EXPECT_TRUE (Tokenizer::ParseInteger("0", 0, &i));
-  EXPECT_FALSE(Tokenizer::ParseInteger("1", 0, &i));
-  EXPECT_TRUE (Tokenizer::ParseInteger("1", 1, &i));
-  EXPECT_TRUE (Tokenizer::ParseInteger("12345", 12345, &i));
-  EXPECT_FALSE(Tokenizer::ParseInteger("12346", 12345, &i));
-  EXPECT_TRUE (Tokenizer::ParseInteger("0xFFFFFFFFFFFFFFFF" , kuint64max, &i));
-  EXPECT_FALSE(Tokenizer::ParseInteger("0x10000000000000000", kuint64max, &i));
+  EXPECT_TRUE( Tokenizer::ParseInteger( "0", 0, &i ) );
+  EXPECT_FALSE( Tokenizer::ParseInteger( "1", 0, &i ) );
+  EXPECT_TRUE( Tokenizer::ParseInteger( "1", 1, &i ) );
+  EXPECT_TRUE( Tokenizer::ParseInteger( "12345", 12345, &i ) );
+  EXPECT_FALSE( Tokenizer::ParseInteger( "12346", 12345, &i ) );
+  EXPECT_TRUE( Tokenizer::ParseInteger( "0xFFFFFFFFFFFFFFFF", kuint64max, &i ) );
+  EXPECT_FALSE( Tokenizer::ParseInteger( "0x10000000000000000", kuint64max, &i ) );
 }
 
-TEST_F(TokenizerTest, ParseFloat) {
-  EXPECT_DOUBLE_EQ(1    , Tokenizer::ParseFloat("1."));
-  EXPECT_DOUBLE_EQ(1e3  , Tokenizer::ParseFloat("1e3"));
-  EXPECT_DOUBLE_EQ(1e3  , Tokenizer::ParseFloat("1E3"));
-  EXPECT_DOUBLE_EQ(1.5e3, Tokenizer::ParseFloat("1.5e3"));
-  EXPECT_DOUBLE_EQ(.1   , Tokenizer::ParseFloat(".1"));
-  EXPECT_DOUBLE_EQ(.25  , Tokenizer::ParseFloat(".25"));
-  EXPECT_DOUBLE_EQ(.1e3 , Tokenizer::ParseFloat(".1e3"));
-  EXPECT_DOUBLE_EQ(.25e3, Tokenizer::ParseFloat(".25e3"));
-  EXPECT_DOUBLE_EQ(.1e+3, Tokenizer::ParseFloat(".1e+3"));
-  EXPECT_DOUBLE_EQ(.1e-3, Tokenizer::ParseFloat(".1e-3"));
-  EXPECT_DOUBLE_EQ(5    , Tokenizer::ParseFloat("5"));
-  EXPECT_DOUBLE_EQ(6e-12, Tokenizer::ParseFloat("6e-12"));
-  EXPECT_DOUBLE_EQ(1.2  , Tokenizer::ParseFloat("1.2"));
-  EXPECT_DOUBLE_EQ(1.e2 , Tokenizer::ParseFloat("1.e2"));
+TEST_F( TokenizerTest, ParseFloat )
+{
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1." ) );
+  EXPECT_DOUBLE_EQ( 1e3, Tokenizer::ParseFloat( "1e3" ) );
+  EXPECT_DOUBLE_EQ( 1e3, Tokenizer::ParseFloat( "1E3" ) );
+  EXPECT_DOUBLE_EQ( 1.5e3, Tokenizer::ParseFloat( "1.5e3" ) );
+  EXPECT_DOUBLE_EQ( .1, Tokenizer::ParseFloat( ".1" ) );
+  EXPECT_DOUBLE_EQ( .25, Tokenizer::ParseFloat( ".25" ) );
+  EXPECT_DOUBLE_EQ( .1e3, Tokenizer::ParseFloat( ".1e3" ) );
+  EXPECT_DOUBLE_EQ( .25e3, Tokenizer::ParseFloat( ".25e3" ) );
+  EXPECT_DOUBLE_EQ( .1e+3, Tokenizer::ParseFloat( ".1e+3" ) );
+  EXPECT_DOUBLE_EQ( .1e-3, Tokenizer::ParseFloat( ".1e-3" ) );
+  EXPECT_DOUBLE_EQ( 5, Tokenizer::ParseFloat( "5" ) );
+  EXPECT_DOUBLE_EQ( 6e-12, Tokenizer::ParseFloat( "6e-12" ) );
+  EXPECT_DOUBLE_EQ( 1.2, Tokenizer::ParseFloat( "1.2" ) );
+  EXPECT_DOUBLE_EQ( 1.e2, Tokenizer::ParseFloat( "1.e2" ) );
 
   // Test invalid integers that may still be tokenized as integers.
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1e"));
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1e-"));
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1.e"));
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1e" ) );
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1e-" ) );
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1.e" ) );
 
   // Test 'f' suffix.
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1f"));
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1.0f"));
-  EXPECT_DOUBLE_EQ(1, Tokenizer::ParseFloat("1F"));
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1f" ) );
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1.0f" ) );
+  EXPECT_DOUBLE_EQ( 1, Tokenizer::ParseFloat( "1F" ) );
 
   // These should parse successfully even though they are out of range.
   // Overflows become infinity and underflows become zero.
-  EXPECT_EQ(     0.0, Tokenizer::ParseFloat("1e-9999999999999999999999999999"));
-  EXPECT_EQ(HUGE_VAL, Tokenizer::ParseFloat("1e+9999999999999999999999999999"));
+  EXPECT_EQ( 0.0, Tokenizer::ParseFloat( "1e-9999999999999999999999999999" ) );
+  EXPECT_EQ( HUGE_VAL, Tokenizer::ParseFloat( "1e+9999999999999999999999999999" ) );
 
 #ifdef GTEST_HAS_DEATH_TEST  // death tests do not work on Windows yet
   // Test invalid integers that will never be tokenized as integers.
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseFloat("zxy"),
-    "passed text that could not have been tokenized as a float");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseFloat("1-e0"),
-    "passed text that could not have been tokenized as a float");
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseFloat("-1.0"),
-    "passed text that could not have been tokenized as a float");
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseFloat( "zxy" ),
+                      "passed text that could not have been tokenized as a float" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseFloat( "1-e0" ),
+                      "passed text that could not have been tokenized as a float" );
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseFloat( "-1.0" ),
+                      "passed text that could not have been tokenized as a float" );
 #endif  // GTEST_HAS_DEATH_TEST
 }
 
-TEST_F(TokenizerTest, ParseString) {
+TEST_F( TokenizerTest, ParseString )
+{
   string output;
-  Tokenizer::ParseString("'hello'", &output);
-  EXPECT_EQ("hello", output);
-  Tokenizer::ParseString("\"blah\\nblah2\"", &output);
-  EXPECT_EQ("blah\nblah2", output);
-  Tokenizer::ParseString("'\\1x\\1\\123\\739\\52\\334n\\3'", &output);
-  EXPECT_EQ("\1x\1\123\739\52\334n\3", output);
-  Tokenizer::ParseString("'\\x20\\x4'", &output);
-  EXPECT_EQ("\x20\x4", output);
+  Tokenizer::ParseString( "'hello'", &output );
+  EXPECT_EQ( "hello", output );
+  Tokenizer::ParseString( "\"blah\\nblah2\"", &output );
+  EXPECT_EQ( "blah\nblah2", output );
+  Tokenizer::ParseString( "'\\1x\\1\\123\\739\\52\\334n\\3'", &output );
+  EXPECT_EQ( "\1x\1\123\739\52\334n\3", output );
+  Tokenizer::ParseString( "'\\x20\\x4'", &output );
+  EXPECT_EQ( "\x20\x4", output );
 
   // Test invalid strings that may still be tokenized as strings.
-  Tokenizer::ParseString("\"\\a\\l\\v\\t", &output);  // \l is invalid
-  EXPECT_EQ("\a?\v\t", output);
-  Tokenizer::ParseString("'", &output);
-  EXPECT_EQ("", output);
-  Tokenizer::ParseString("'\\", &output);
-  EXPECT_EQ("\\", output);
+  Tokenizer::ParseString( "\"\\a\\l\\v\\t", &output );  // \l is invalid
+  EXPECT_EQ( "\a?\v\t", output );
+  Tokenizer::ParseString( "'", &output );
+  EXPECT_EQ( "", output );
+  Tokenizer::ParseString( "'\\", &output );
+  EXPECT_EQ( "\\", output );
 
   // Test invalid strings that will never be tokenized as strings.
 #ifdef GTEST_HAS_DEATH_TEST  // death tests do not work on Windows yet
-  EXPECT_DEBUG_DEATH(Tokenizer::ParseString("", &output),
-    "passed text that could not have been tokenized as a string");
+  EXPECT_DEBUG_DEATH( Tokenizer::ParseString( "", &output ),
+                      "passed text that could not have been tokenized as a string" );
 #endif  // GTEST_HAS_DEATH_TEST
 }
 
-TEST_F(TokenizerTest, ParseStringAppend) {
+TEST_F( TokenizerTest, ParseStringAppend )
+{
   // Check that ParseString and ParseStringAppend differ.
-  string output("stuff+");
-  Tokenizer::ParseStringAppend("'hello'", &output);
-  EXPECT_EQ("stuff+hello", output);
-  Tokenizer::ParseString("'hello'", &output);
-  EXPECT_EQ("hello", output);
+  string output( "stuff+" );
+  Tokenizer::ParseStringAppend( "'hello'", &output );
+  EXPECT_EQ( "stuff+hello", output );
+  Tokenizer::ParseString( "'hello'", &output );
+  EXPECT_EQ( "hello", output );
 }
 
 // -------------------------------------------------------------------
 
 // Each case parses some input text, ignoring the tokens produced, and
 // checks that the error output matches what is expected.
-struct ErrorCase {
+struct ErrorCase
+{
   string input;
   bool recoverable;  // True if the tokenizer should be able to recover and
                      // parse more tokens after seeing this error.  Cases
@@ -620,121 +670,126 @@ struct ErrorCase {
   const char* errors;
 };
 
-inline ostream& operator<<(ostream& out,
-                           const ErrorCase& test_case) {
-  return out << CEscape(test_case.input);
+inline ostream& operator<<( ostream& out,
+                            const ErrorCase& test_case )
+{
+  return out << CEscape( test_case.input );
 }
 
 ErrorCase kErrorCases[] = {
-  // String errors.
-  { "'\\l' foo", true,
-    "0:2: Invalid escape sequence in string literal.\n" },
-  { "'\\x' foo", true,
-    "0:3: Expected hex digits for escape sequence.\n" },
-  { "'foo", false,
-    "0:4: String literals cannot cross line boundaries.\n" },
-  { "'bar\nfoo", true,
-    "0:4: String literals cannot cross line boundaries.\n" },
+    // String errors.
+    { "'\\l' foo", true,
+      "0:2: Invalid escape sequence in string literal.\n" },
+    { "'\\x' foo", true,
+      "0:3: Expected hex digits for escape sequence.\n" },
+    { "'foo", false,
+      "0:4: String literals cannot cross line boundaries.\n" },
+    { "'bar\nfoo", true,
+      "0:4: String literals cannot cross line boundaries.\n" },
 
-  // Integer errors.
-  { "123foo", true,
-    "0:3: Need space between number and identifier.\n" },
+    // Integer errors.
+    { "123foo", true,
+      "0:3: Need space between number and identifier.\n" },
 
-  // Hex/octal errors.
-  { "0x foo", true,
-    "0:2: \"0x\" must be followed by hex digits.\n" },
-  { "0541823 foo", true,
-    "0:4: Numbers starting with leading zero must be in octal.\n" },
-  { "0x123z foo", true,
-    "0:5: Need space between number and identifier.\n" },
-  { "0x123.4 foo", true,
-    "0:5: Hex and octal numbers must be integers.\n" },
-  { "0123.4 foo", true,
-    "0:4: Hex and octal numbers must be integers.\n" },
+    // Hex/octal errors.
+    { "0x foo", true,
+      "0:2: \"0x\" must be followed by hex digits.\n" },
+    { "0541823 foo", true,
+      "0:4: Numbers starting with leading zero must be in octal.\n" },
+    { "0x123z foo", true,
+      "0:5: Need space between number and identifier.\n" },
+    { "0x123.4 foo", true,
+      "0:5: Hex and octal numbers must be integers.\n" },
+    { "0123.4 foo", true,
+      "0:4: Hex and octal numbers must be integers.\n" },
 
-  // Float errors.
-  { "1e foo", true,
-    "0:2: \"e\" must be followed by exponent.\n" },
-  { "1e- foo", true,
-    "0:3: \"e\" must be followed by exponent.\n" },
-  { "1.2.3 foo", true,
-    "0:3: Already saw decimal point or exponent; can't have another one.\n" },
-  { "1e2.3 foo", true,
-    "0:3: Already saw decimal point or exponent; can't have another one.\n" },
-  { "a.1 foo", true,
-    "0:1: Need space between identifier and decimal point.\n" },
-  // allow_f_after_float not enabled, so this should be an error.
-  { "1.0f foo", true,
-    "0:3: Need space between number and identifier.\n" },
+    // Float errors.
+    { "1e foo", true,
+      "0:2: \"e\" must be followed by exponent.\n" },
+    { "1e- foo", true,
+      "0:3: \"e\" must be followed by exponent.\n" },
+    { "1.2.3 foo", true,
+      "0:3: Already saw decimal point or exponent; can't have another one.\n" },
+    { "1e2.3 foo", true,
+      "0:3: Already saw decimal point or exponent; can't have another one.\n" },
+    { "a.1 foo", true,
+      "0:1: Need space between identifier and decimal point.\n" },
+    // allow_f_after_float not enabled, so this should be an error.
+    { "1.0f foo", true,
+      "0:3: Need space between number and identifier.\n" },
 
-  // Block comment errors.
-  { "/*", false,
-    "0:2: End-of-file inside block comment.\n"
-    "0:0:   Comment started here.\n"},
-  { "/*/*/ foo", true,
-    "0:3: \"/*\" inside block comment.  Block comments cannot be nested.\n"},
+    // Block comment errors.
+    { "/*", false,
+      "0:2: End-of-file inside block comment.\n"
+      "0:0:   Comment started here.\n" },
+    { "/*/*/ foo", true,
+      "0:3: \"/*\" inside block comment.  Block comments cannot be nested.\n" },
 
-  // Control characters.  Multiple consecutive control characters should only
-  // produce one error.
-  { "\b foo", true,
-    "0:0: Invalid control characters encountered in text.\n" },
-  { "\b\b foo", true,
-    "0:0: Invalid control characters encountered in text.\n" },
+    // Control characters.  Multiple consecutive control characters should only
+    // produce one error.
+    { "\b foo", true,
+      "0:0: Invalid control characters encountered in text.\n" },
+    { "\b\b foo", true,
+      "0:0: Invalid control characters encountered in text.\n" },
 
-  // Check that control characters at end of input don't result in an
-  // infinite loop.
-  { "\b", false,
-    "0:0: Invalid control characters encountered in text.\n" },
+    // Check that control characters at end of input don't result in an
+    // infinite loop.
+    { "\b", false,
+      "0:0: Invalid control characters encountered in text.\n" },
 
-  // Check recovery from '\0'.  We have to explicitly specify the length of
-  // these strings because otherwise the string constructor will just call
-  // strlen() which will see the first '\0' and think that is the end of the
-  // string.
-  { string("\0foo", 4), true,
-    "0:0: Invalid control characters encountered in text.\n" },
-  { string("\0\0foo", 5), true,
-    "0:0: Invalid control characters encountered in text.\n" },
+    // Check recovery from '\0'.  We have to explicitly specify the length of
+    // these strings because otherwise the string constructor will just call
+    // strlen() which will see the first '\0' and think that is the end of the
+    // string.
+    { string( "\0foo", 4 ), true,
+      "0:0: Invalid control characters encountered in text.\n" },
+    { string( "\0\0foo", 5 ), true,
+      "0:0: Invalid control characters encountered in text.\n" },
 };
 
-TEST_2D(TokenizerTest, Errors, kErrorCases, kBlockSizes) {
+TEST_2D( TokenizerTest, Errors, kErrorCases, kBlockSizes )
+{
   // Set up the tokenizer.
-  TestInputStream input(kErrorCases_case.input.data(),
-                        kErrorCases_case.input.size(),
-                        kBlockSizes_case);
+  TestInputStream input( kErrorCases_case.input.data(),
+                         kErrorCases_case.input.size(),
+                         kBlockSizes_case );
   TestErrorCollector error_collector;
-  Tokenizer tokenizer(&input, &error_collector);
+  Tokenizer tokenizer( &input, &error_collector );
 
   // Ignore all input, except remember if the last token was "foo".
   bool last_was_foo = false;
-  while (tokenizer.Next()) {
+  while ( tokenizer.Next() )
+  {
     last_was_foo = tokenizer.current().text == "foo";
   }
 
   // Check that the errors match what was expected.
-  EXPECT_EQ(error_collector.text_, kErrorCases_case.errors);
+  EXPECT_EQ( error_collector.text_, kErrorCases_case.errors );
 
   // If the error was recoverable, make sure we saw "foo" after it.
-  if (kErrorCases_case.recoverable) {
-    EXPECT_TRUE(last_was_foo);
+  if ( kErrorCases_case.recoverable )
+  {
+    EXPECT_TRUE( last_was_foo );
   }
 }
 
 // -------------------------------------------------------------------
 
-TEST_1D(TokenizerTest, BackUpOnDestruction, kBlockSizes) {
+TEST_1D( TokenizerTest, BackUpOnDestruction, kBlockSizes )
+{
   string text = "foo bar";
-  TestInputStream input(text.data(), text.size(), kBlockSizes_case);
+  TestInputStream input( text.data(), text.size(), kBlockSizes_case );
 
   // Create a tokenizer, read one token, then destroy it.
   {
     TestErrorCollector error_collector;
-    Tokenizer tokenizer(&input, &error_collector);
+    Tokenizer tokenizer( &input, &error_collector );
 
     tokenizer.Next();
   }
 
   // Only "foo" should have been read.
-  EXPECT_EQ(strlen("foo"), input.ByteCount());
+  EXPECT_EQ( strlen( "foo" ), input.ByteCount() );
 }
 
 }  // namespace

@@ -40,41 +40,51 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/wire_format.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 UnknownFieldSet::UnknownFieldSet()
-  : fields_(NULL) {}
+    : fields_( NULL ) {}
 
-UnknownFieldSet::~UnknownFieldSet() {
+UnknownFieldSet::~UnknownFieldSet()
+{
   Clear();
   delete fields_;
 }
 
-void UnknownFieldSet::ClearFallback() {
-  GOOGLE_DCHECK(fields_ != NULL);
-  for (int i = 0; i < fields_->size(); i++) {
-    (*fields_)[i].Delete();
+void UnknownFieldSet::ClearFallback()
+{
+  GOOGLE_DCHECK( fields_ != NULL );
+  for ( int i = 0; i < fields_->size(); i++ )
+  {
+    ( *fields_ )[i].Delete();
   }
   fields_->clear();
 }
 
-void UnknownFieldSet::MergeFrom(const UnknownFieldSet& other) {
-  for (int i = 0; i < other.field_count(); i++) {
-    AddField(other.field(i));
+void UnknownFieldSet::MergeFrom( const UnknownFieldSet& other )
+{
+  for ( int i = 0; i < other.field_count(); i++ )
+  {
+    AddField( other.field( i ) );
   }
 }
 
-int UnknownFieldSet::SpaceUsedExcludingSelf() const {
-  if (fields_ == NULL) return 0;
+int UnknownFieldSet::SpaceUsedExcludingSelf() const
+{
+  if ( fields_ == NULL ) return 0;
 
-  int total_size = sizeof(*fields_) + sizeof(UnknownField) * fields_->size();
-  for (int i = 0; i < fields_->size(); i++) {
-    const UnknownField& field = (*fields_)[i];
-    switch (field.type()) {
+  int total_size = sizeof( *fields_ ) + sizeof( UnknownField ) * fields_->size();
+  for ( int i = 0; i < fields_->size(); i++ )
+  {
+    const UnknownField& field = ( *fields_ )[i];
+    switch ( field.type() )
+    {
       case UnknownField::TYPE_LENGTH_DELIMITED:
-        total_size += sizeof(*field.length_delimited_) +
-          internal::StringSpaceUsedExcludingSelf(*field.length_delimited_);
+        total_size += sizeof( *field.length_delimited_ ) +
+                      internal::StringSpaceUsedExcludingSelf( *field.length_delimited_ );
         break;
       case UnknownField::TYPE_GROUP:
         total_size += field.group_->SpaceUsed();
@@ -86,93 +96,108 @@ int UnknownFieldSet::SpaceUsedExcludingSelf() const {
   return total_size;
 }
 
-int UnknownFieldSet::SpaceUsed() const {
-  return sizeof(*this) + SpaceUsedExcludingSelf();
+int UnknownFieldSet::SpaceUsed() const
+{
+  return sizeof( *this ) + SpaceUsedExcludingSelf();
 }
 
-void UnknownFieldSet::AddVarint(int number, uint64 value) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
+void UnknownFieldSet::AddVarint( int number, uint64 value )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
   UnknownField field;
   field.number_ = number;
   field.type_ = UnknownField::TYPE_VARINT;
   field.varint_ = value;
-  fields_->push_back(field);
+  fields_->push_back( field );
 }
 
-void UnknownFieldSet::AddFixed32(int number, uint32 value) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
+void UnknownFieldSet::AddFixed32( int number, uint32 value )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
   UnknownField field;
   field.number_ = number;
   field.type_ = UnknownField::TYPE_FIXED32;
   field.fixed32_ = value;
-  fields_->push_back(field);
+  fields_->push_back( field );
 }
 
-void UnknownFieldSet::AddFixed64(int number, uint64 value) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
+void UnknownFieldSet::AddFixed64( int number, uint64 value )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
   UnknownField field;
   field.number_ = number;
   field.type_ = UnknownField::TYPE_FIXED64;
   field.fixed64_ = value;
-  fields_->push_back(field);
+  fields_->push_back( field );
 }
 
-string* UnknownFieldSet::AddLengthDelimited(int number) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
+string* UnknownFieldSet::AddLengthDelimited( int number )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
   UnknownField field;
   field.number_ = number;
   field.type_ = UnknownField::TYPE_LENGTH_DELIMITED;
   field.length_delimited_ = new string;
-  fields_->push_back(field);
+  fields_->push_back( field );
   return field.length_delimited_;
 }
 
-UnknownFieldSet* UnknownFieldSet::AddGroup(int number) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
+UnknownFieldSet* UnknownFieldSet::AddGroup( int number )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
   UnknownField field;
   field.number_ = number;
   field.type_ = UnknownField::TYPE_GROUP;
   field.group_ = new UnknownFieldSet;
-  fields_->push_back(field);
+  fields_->push_back( field );
   return field.group_;
 }
 
-void UnknownFieldSet::AddField(const UnknownField& field) {
-  if (fields_ == NULL) fields_ = new vector<UnknownField>;
-  fields_->push_back(field);
+void UnknownFieldSet::AddField( const UnknownField& field )
+{
+  if ( fields_ == NULL ) fields_ = new vector< UnknownField >;
+  fields_->push_back( field );
   fields_->back().DeepCopy();
 }
 
-bool UnknownFieldSet::MergeFromCodedStream(io::CodedInputStream* input) {
-
+bool UnknownFieldSet::MergeFromCodedStream( io::CodedInputStream* input )
+{
   UnknownFieldSet other;
-  if (internal::WireFormat::SkipMessage(input, &other) &&
-                                  input->ConsumedEntireMessage()) {
-    MergeFrom(other);
+  if ( internal::WireFormat::SkipMessage( input, &other ) &&
+       input->ConsumedEntireMessage() )
+  {
+    MergeFrom( other );
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
 
-bool UnknownFieldSet::ParseFromCodedStream(io::CodedInputStream* input) {
+bool UnknownFieldSet::ParseFromCodedStream( io::CodedInputStream* input )
+{
   Clear();
-  return MergeFromCodedStream(input);
+  return MergeFromCodedStream( input );
 }
 
-bool UnknownFieldSet::ParseFromZeroCopyStream(io::ZeroCopyInputStream* input) {
-  io::CodedInputStream coded_input(input);
-  return ParseFromCodedStream(&coded_input) &&
-    coded_input.ConsumedEntireMessage();
+bool UnknownFieldSet::ParseFromZeroCopyStream( io::ZeroCopyInputStream* input )
+{
+  io::CodedInputStream coded_input( input );
+  return ParseFromCodedStream( &coded_input ) &&
+         coded_input.ConsumedEntireMessage();
 }
 
-bool UnknownFieldSet::ParseFromArray(const void* data, int size) {
-  io::ArrayInputStream input(data, size);
-  return ParseFromZeroCopyStream(&input);
+bool UnknownFieldSet::ParseFromArray( const void* data, int size )
+{
+  io::ArrayInputStream input( data, size );
+  return ParseFromZeroCopyStream( &input );
 }
 
-void UnknownField::Delete() {
-  switch (type()) {
+void UnknownField::Delete()
+{
+  switch ( type() )
+  {
     case UnknownField::TYPE_LENGTH_DELIMITED:
       delete length_delimited_;
       break;
@@ -184,14 +209,17 @@ void UnknownField::Delete() {
   }
 }
 
-void UnknownField::DeepCopy() {
-  switch (type()) {
+void UnknownField::DeepCopy()
+{
+  switch ( type() )
+  {
     case UnknownField::TYPE_LENGTH_DELIMITED:
-      length_delimited_ = new string(*length_delimited_);
+      length_delimited_ = new string( *length_delimited_ );
       break;
-    case UnknownField::TYPE_GROUP: {
+    case UnknownField::TYPE_GROUP:
+    {
       UnknownFieldSet* group = new UnknownFieldSet;
-      group->MergeFrom(*group_);
+      group->MergeFrom( *group_ );
       group_ = group;
       break;
     }

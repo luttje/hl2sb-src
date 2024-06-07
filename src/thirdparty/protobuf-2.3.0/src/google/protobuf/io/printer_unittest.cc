@@ -41,218 +41,240 @@
 #include <google/protobuf/testing/googletest.h>
 #include <gtest/gtest.h>
 
-namespace google {
-namespace protobuf {
-namespace io {
-namespace {
+namespace google
+{
+namespace protobuf
+{
+namespace io
+{
+namespace
+{
 
 // Each test repeats over several block sizes in order to test both cases
 // where particular writes cross a buffer boundary and cases where they do
 // not.
 
-TEST(Printer, EmptyPrinter) {
+TEST( Printer, EmptyPrinter )
+{
   char buffer[8192];
   const int block_size = 100;
-  ArrayOutputStream output(buffer, GOOGLE_ARRAYSIZE(buffer), block_size);
-  Printer printer(&output, '\0');
-  EXPECT_TRUE(!printer.failed());
+  ArrayOutputStream output( buffer, GOOGLE_ARRAYSIZE( buffer ), block_size );
+  Printer printer( &output, '\0' );
+  EXPECT_TRUE( !printer.failed() );
 }
 
-TEST(Printer, BasicPrinting) {
+TEST( Printer, BasicPrinting )
+{
   char buffer[8192];
 
-  for (int block_size = 1; block_size < 512; block_size *= 2) {
-    ArrayOutputStream output(buffer, sizeof(buffer), block_size);
-
-    {
-      Printer printer(&output, '\0');
-
-      printer.Print("Hello World!");
-      printer.Print("  This is the same line.\n");
-      printer.Print("But this is a new one.\nAnd this is another one.");
-
-      EXPECT_FALSE(printer.failed());
-    }
-
-    buffer[output.ByteCount()] = '\0';
-
-    EXPECT_STREQ("Hello World!  This is the same line.\n"
-                 "But this is a new one.\n"
-                 "And this is another one.",
-                 buffer);
-  }
-}
-
-TEST(Printer, WriteRaw) {
-  char buffer[8192];
-
-  for (int block_size = 1; block_size < 512; block_size *= 2) {
-    ArrayOutputStream output(buffer, sizeof(buffer), block_size);
-
-    {
-      string string_obj = "From an object\n";
-      Printer printer(&output, '$');
-      printer.WriteRaw("Hello World!", 12);
-      printer.PrintRaw("  This is the same line.\n");
-      printer.PrintRaw("But this is a new one.\nAnd this is another one.");
-      printer.WriteRaw("\n", 1);
-      printer.PrintRaw(string_obj);
-      EXPECT_FALSE(printer.failed());
-    }
-
-    buffer[output.ByteCount()] = '\0';
-
-    EXPECT_STREQ("Hello World!  This is the same line.\n"
-                 "But this is a new one.\n"
-                 "And this is another one."
-                 "\n"
-                 "From an object\n",
-                 buffer);
-  }
-}
-
-TEST(Printer, VariableSubstitution) {
-  char buffer[8192];
-
-  for (int block_size = 1; block_size < 512; block_size *= 2) {
-    ArrayOutputStream output(buffer, sizeof(buffer), block_size);
-
-    {
-      Printer printer(&output, '$');
-      map<string, string> vars;
-
-      vars["foo"] = "World";
-      vars["bar"] = "$foo$";
-      vars["abcdefg"] = "1234";
-
-      printer.Print(vars, "Hello $foo$!\nbar = $bar$\n");
-      printer.PrintRaw("RawBit\n");
-      printer.Print(vars, "$abcdefg$\nA literal dollar sign:  $$");
-
-      vars["foo"] = "blah";
-      printer.Print(vars, "\nNow foo = $foo$.");
-
-      EXPECT_FALSE(printer.failed());
-    }
-
-    buffer[output.ByteCount()] = '\0';
-
-    EXPECT_STREQ("Hello World!\n"
-                 "bar = $foo$\n"
-                 "RawBit\n"
-                 "1234\n"
-                 "A literal dollar sign:  $\n"
-                 "Now foo = blah.",
-                 buffer);
-  }
-}
-
-TEST(Printer, InlineVariableSubstitution) {
-  char buffer[8192];
-
-  ArrayOutputStream output(buffer, sizeof(buffer));
-
+  for ( int block_size = 1; block_size < 512; block_size *= 2 )
   {
-    Printer printer(&output, '$');
-    printer.Print("Hello $foo$!\n", "foo", "World");
-    printer.PrintRaw("RawBit\n");
-    printer.Print("$foo$ $bar$\n", "foo", "one", "bar", "two");
-    EXPECT_FALSE(printer.failed());
-  }
-
-  buffer[output.ByteCount()] = '\0';
-
-  EXPECT_STREQ("Hello World!\n"
-               "RawBit\n"
-               "one two\n",
-               buffer);
-}
-
-TEST(Printer, Indenting) {
-  char buffer[8192];
-
-  for (int block_size = 1; block_size < 512; block_size *= 2) {
-    ArrayOutputStream output(buffer, sizeof(buffer), block_size);
+    ArrayOutputStream output( buffer, sizeof( buffer ), block_size );
 
     {
-      Printer printer(&output, '$');
-      map<string, string> vars;
+      Printer printer( &output, '\0' );
 
-      vars["newline"] = "\n";
+      printer.Print( "Hello World!" );
+      printer.Print( "  This is the same line.\n" );
+      printer.Print( "But this is a new one.\nAnd this is another one." );
 
-      printer.Print("This is not indented.\n");
-      printer.Indent();
-      printer.Print("This is indented\nAnd so is this\n");
-      printer.Outdent();
-      printer.Print("But this is not.");
-      printer.Indent();
-      printer.Print("  And this is still the same line.\n"
-                    "But this is indented.\n");
-      printer.PrintRaw("RawBit has indent at start\n");
-      printer.PrintRaw("but not after a raw newline\n");
-      printer.Print(vars, "Note that a newline in a variable will break "
-                    "indenting, as we see$newline$here.\n");
-      printer.Indent();
-      printer.Print("And this");
-      printer.Outdent();
-      printer.Outdent();
-      printer.Print(" is double-indented\nBack to normal.");
-
-      EXPECT_FALSE(printer.failed());
+      EXPECT_FALSE( printer.failed() );
     }
 
     buffer[output.ByteCount()] = '\0';
 
     EXPECT_STREQ(
-      "This is not indented.\n"
-      "  This is indented\n"
-      "  And so is this\n"
-      "But this is not.  And this is still the same line.\n"
-      "  But this is indented.\n"
-      "  RawBit has indent at start\n"
-      "but not after a raw newline\n"
-      "Note that a newline in a variable will break indenting, as we see\n"
-      "here.\n"
-      "    And this is double-indented\n"
-      "Back to normal.",
-      buffer);
+        "Hello World!  This is the same line.\n"
+        "But this is a new one.\n"
+        "And this is another one.",
+        buffer );
+  }
+}
+
+TEST( Printer, WriteRaw )
+{
+  char buffer[8192];
+
+  for ( int block_size = 1; block_size < 512; block_size *= 2 )
+  {
+    ArrayOutputStream output( buffer, sizeof( buffer ), block_size );
+
+    {
+      string string_obj = "From an object\n";
+      Printer printer( &output, '$' );
+      printer.WriteRaw( "Hello World!", 12 );
+      printer.PrintRaw( "  This is the same line.\n" );
+      printer.PrintRaw( "But this is a new one.\nAnd this is another one." );
+      printer.WriteRaw( "\n", 1 );
+      printer.PrintRaw( string_obj );
+      EXPECT_FALSE( printer.failed() );
+    }
+
+    buffer[output.ByteCount()] = '\0';
+
+    EXPECT_STREQ(
+        "Hello World!  This is the same line.\n"
+        "But this is a new one.\n"
+        "And this is another one."
+        "\n"
+        "From an object\n",
+        buffer );
+  }
+}
+
+TEST( Printer, VariableSubstitution )
+{
+  char buffer[8192];
+
+  for ( int block_size = 1; block_size < 512; block_size *= 2 )
+  {
+    ArrayOutputStream output( buffer, sizeof( buffer ), block_size );
+
+    {
+      Printer printer( &output, '$' );
+      map< string, string > vars;
+
+      vars["foo"] = "World";
+      vars["bar"] = "$foo$";
+      vars["abcdefg"] = "1234";
+
+      printer.Print( vars, "Hello $foo$!\nbar = $bar$\n" );
+      printer.PrintRaw( "RawBit\n" );
+      printer.Print( vars, "$abcdefg$\nA literal dollar sign:  $$" );
+
+      vars["foo"] = "blah";
+      printer.Print( vars, "\nNow foo = $foo$." );
+
+      EXPECT_FALSE( printer.failed() );
+    }
+
+    buffer[output.ByteCount()] = '\0';
+
+    EXPECT_STREQ(
+        "Hello World!\n"
+        "bar = $foo$\n"
+        "RawBit\n"
+        "1234\n"
+        "A literal dollar sign:  $\n"
+        "Now foo = blah.",
+        buffer );
+  }
+}
+
+TEST( Printer, InlineVariableSubstitution )
+{
+  char buffer[8192];
+
+  ArrayOutputStream output( buffer, sizeof( buffer ) );
+
+  {
+    Printer printer( &output, '$' );
+    printer.Print( "Hello $foo$!\n", "foo", "World" );
+    printer.PrintRaw( "RawBit\n" );
+    printer.Print( "$foo$ $bar$\n", "foo", "one", "bar", "two" );
+    EXPECT_FALSE( printer.failed() );
+  }
+
+  buffer[output.ByteCount()] = '\0';
+
+  EXPECT_STREQ(
+      "Hello World!\n"
+      "RawBit\n"
+      "one two\n",
+      buffer );
+}
+
+TEST( Printer, Indenting )
+{
+  char buffer[8192];
+
+  for ( int block_size = 1; block_size < 512; block_size *= 2 )
+  {
+    ArrayOutputStream output( buffer, sizeof( buffer ), block_size );
+
+    {
+      Printer printer( &output, '$' );
+      map< string, string > vars;
+
+      vars["newline"] = "\n";
+
+      printer.Print( "This is not indented.\n" );
+      printer.Indent();
+      printer.Print( "This is indented\nAnd so is this\n" );
+      printer.Outdent();
+      printer.Print( "But this is not." );
+      printer.Indent();
+      printer.Print(
+          "  And this is still the same line.\n"
+          "But this is indented.\n" );
+      printer.PrintRaw( "RawBit has indent at start\n" );
+      printer.PrintRaw( "but not after a raw newline\n" );
+      printer.Print( vars,
+                     "Note that a newline in a variable will break "
+                     "indenting, as we see$newline$here.\n" );
+      printer.Indent();
+      printer.Print( "And this" );
+      printer.Outdent();
+      printer.Outdent();
+      printer.Print( " is double-indented\nBack to normal." );
+
+      EXPECT_FALSE( printer.failed() );
+    }
+
+    buffer[output.ByteCount()] = '\0';
+
+    EXPECT_STREQ(
+        "This is not indented.\n"
+        "  This is indented\n"
+        "  And so is this\n"
+        "But this is not.  And this is still the same line.\n"
+        "  But this is indented.\n"
+        "  RawBit has indent at start\n"
+        "but not after a raw newline\n"
+        "Note that a newline in a variable will break indenting, as we see\n"
+        "here.\n"
+        "    And this is double-indented\n"
+        "Back to normal.",
+        buffer );
   }
 }
 
 // Death tests do not work on Windows as of yet.
 #ifdef GTEST_HAS_DEATH_TEST
-TEST(Printer, Death) {
+TEST( Printer, Death )
+{
   char buffer[8192];
 
-  ArrayOutputStream output(buffer, sizeof(buffer));
-  Printer printer(&output, '$');
+  ArrayOutputStream output( buffer, sizeof( buffer ) );
+  Printer printer( &output, '$' );
 
-  EXPECT_DEBUG_DEATH(printer.Print("$nosuchvar$"), "Undefined variable");
-  EXPECT_DEBUG_DEATH(printer.Print("$unclosed"), "Unclosed variable name");
-  EXPECT_DEBUG_DEATH(printer.Outdent(), "without matching Indent");
+  EXPECT_DEBUG_DEATH( printer.Print( "$nosuchvar$" ), "Undefined variable" );
+  EXPECT_DEBUG_DEATH( printer.Print( "$unclosed" ), "Unclosed variable name" );
+  EXPECT_DEBUG_DEATH( printer.Outdent(), "without matching Indent" );
 }
 #endif  // GTEST_HAS_DEATH_TEST
 
-TEST(Printer, WriteFailure) {
+TEST( Printer, WriteFailure )
+{
   char buffer[16];
 
-  ArrayOutputStream output(buffer, sizeof(buffer));
-  Printer printer(&output, '$');
+  ArrayOutputStream output( buffer, sizeof( buffer ) );
+  Printer printer( &output, '$' );
 
   // Print 16 bytes to fill the buffer exactly (should not fail).
-  printer.Print("0123456789abcdef");
-  EXPECT_FALSE(printer.failed());
+  printer.Print( "0123456789abcdef" );
+  EXPECT_FALSE( printer.failed() );
 
   // Try to print one more byte (should fail).
-  printer.Print(" ");
-  EXPECT_TRUE(printer.failed());
+  printer.Print( " " );
+  EXPECT_TRUE( printer.failed() );
 
   // Should not crash
-  printer.Print("blah");
-  EXPECT_TRUE(printer.failed());
+  printer.Print( "blah" );
+  EXPECT_TRUE( printer.failed() );
 
   // Buffer should contain the first 16 bytes written.
-  EXPECT_EQ("0123456789abcdef", string(buffer, sizeof(buffer)));
+  EXPECT_EQ( "0123456789abcdef", string( buffer, sizeof( buffer ) ) );
 }
 
 }  // namespace

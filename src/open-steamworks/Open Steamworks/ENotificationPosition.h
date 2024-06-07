@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -25,11 +25,10 @@
 //-----------------------------------------------------------------------------
 typedef enum ENotificationPosition
 {
-	k_EPositionTopLeft = 0,
-	k_EPositionTopRight = 1,
-	k_EPositionBottomLeft = 2,
-	k_EPositionBottomRight = 3,
+  k_EPositionTopLeft = 0,
+  k_EPositionTopRight = 1,
+  k_EPositionBottomLeft = 2,
+  k_EPositionBottomRight = 3,
 } ENotificationPosition;
 
-
-#endif // ENOTIFICATIONPOSITION_H
+#endif  // ENOTIFICATIONPOSITION_H

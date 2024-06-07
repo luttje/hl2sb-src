@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -15,26 +15,19 @@
 /* type for Vector functions */
 typedef Color lua_Color;
 
-
-
 /*
 ** access functions (stack -> C)
 */
 
-LUA_API lua_Color      (lua_tocolor) (lua_State *L, int idx);
-
+LUA_API lua_Color( lua_tocolor )( lua_State *L, int idx );
 
 /*
 ** push functions (C -> stack)
 */
-LUA_API void  (lua_pushcolor) (lua_State *L, lua_Color clr);
+LUA_API void( lua_pushcolor )( lua_State *L, lua_Color clr );
 
+LUALIB_API lua_Color( luaL_checkcolor )( lua_State *L, int narg );
 
+int luaopen_Color( lua_State *L );
 
-LUALIB_API lua_Color (luaL_checkcolor) (lua_State *L, int narg);
-
-
-int luaopen_Color(lua_State *L);
-
-
-#endif // LCOLOR_H
+#endif  // LCOLOR_H

@@ -40,56 +40,80 @@
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/stubs/substitute.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace java {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace java
+{
 
 const char kThickSeparator[] =
-  "// ===================================================================\n";
+    "// ===================================================================\n";
 const char kThinSeparator[] =
-  "// -------------------------------------------------------------------\n";
+    "// -------------------------------------------------------------------\n";
 
-namespace {
+namespace
+{
 
 const char* kDefaultPackage = "";
 
-const string& FieldName(const FieldDescriptor* field) {
+const string& FieldName( const FieldDescriptor* field )
+{
   // Groups are hacky:  The name of the field is just the lower-cased name
   // of the group type.  In Java, though, we would like to retain the original
   // capitalization of the type name.
-  if (GetType(field) == FieldDescriptor::TYPE_GROUP) {
+  if ( GetType( field ) == FieldDescriptor::TYPE_GROUP )
+  {
     return field->message_type()->name();
-  } else {
+  }
+  else
+  {
     return field->name();
   }
 }
 
-string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
+string UnderscoresToCamelCaseImpl( const string& input, bool cap_next_letter )
+{
   string result;
   // Note:  I distrust ctype.h due to locales.
-  for (int i = 0; i < input.size(); i++) {
-    if ('a' <= input[i] && input[i] <= 'z') {
-      if (cap_next_letter) {
-        result += input[i] + ('A' - 'a');
-      } else {
+  for ( int i = 0; i < input.size(); i++ )
+  {
+    if ( 'a' <= input[i] && input[i] <= 'z' )
+    {
+      if ( cap_next_letter )
+      {
+        result += input[i] + ( 'A' - 'a' );
+      }
+      else
+      {
         result += input[i];
       }
       cap_next_letter = false;
-    } else if ('A' <= input[i] && input[i] <= 'Z') {
-      if (i == 0 && !cap_next_letter) {
+    }
+    else if ( 'A' <= input[i] && input[i] <= 'Z' )
+    {
+      if ( i == 0 && !cap_next_letter )
+      {
         // Force first letter to lower-case unless explicitly told to
         // capitalize it.
-        result += input[i] + ('a' - 'A');
-      } else {
+        result += input[i] + ( 'a' - 'A' );
+      }
+      else
+      {
         // Capital letters after the first are left as-is.
         result += input[i];
       }
       cap_next_letter = false;
-    } else if ('0' <= input[i] && input[i] <= '9') {
+    }
+    else if ( '0' <= input[i] && input[i] <= '9' )
+    {
       result += input[i];
       cap_next_letter = true;
-    } else {
+    }
+    else
+    {
       cap_next_letter = true;
     }
   }
@@ -98,93 +122,125 @@ string UnderscoresToCamelCaseImpl(const string& input, bool cap_next_letter) {
 
 }  // namespace
 
-string UnderscoresToCamelCase(const FieldDescriptor* field) {
-  return UnderscoresToCamelCaseImpl(FieldName(field), false);
+string UnderscoresToCamelCase( const FieldDescriptor* field )
+{
+  return UnderscoresToCamelCaseImpl( FieldName( field ), false );
 }
 
-string UnderscoresToCapitalizedCamelCase(const FieldDescriptor* field) {
-  return UnderscoresToCamelCaseImpl(FieldName(field), true);
+string UnderscoresToCapitalizedCamelCase( const FieldDescriptor* field )
+{
+  return UnderscoresToCamelCaseImpl( FieldName( field ), true );
 }
 
-string UnderscoresToCamelCase(const MethodDescriptor* method) {
-  return UnderscoresToCamelCaseImpl(method->name(), false);
+string UnderscoresToCamelCase( const MethodDescriptor* method )
+{
+  return UnderscoresToCamelCaseImpl( method->name(), false );
 }
 
-string StripProto(const string& filename) {
-  if (HasSuffixString(filename, ".protodevel")) {
-    return StripSuffixString(filename, ".protodevel");
-  } else {
-    return StripSuffixString(filename, ".proto");
+string StripProto( const string& filename )
+{
+  if ( HasSuffixString( filename, ".protodevel" ) )
+  {
+    return StripSuffixString( filename, ".protodevel" );
+  }
+  else
+  {
+    return StripSuffixString( filename, ".proto" );
   }
 }
 
-string FileClassName(const FileDescriptor* file) {
-  if (file->options().has_java_outer_classname()) {
+string FileClassName( const FileDescriptor* file )
+{
+  if ( file->options().has_java_outer_classname() )
+  {
     return file->options().java_outer_classname();
-  } else {
+  }
+  else
+  {
     string basename;
-    string::size_type last_slash = file->name().find_last_of('/');
-    if (last_slash == string::npos) {
+    string::size_type last_slash = file->name().find_last_of( '/' );
+    if ( last_slash == string::npos )
+    {
       basename = file->name();
-    } else {
-      basename = file->name().substr(last_slash + 1);
     }
-    return UnderscoresToCamelCaseImpl(StripProto(basename), true);
+    else
+    {
+      basename = file->name().substr( last_slash + 1 );
+    }
+    return UnderscoresToCamelCaseImpl( StripProto( basename ), true );
   }
 }
 
-string FileJavaPackage(const FileDescriptor* file) {
-  if (file->options().has_java_package()) {
+string FileJavaPackage( const FileDescriptor* file )
+{
+  if ( file->options().has_java_package() )
+  {
     return file->options().java_package();
-  } else {
+  }
+  else
+  {
     string result = kDefaultPackage;
-    if (!file->package().empty()) {
-      if (!result.empty()) result += '.';
+    if ( !file->package().empty() )
+    {
+      if ( !result.empty() ) result += '.';
       result += file->package();
     }
     return result;
   }
 }
 
-string ToJavaName(const string& full_name, const FileDescriptor* file) {
+string ToJavaName( const string& full_name, const FileDescriptor* file )
+{
   string result;
-  if (file->options().java_multiple_files()) {
-    result = FileJavaPackage(file);
-  } else {
-    result = ClassName(file);
+  if ( file->options().java_multiple_files() )
+  {
+    result = FileJavaPackage( file );
   }
-  if (!result.empty()) {
+  else
+  {
+    result = ClassName( file );
+  }
+  if ( !result.empty() )
+  {
     result += '.';
   }
-  if (file->package().empty()) {
+  if ( file->package().empty() )
+  {
     result += full_name;
-  } else {
+  }
+  else
+  {
     // Strip the proto package from full_name since we've replaced it with
     // the Java package.
-    result += full_name.substr(file->package().size() + 1);
+    result += full_name.substr( file->package().size() + 1 );
   }
   return result;
 }
 
-string ClassName(const FileDescriptor* descriptor) {
-  string result = FileJavaPackage(descriptor);
-  if (!result.empty()) result += '.';
-  result += FileClassName(descriptor);
+string ClassName( const FileDescriptor* descriptor )
+{
+  string result = FileJavaPackage( descriptor );
+  if ( !result.empty() ) result += '.';
+  result += FileClassName( descriptor );
   return result;
 }
 
-string FieldConstantName(const FieldDescriptor *field) {
+string FieldConstantName( const FieldDescriptor* field )
+{
   string name = field->name() + "_FIELD_NUMBER";
-  UpperString(&name);
+  UpperString( &name );
   return name;
 }
 
-FieldDescriptor::Type GetType(const FieldDescriptor* field) {
+FieldDescriptor::Type GetType( const FieldDescriptor* field )
+{
   return field->type();
 }
 
-JavaType GetJavaType(const FieldDescriptor* field) {
-  switch (GetType(field)) {
+JavaType GetJavaType( const FieldDescriptor* field )
+{
+  switch ( GetType( field ) )
+  {
     case FieldDescriptor::TYPE_INT32:
     case FieldDescriptor::TYPE_UINT32:
     case FieldDescriptor::TYPE_SINT32:
@@ -221,117 +277,158 @@ JavaType GetJavaType(const FieldDescriptor* field) {
     case FieldDescriptor::TYPE_MESSAGE:
       return JAVATYPE_MESSAGE;
 
-    // No default because we want the compiler to complain if any new
-    // types are added.
+      // No default because we want the compiler to complain if any new
+      // types are added.
   }
 
-  GOOGLE_LOG(FATAL) << "Can't get here.";
+  GOOGLE_LOG( FATAL ) << "Can't get here.";
   return JAVATYPE_INT;
 }
 
-const char* BoxedPrimitiveTypeName(JavaType type) {
-  switch (type) {
-    case JAVATYPE_INT    : return "java.lang.Integer";
-    case JAVATYPE_LONG   : return "java.lang.Long";
-    case JAVATYPE_FLOAT  : return "java.lang.Float";
-    case JAVATYPE_DOUBLE : return "java.lang.Double";
-    case JAVATYPE_BOOLEAN: return "java.lang.Boolean";
-    case JAVATYPE_STRING : return "java.lang.String";
-    case JAVATYPE_BYTES  : return "com.google.protobuf.ByteString";
-    case JAVATYPE_ENUM   : return NULL;
-    case JAVATYPE_MESSAGE: return NULL;
+const char* BoxedPrimitiveTypeName( JavaType type )
+{
+  switch ( type )
+  {
+    case JAVATYPE_INT:
+      return "java.lang.Integer";
+    case JAVATYPE_LONG:
+      return "java.lang.Long";
+    case JAVATYPE_FLOAT:
+      return "java.lang.Float";
+    case JAVATYPE_DOUBLE:
+      return "java.lang.Double";
+    case JAVATYPE_BOOLEAN:
+      return "java.lang.Boolean";
+    case JAVATYPE_STRING:
+      return "java.lang.String";
+    case JAVATYPE_BYTES:
+      return "com.google.protobuf.ByteString";
+    case JAVATYPE_ENUM:
+      return NULL;
+    case JAVATYPE_MESSAGE:
+      return NULL;
 
-    // No default because we want the compiler to complain if any new
-    // JavaTypes are added.
+      // No default because we want the compiler to complain if any new
+      // JavaTypes are added.
   }
 
-  GOOGLE_LOG(FATAL) << "Can't get here.";
+  GOOGLE_LOG( FATAL ) << "Can't get here.";
   return NULL;
 }
 
-bool AllAscii(const string& text) {
-  for (int i = 0; i < text.size(); i++) {
-    if ((text[i] & 0x80) != 0) {
+bool AllAscii( const string& text )
+{
+  for ( int i = 0; i < text.size(); i++ )
+  {
+    if ( ( text[i] & 0x80 ) != 0 )
+    {
       return false;
     }
   }
   return true;
 }
 
-string DefaultValue(const FieldDescriptor* field) {
+string DefaultValue( const FieldDescriptor* field )
+{
   // Switch on CppType since we need to know which default_value_* method
   // of FieldDescriptor to call.
-  switch (field->cpp_type()) {
+  switch ( field->cpp_type() )
+  {
     case FieldDescriptor::CPPTYPE_INT32:
-      return SimpleItoa(field->default_value_int32());
+      return SimpleItoa( field->default_value_int32() );
     case FieldDescriptor::CPPTYPE_UINT32:
       // Need to print as a signed int since Java has no unsigned.
-      return SimpleItoa(static_cast<int32>(field->default_value_uint32()));
+      return SimpleItoa( static_cast< int32 >( field->default_value_uint32() ) );
     case FieldDescriptor::CPPTYPE_INT64:
-      return SimpleItoa(field->default_value_int64()) + "L";
+      return SimpleItoa( field->default_value_int64() ) + "L";
     case FieldDescriptor::CPPTYPE_UINT64:
-      return SimpleItoa(static_cast<int64>(field->default_value_uint64())) +
+      return SimpleItoa( static_cast< int64 >( field->default_value_uint64() ) ) +
              "L";
-    case FieldDescriptor::CPPTYPE_DOUBLE: {
+    case FieldDescriptor::CPPTYPE_DOUBLE:
+    {
       double value = field->default_value_double();
-      if (value == numeric_limits<double>::infinity()) {
+      if ( value == numeric_limits< double >::infinity() )
+      {
         return "Double.POSITIVE_INFINITY";
-      } else if (value == -numeric_limits<double>::infinity()) {
+      }
+      else if ( value == -numeric_limits< double >::infinity() )
+      {
         return "Double.NEGATIVE_INFINITY";
-      } else if (value != value) {
+      }
+      else if ( value != value )
+      {
         return "Double.NaN";
-      } else {
-        return SimpleDtoa(value) + "D";
+      }
+      else
+      {
+        return SimpleDtoa( value ) + "D";
       }
     }
-    case FieldDescriptor::CPPTYPE_FLOAT: {
+    case FieldDescriptor::CPPTYPE_FLOAT:
+    {
       float value = field->default_value_float();
-      if (value == numeric_limits<float>::infinity()) {
+      if ( value == numeric_limits< float >::infinity() )
+      {
         return "Float.POSITIVE_INFINITY";
-      } else if (value == -numeric_limits<float>::infinity()) {
+      }
+      else if ( value == -numeric_limits< float >::infinity() )
+      {
         return "Float.NEGATIVE_INFINITY";
-      } else if (value != value) {
+      }
+      else if ( value != value )
+      {
         return "Float.NaN";
-      } else {
-        return SimpleFtoa(value) + "F";
+      }
+      else
+      {
+        return SimpleFtoa( value ) + "F";
       }
     }
     case FieldDescriptor::CPPTYPE_BOOL:
       return field->default_value_bool() ? "true" : "false";
     case FieldDescriptor::CPPTYPE_STRING:
-      if (GetType(field) == FieldDescriptor::TYPE_BYTES) {
-        if (field->has_default_value()) {
+      if ( GetType( field ) == FieldDescriptor::TYPE_BYTES )
+      {
+        if ( field->has_default_value() )
+        {
           // See comments in Internal.java for gory details.
           return strings::Substitute(
-            "com.google.protobuf.Internal.bytesDefaultValue(\"$0\")",
-            CEscape(field->default_value_string()));
-        } else {
+              "com.google.protobuf.Internal.bytesDefaultValue(\"$0\")",
+              CEscape( field->default_value_string() ) );
+        }
+        else
+        {
           return "com.google.protobuf.ByteString.EMPTY";
         }
-      } else {
-        if (AllAscii(field->default_value_string())) {
+      }
+      else
+      {
+        if ( AllAscii( field->default_value_string() ) )
+        {
           // All chars are ASCII.  In this case CEscape() works fine.
-          return "\"" + CEscape(field->default_value_string()) + "\"";
-        } else {
+          return "\"" + CEscape( field->default_value_string() ) + "\"";
+        }
+        else
+        {
           // See comments in Internal.java for gory details.
           return strings::Substitute(
-            "com.google.protobuf.Internal.stringDefaultValue(\"$0\")",
-            CEscape(field->default_value_string()));
+              "com.google.protobuf.Internal.stringDefaultValue(\"$0\")",
+              CEscape( field->default_value_string() ) );
         }
       }
 
     case FieldDescriptor::CPPTYPE_ENUM:
-      return ClassName(field->enum_type()) + "." +
+      return ClassName( field->enum_type() ) + "." +
              field->default_value_enum()->name();
 
     case FieldDescriptor::CPPTYPE_MESSAGE:
-      return ClassName(field->message_type()) + ".getDefaultInstance()";
+      return ClassName( field->message_type() ) + ".getDefaultInstance()";
 
-    // No default because we want the compiler to complain if any new
-    // types are added.
+      // No default because we want the compiler to complain if any new
+      // types are added.
   }
 
-  GOOGLE_LOG(FATAL) << "Can't get here.";
+  GOOGLE_LOG( FATAL ) << "Can't get here.";
   return "";
 }
 

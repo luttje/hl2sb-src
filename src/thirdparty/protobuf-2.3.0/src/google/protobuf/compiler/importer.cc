@@ -51,9 +51,12 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/stubs/strutil.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
 
 #ifdef _WIN32
 #ifndef F_OK
@@ -65,12 +68,13 @@ namespace compiler {
 // Returns true if the text looks like a Windows-style absolute path, starting
 // with a drive letter.  Example:  "C:\foo".  TODO(kenton):  Share this with
 // copy in command_line_interface.cc?
-static bool IsWindowsAbsolutePath(const string& text) {
-#if defined(_WIN32) || defined(__CYGWIN__)
+static bool IsWindowsAbsolutePath( const string& text )
+{
+#if defined( _WIN32 ) || defined( __CYGWIN__ )
   return text.size() >= 3 && text[1] == ':' &&
-         isalpha(text[0]) &&
-         (text[2] == '/' || text[2] == '\\') &&
-         text.find_last_of(':') == 1;
+         isalpha( text[0] ) &&
+         ( text[2] == '/' || text[2] == '\\' ) &&
+         text.find_last_of( ':' ) == 1;
 #else
   return false;
 #endif
@@ -83,21 +87,27 @@ MultiFileErrorCollector::~MultiFileErrorCollector() {}
 //   in terms of MultiFileErrorCollector, using a particular filename.
 // - It lets us check if any errors have occurred.
 class SourceTreeDescriptorDatabase::SingleFileErrorCollector
-    : public io::ErrorCollector {
+    : public io::ErrorCollector
+{
  public:
-  SingleFileErrorCollector(const string& filename,
-                           MultiFileErrorCollector* multi_file_error_collector)
-    : filename_(filename),
-      multi_file_error_collector_(multi_file_error_collector),
-      had_errors_(false) {}
+  SingleFileErrorCollector( const string& filename,
+                            MultiFileErrorCollector* multi_file_error_collector )
+      : filename_( filename ),
+        multi_file_error_collector_( multi_file_error_collector ),
+        had_errors_( false ) {}
   ~SingleFileErrorCollector() {}
 
-  bool had_errors() { return had_errors_; }
+  bool had_errors()
+  {
+    return had_errors_;
+  }
 
   // implements ErrorCollector ---------------------------------------
-  void AddError(int line, int column, const string& message) {
-    if (multi_file_error_collector_ != NULL) {
-      multi_file_error_collector_->AddError(filename_, line, column, message);
+  void AddError( int line, int column, const string& message )
+  {
+    if ( multi_file_error_collector_ != NULL )
+    {
+      multi_file_error_collector_->AddError( filename_, line, column, message );
     }
     had_errors_ = true;
   }
@@ -111,88 +121,98 @@ class SourceTreeDescriptorDatabase::SingleFileErrorCollector
 // ===================================================================
 
 SourceTreeDescriptorDatabase::SourceTreeDescriptorDatabase(
-    SourceTree* source_tree)
-  : source_tree_(source_tree),
-    error_collector_(NULL),
-    using_validation_error_collector_(false),
-    validation_error_collector_(this) {}
+    SourceTree* source_tree )
+    : source_tree_( source_tree ),
+      error_collector_( NULL ),
+      using_validation_error_collector_( false ),
+      validation_error_collector_( this ) {}
 
 SourceTreeDescriptorDatabase::~SourceTreeDescriptorDatabase() {}
 
 bool SourceTreeDescriptorDatabase::FindFileByName(
-    const string& filename, FileDescriptorProto* output) {
-  scoped_ptr<io::ZeroCopyInputStream> input(source_tree_->Open(filename));
-  if (input == NULL) {
-    if (error_collector_ != NULL) {
-      error_collector_->AddError(filename, -1, 0, "File not found.");
+    const string& filename, FileDescriptorProto* output )
+{
+  scoped_ptr< io::ZeroCopyInputStream > input( source_tree_->Open( filename ) );
+  if ( input == NULL )
+  {
+    if ( error_collector_ != NULL )
+    {
+      error_collector_->AddError( filename, -1, 0, "File not found." );
     }
     return false;
   }
 
   // Set up the tokenizer and parser.
-  SingleFileErrorCollector file_error_collector(filename, error_collector_);
-  io::Tokenizer tokenizer(input.get(), &file_error_collector);
+  SingleFileErrorCollector file_error_collector( filename, error_collector_ );
+  io::Tokenizer tokenizer( input.get(), &file_error_collector );
 
   Parser parser;
-  if (error_collector_ != NULL) {
-    parser.RecordErrorsTo(&file_error_collector);
+  if ( error_collector_ != NULL )
+  {
+    parser.RecordErrorsTo( &file_error_collector );
   }
-  if (using_validation_error_collector_) {
-    parser.RecordSourceLocationsTo(&source_locations_);
+  if ( using_validation_error_collector_ )
+  {
+    parser.RecordSourceLocationsTo( &source_locations_ );
   }
 
   // Parse it.
-  output->set_name(filename);
-  return parser.Parse(&tokenizer, output) &&
+  output->set_name( filename );
+  return parser.Parse( &tokenizer, output ) &&
          !file_error_collector.had_errors();
 }
 
 bool SourceTreeDescriptorDatabase::FindFileContainingSymbol(
-    const string& symbol_name, FileDescriptorProto* output) {
+    const string& symbol_name, FileDescriptorProto* output )
+{
   return false;
 }
 
 bool SourceTreeDescriptorDatabase::FindFileContainingExtension(
     const string& containing_type, int field_number,
-    FileDescriptorProto* output) {
+    FileDescriptorProto* output )
+{
   return false;
 }
 
 // -------------------------------------------------------------------
 
 SourceTreeDescriptorDatabase::ValidationErrorCollector::
-ValidationErrorCollector(SourceTreeDescriptorDatabase* owner)
-  : owner_(owner) {}
+    ValidationErrorCollector( SourceTreeDescriptorDatabase* owner )
+    : owner_( owner ) {}
 
 SourceTreeDescriptorDatabase::ValidationErrorCollector::
-~ValidationErrorCollector() {}
+    ~ValidationErrorCollector() {}
 
 void SourceTreeDescriptorDatabase::ValidationErrorCollector::AddError(
     const string& filename,
     const string& element_name,
     const Message* descriptor,
     ErrorLocation location,
-    const string& message) {
-  if (owner_->error_collector_ == NULL) return;
+    const string& message )
+{
+  if ( owner_->error_collector_ == NULL ) return;
 
   int line, column;
-  owner_->source_locations_.Find(descriptor, location, &line, &column);
-  owner_->error_collector_->AddError(filename, line, column, message);
+  owner_->source_locations_.Find( descriptor, location, &line, &column );
+  owner_->error_collector_->AddError( filename, line, column, message );
 }
 
 // ===================================================================
 
-Importer::Importer(SourceTree* source_tree,
-                   MultiFileErrorCollector* error_collector)
-  : database_(source_tree),
-    pool_(&database_, database_.GetValidationErrorCollector()) {
-  database_.RecordErrorsTo(error_collector);
+Importer::Importer( SourceTree* source_tree,
+                    MultiFileErrorCollector* error_collector )
+    : database_( source_tree ),
+      pool_( &database_, database_.GetValidationErrorCollector() )
+{
+  database_.RecordErrorsTo( error_collector );
 }
 
 Importer::~Importer() {}
 
-const FileDescriptor* Importer::Import(const string& filename) {
-  return pool_.FindFileByName(filename);
+const FileDescriptor* Importer::Import( const string& filename )
+{
+  return pool_.FindFileByName( filename );
 }
 
 // ===================================================================
@@ -203,7 +223,8 @@ DiskSourceTree::DiskSourceTree() {}
 
 DiskSourceTree::~DiskSourceTree() {}
 
-static inline char LastChar(const string& str) {
+static inline char LastChar( const string& str )
+{
   return str[str.size() - 1];
 }
 
@@ -226,42 +247,50 @@ static inline char LastChar(const string& str) {
 //   then if foo/bar is a symbolic link, foo/bar/baz.proto will canonicalize
 //   to a path which does not appear to be under foo, and thus the compiler
 //   will complain that baz.proto is not inside the --proto_path.
-static string CanonicalizePath(string path) {
+static string CanonicalizePath( string path )
+{
 #ifdef _WIN32
   // The Win32 API accepts forward slashes as a path delimiter even though
   // backslashes are standard.  Let's avoid confusion and use only forward
   // slashes.
-  path = StringReplace(path, "\\", "/", true);
+  path = StringReplace( path, "\\", "/", true );
 #endif
 
-  vector<string> parts;
-  vector<string> canonical_parts;
-  SplitStringUsing(path, "/", &parts);  // Note:  Removes empty parts.
-  for (int i = 0; i < parts.size(); i++) {
-    if (parts[i] == ".") {
+  vector< string > parts;
+  vector< string > canonical_parts;
+  SplitStringUsing( path, "/", &parts );  // Note:  Removes empty parts.
+  for ( int i = 0; i < parts.size(); i++ )
+  {
+    if ( parts[i] == "." )
+    {
       // Ignore.
-    } else {
-      canonical_parts.push_back(parts[i]);
+    }
+    else
+    {
+      canonical_parts.push_back( parts[i] );
     }
   }
-  string result = JoinStrings(canonical_parts, "/");
-  if (!path.empty() && path[0] == '/') {
+  string result = JoinStrings( canonical_parts, "/" );
+  if ( !path.empty() && path[0] == '/' )
+  {
     // Restore leading slash.
     result = '/' + result;
   }
-  if (!path.empty() && LastChar(path) == '/' &&
-      !result.empty() && LastChar(result) != '/') {
+  if ( !path.empty() && LastChar( path ) == '/' &&
+       !result.empty() && LastChar( result ) != '/' )
+  {
     // Restore trailing slash.
     result += '/';
   }
   return result;
 }
 
-static inline bool ContainsParentReference(const string& path) {
+static inline bool ContainsParentReference( const string& path )
+{
   return path == ".." ||
-         HasPrefixString(path, "../") ||
-         HasSuffixString(path, "/..") ||
-         path.find("/../") != string::npos;
+         HasPrefixString( path, "../" ) ||
+         HasSuffixString( path, "/.." ) ||
+         path.find( "/../" ) != string::npos;
 }
 
 // Maps a file from an old location to a new one.  Typically, old_prefix is
@@ -281,54 +310,68 @@ static inline bool ContainsParentReference(const string& path) {
 //   assert(!ApplyMapping("foo/bar", "baz", "qux", &result));
 //   assert(!ApplyMapping("foo/bar", "baz", "qux", &result));
 //   assert(!ApplyMapping("foobar", "foo", "baz", &result));
-static bool ApplyMapping(const string& filename,
-                         const string& old_prefix,
-                         const string& new_prefix,
-                         string* result) {
-  if (old_prefix.empty()) {
+static bool ApplyMapping( const string& filename,
+                          const string& old_prefix,
+                          const string& new_prefix,
+                          string* result )
+{
+  if ( old_prefix.empty() )
+  {
     // old_prefix matches any relative path.
-    if (ContainsParentReference(filename)) {
+    if ( ContainsParentReference( filename ) )
+    {
       // We do not allow the file name to use "..".
       return false;
     }
-    if (HasPrefixString(filename, "/") ||
-        IsWindowsAbsolutePath(filename)) {
+    if ( HasPrefixString( filename, "/" ) ||
+         IsWindowsAbsolutePath( filename ) )
+    {
       // This is an absolute path, so it isn't matched by the empty string.
       return false;
     }
-    result->assign(new_prefix);
-    if (!result->empty()) result->push_back('/');
-    result->append(filename);
+    result->assign( new_prefix );
+    if ( !result->empty() ) result->push_back( '/' );
+    result->append( filename );
     return true;
-  } else if (HasPrefixString(filename, old_prefix)) {
+  }
+  else if ( HasPrefixString( filename, old_prefix ) )
+  {
     // old_prefix is a prefix of the filename.  Is it the whole filename?
-    if (filename.size() == old_prefix.size()) {
+    if ( filename.size() == old_prefix.size() )
+    {
       // Yep, it's an exact match.
       *result = new_prefix;
       return true;
-    } else {
+    }
+    else
+    {
       // Not an exact match.  Is the next character a '/'?  Otherwise,
       // this isn't actually a match at all.  E.g. the prefix "foo/bar"
       // does not match the filename "foo/barbaz".
       int after_prefix_start = -1;
-      if (filename[old_prefix.size()] == '/') {
+      if ( filename[old_prefix.size()] == '/' )
+      {
         after_prefix_start = old_prefix.size() + 1;
-      } else if (filename[old_prefix.size() - 1] == '/') {
+      }
+      else if ( filename[old_prefix.size() - 1] == '/' )
+      {
         // old_prefix is never empty, and canonicalized paths never have
         // consecutive '/' characters.
         after_prefix_start = old_prefix.size();
       }
-      if (after_prefix_start != -1) {
+      if ( after_prefix_start != -1 )
+      {
         // Yep.  So the prefixes are directories and the filename is a file
         // inside them.
-        string after_prefix = filename.substr(after_prefix_start);
-        if (ContainsParentReference(after_prefix)) {
+        string after_prefix = filename.substr( after_prefix_start );
+        if ( ContainsParentReference( after_prefix ) )
+        {
           // We do not allow the file name to use "..".
           return false;
         }
-        result->assign(new_prefix);
-        if (!result->empty()) result->push_back('/');
-        result->append(after_prefix);
+        result->assign( new_prefix );
+        if ( !result->empty() ) result->push_back( '/' );
+        result->append( after_prefix );
         return true;
       }
     }
@@ -337,46 +380,55 @@ static bool ApplyMapping(const string& filename,
   return false;
 }
 
-void DiskSourceTree::MapPath(const string& virtual_path,
-                             const string& disk_path) {
-  mappings_.push_back(Mapping(virtual_path, CanonicalizePath(disk_path)));
+void DiskSourceTree::MapPath( const string& virtual_path,
+                              const string& disk_path )
+{
+  mappings_.push_back( Mapping( virtual_path, CanonicalizePath( disk_path ) ) );
 }
 
 DiskSourceTree::DiskFileToVirtualFileResult
 DiskSourceTree::DiskFileToVirtualFile(
     const string& disk_file,
     string* virtual_file,
-    string* shadowing_disk_file) {
+    string* shadowing_disk_file )
+{
   int mapping_index = -1;
-  string canonical_disk_file = CanonicalizePath(disk_file);
+  string canonical_disk_file = CanonicalizePath( disk_file );
 
-  for (int i = 0; i < mappings_.size(); i++) {
+  for ( int i = 0; i < mappings_.size(); i++ )
+  {
     // Apply the mapping in reverse.
-    if (ApplyMapping(canonical_disk_file, mappings_[i].disk_path,
-                     mappings_[i].virtual_path, virtual_file)) {
+    if ( ApplyMapping( canonical_disk_file, mappings_[i].disk_path,
+                       mappings_[i].virtual_path, virtual_file ) )
+    {
       // Success.
       mapping_index = i;
       break;
     }
   }
 
-  if (mapping_index == -1) {
+  if ( mapping_index == -1 )
+  {
     return NO_MAPPING;
   }
 
   // Iterate through all mappings with higher precedence and verify that none
   // of them map this file to some other existing file.
-  for (int i = 0; i < mapping_index; i++) {
-    if (ApplyMapping(*virtual_file, mappings_[i].virtual_path,
-                     mappings_[i].disk_path, shadowing_disk_file)) {
+  for ( int i = 0; i < mapping_index; i++ )
+  {
+    if ( ApplyMapping( *virtual_file, mappings_[i].virtual_path,
+                       mappings_[i].disk_path, shadowing_disk_file ) )
+    {
 #ifdef _PS3
-      FILE *f = fopen( shadowing_disk_file->c_str(), "r" );
-      if (f != NULL) {
-          fclose(f);
-          return SHADOWED;
+      FILE* f = fopen( shadowing_disk_file->c_str(), "r" );
+      if ( f != NULL )
+      {
+        fclose( f );
+        return SHADOWED;
       }
 #else
-      if (access(shadowing_disk_file->c_str(), F_OK) >= 0) {
+      if ( access( shadowing_disk_file->c_str(), F_OK ) >= 0 )
+      {
         // File exists.
         return SHADOWED;
       }
@@ -388,52 +440,62 @@ DiskSourceTree::DiskFileToVirtualFile(
   // Verify that we can open the file.  Note that this also has the side-effect
   // of verifying that we are not canonicalizing away any non-existent
   // directories.
-  scoped_ptr<io::ZeroCopyInputStream> stream(OpenDiskFile(disk_file));
-  if (stream == NULL) {
+  scoped_ptr< io::ZeroCopyInputStream > stream( OpenDiskFile( disk_file ) );
+  if ( stream == NULL )
+  {
     return CANNOT_OPEN;
   }
 
   return SUCCESS;
 }
 
-bool DiskSourceTree::VirtualFileToDiskFile(const string& virtual_file,
-                                           string* disk_file) {
-  scoped_ptr<io::ZeroCopyInputStream> stream(OpenVirtualFile(virtual_file,
-                                                             disk_file));
+bool DiskSourceTree::VirtualFileToDiskFile( const string& virtual_file,
+                                            string* disk_file )
+{
+  scoped_ptr< io::ZeroCopyInputStream > stream( OpenVirtualFile( virtual_file,
+                                                                 disk_file ) );
   return stream != NULL;
 }
 
-io::ZeroCopyInputStream* DiskSourceTree::Open(const string& filename) {
-  return OpenVirtualFile(filename, NULL);
+io::ZeroCopyInputStream* DiskSourceTree::Open( const string& filename )
+{
+  return OpenVirtualFile( filename, NULL );
 }
 
 io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
     const string& virtual_file,
-    string* disk_file) {
-  if (virtual_file != CanonicalizePath(virtual_file) ||
-      ContainsParentReference(virtual_file)) {
+    string* disk_file )
+{
+  if ( virtual_file != CanonicalizePath( virtual_file ) ||
+       ContainsParentReference( virtual_file ) )
+  {
     // We do not allow importing of paths containing things like ".." or
     // consecutive slashes since the compiler expects files to be uniquely
     // identified by file name.
     return NULL;
   }
 
-  for (int i = 0; i < mappings_.size(); i++) {
+  for ( int i = 0; i < mappings_.size(); i++ )
+  {
     string temp_disk_file;
-    if (ApplyMapping(virtual_file, mappings_[i].virtual_path,
-                     mappings_[i].disk_path, &temp_disk_file)) {
-      io::ZeroCopyInputStream* stream = OpenDiskFile(temp_disk_file);
-      if (stream != NULL) {
-        if (disk_file != NULL) {
+    if ( ApplyMapping( virtual_file, mappings_[i].virtual_path,
+                       mappings_[i].disk_path, &temp_disk_file ) )
+    {
+      io::ZeroCopyInputStream* stream = OpenDiskFile( temp_disk_file );
+      if ( stream != NULL )
+      {
+        if ( disk_file != NULL )
+        {
           *disk_file = temp_disk_file;
         }
         return stream;
       }
 
-      if (errno == EACCES) {
+      if ( errno == EACCES )
+      {
         // The file exists but is not readable.
         // TODO(kenton):  Find a way to report this more nicely.
-        GOOGLE_LOG(WARNING) << "Read access is denied for file: " << temp_disk_file;
+        GOOGLE_LOG( WARNING ) << "Read access is denied for file: " << temp_disk_file;
         return NULL;
       }
     }
@@ -443,16 +505,21 @@ io::ZeroCopyInputStream* DiskSourceTree::OpenVirtualFile(
 }
 
 io::ZeroCopyInputStream* DiskSourceTree::OpenDiskFile(
-    const string& filename) {
+    const string& filename )
+{
   int file_descriptor;
-  do {
-    file_descriptor = open(filename.c_str(), O_RDONLY);
-  } while (file_descriptor < 0 && errno == EINTR);
-  if (file_descriptor >= 0) {
-    io::FileInputStream* result = new io::FileInputStream(file_descriptor);
-    result->SetCloseOnDelete(true);
+  do
+  {
+    file_descriptor = open( filename.c_str(), O_RDONLY );
+  } while ( file_descriptor < 0 && errno == EINTR );
+  if ( file_descriptor >= 0 )
+  {
+    io::FileInputStream* result = new io::FileInputStream( file_descriptor );
+    result->SetCloseOnDelete( true );
     return result;
-  } else {
+  }
+  else
+  {
     return NULL;
   }
 }

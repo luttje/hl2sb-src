@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -16,27 +16,21 @@ class CBaseEntity;
 /* type for CBaseEntity functions */
 typedef CBaseEntity lua_CBaseEntity;
 
-
-
 /*
 ** access functions (stack -> C)
 */
 
-LUA_API lua_CBaseEntity     *(lua_toentity) (lua_State *L, int idx);
-
+LUA_API lua_CBaseEntity *( lua_toentity )( lua_State *L, int idx );
 
 /*
 ** push functions (C -> stack)
 */
-LUA_API void  (lua_pushentity) (lua_State *L, lua_CBaseEntity *pEntity);
+LUA_API void( lua_pushentity )( lua_State *L, lua_CBaseEntity *pEntity );
 
+LUALIB_API lua_CBaseEntity *( luaL_checkentity )( lua_State *L, int narg );
+LUALIB_API lua_CBaseEntity *( luaL_optentity )( lua_State *L, int narg,
+                                                lua_CBaseEntity *def );
 
+int luaopen_CBaseEntity( lua_State *L );
 
-LUALIB_API lua_CBaseEntity *(luaL_checkentity) (lua_State *L, int narg);
-LUALIB_API lua_CBaseEntity *(luaL_optentity) (lua_State *L, int narg,
-                                                            lua_CBaseEntity *def);
-
-
-int luaopen_CBaseEntity(lua_State *L);
-
-#endif // LBASEENTITY_H
+#endif  // LBASEENTITY_H

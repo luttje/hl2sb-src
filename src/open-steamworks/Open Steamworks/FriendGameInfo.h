@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -20,16 +20,14 @@
 #pragma once
 #endif
 
-
 // friend game played information
 struct FriendGameInfo_t
 {
-	CGameID m_gameID;
-	uint32 m_unGameIP;
-	uint16 m_usGamePort;
-	uint16 m_usQueryPort;
-	CSteamID m_steamIDLobby;
+  CGameID m_gameID;
+  uint32 m_unGameIP;
+  uint16 m_usGamePort;
+  uint16 m_usQueryPort;
+  CSteamID m_steamIDLobby;
 };
 
-
-#endif // FRIENDGAMEINFO_H
+#endif  // FRIENDGAMEINFO_H

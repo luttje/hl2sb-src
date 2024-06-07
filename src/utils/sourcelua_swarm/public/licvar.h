@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-// Purpose: 
+// Purpose:
 //
 //===========================================================================//
 
@@ -10,7 +10,6 @@
 #pragma once
 #endif
 
-int luaopen_cvar(lua_State *L);
+int luaopen_cvar( lua_State *L );
 
-
-#endif // LICVAR_H
+#endif  // LICVAR_H

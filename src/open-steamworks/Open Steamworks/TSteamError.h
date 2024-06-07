@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,19 +22,19 @@
 
 typedef enum EDetailedPlatformErrorType
 {
-	eNoDetailedErrorAvailable,
-	eStandardCerrno,
-	eWin32LastError,
-	eWinSockLastError,
-	eDetailedPlatformErrorCount
+  eNoDetailedErrorAvailable,
+  eStandardCerrno,
+  eWin32LastError,
+  eWinSockLastError,
+  eDetailedPlatformErrorCount
 } EDetailedPlatformErrorType;
 
 typedef struct TSteamError
 {
-	ESteamError eSteamError;
-	EDetailedPlatformErrorType eDetailedErrorType;
-	int nDetailedErrorCode;
-	char szDesc[STEAM_MAX_PATH];
+  ESteamError eSteamError;
+  EDetailedPlatformErrorType eDetailedErrorType;
+  int nDetailedErrorCode;
+  char szDesc[STEAM_MAX_PATH];
 } TSteamError;
 
-#endif // TSTEAMERROR_H
+#endif  // TSTEAMERROR_H

@@ -35,13 +35,15 @@
 
 #include <gtest/gtest.h>
 
-namespace {
+namespace
+{
 
 using ::testing::Message;
 using ::testing::internal::StrStream;
 
 // A helper function that turns a Message into a C string.
-const char* ToCString(const Message& msg) {
+const char* ToCString( const Message& msg )
+{
   static testing::internal::String result;
   result = msg.GetString();
   return result.c_str();
@@ -50,46 +52,53 @@ const char* ToCString(const Message& msg) {
 // Tests the testing::Message class
 
 // Tests the default constructor.
-TEST(MessageTest, DefaultConstructor) {
+TEST( MessageTest, DefaultConstructor )
+{
   const Message msg;
-  EXPECT_STREQ("", ToCString(msg));
+  EXPECT_STREQ( "", ToCString( msg ) );
 }
 
 // Tests the copy constructor.
-TEST(MessageTest, CopyConstructor) {
-  const Message msg1("Hello");
-  const Message msg2(msg1);
-  EXPECT_STREQ("Hello", ToCString(msg2));
+TEST( MessageTest, CopyConstructor )
+{
+  const Message msg1( "Hello" );
+  const Message msg2( msg1 );
+  EXPECT_STREQ( "Hello", ToCString( msg2 ) );
 }
 
 // Tests constructing a Message from a C-string.
-TEST(MessageTest, ConstructsFromCString) {
-  Message msg("Hello");
-  EXPECT_STREQ("Hello", ToCString(msg));
+TEST( MessageTest, ConstructsFromCString )
+{
+  Message msg( "Hello" );
+  EXPECT_STREQ( "Hello", ToCString( msg ) );
 }
 
 // Tests streaming a non-char pointer.
-TEST(MessageTest, StreamsPointer) {
+TEST( MessageTest, StreamsPointer )
+{
   int n = 0;
   int* p = &n;
-  EXPECT_STRNE("(null)", ToCString(Message() << p));
+  EXPECT_STRNE( "(null)", ToCString( Message() << p ) );
 }
 
 // Tests streaming a NULL non-char pointer.
-TEST(MessageTest, StreamsNullPointer) {
+TEST( MessageTest, StreamsNullPointer )
+{
   int* p = NULL;
-  EXPECT_STREQ("(null)", ToCString(Message() << p));
+  EXPECT_STREQ( "(null)", ToCString( Message() << p ) );
 }
 
 // Tests streaming a C string.
-TEST(MessageTest, StreamsCString) {
-  EXPECT_STREQ("Foo", ToCString(Message() << "Foo"));
+TEST( MessageTest, StreamsCString )
+{
+  EXPECT_STREQ( "Foo", ToCString( Message() << "Foo" ) );
 }
 
 // Tests streaming a NULL C string.
-TEST(MessageTest, StreamsNullCString) {
+TEST( MessageTest, StreamsNullCString )
+{
   char* p = NULL;
-  EXPECT_STREQ("(null)", ToCString(Message() << p));
+  EXPECT_STREQ( "(null)", ToCString( Message() << p ) );
 }
 
 #if GTEST_HAS_STD_STRING
@@ -98,60 +107,68 @@ TEST(MessageTest, StreamsNullCString) {
 //
 // As std::string has problem in MSVC when exception is disabled, we only
 // test this where std::string can be used.
-TEST(MessageTest, StreamsString) {
-  const ::std::string str("Hello");
-  EXPECT_STREQ("Hello", ToCString(Message() << str));
+TEST( MessageTest, StreamsString )
+{
+  const ::std::string str( "Hello" );
+  EXPECT_STREQ( "Hello", ToCString( Message() << str ) );
 }
 
 // Tests that we can output strings containing embedded NULs.
-TEST(MessageTest, StreamsStringWithEmbeddedNUL) {
+TEST( MessageTest, StreamsStringWithEmbeddedNUL )
+{
   const char char_array_with_nul[] =
       "Here's a NUL\0 and some more string";
-  const ::std::string string_with_nul(char_array_with_nul,
-                                      sizeof(char_array_with_nul) - 1);
-  EXPECT_STREQ("Here's a NUL\\0 and some more string",
-               ToCString(Message() << string_with_nul));
+  const ::std::string string_with_nul( char_array_with_nul,
+                                       sizeof( char_array_with_nul ) - 1 );
+  EXPECT_STREQ( "Here's a NUL\\0 and some more string",
+                ToCString( Message() << string_with_nul ) );
 }
 
 #endif  // GTEST_HAS_STD_STRING
 
 // Tests streaming a NUL char.
-TEST(MessageTest, StreamsNULChar) {
-  EXPECT_STREQ("\\0", ToCString(Message() << '\0'));
+TEST( MessageTest, StreamsNULChar )
+{
+  EXPECT_STREQ( "\\0", ToCString( Message() << '\0' ) );
 }
 
 // Tests streaming int.
-TEST(MessageTest, StreamsInt) {
-  EXPECT_STREQ("123", ToCString(Message() << 123));
+TEST( MessageTest, StreamsInt )
+{
+  EXPECT_STREQ( "123", ToCString( Message() << 123 ) );
 }
 
 // Tests that basic IO manipulators (endl, ends, and flush) can be
 // streamed to Message.
-TEST(MessageTest, StreamsBasicIoManip) {
-  EXPECT_STREQ("Line 1.\nA NUL char \\0 in line 2.",
-               ToCString(Message() << "Line 1." << std::endl
-                         << "A NUL char " << std::ends << std::flush
-                         << " in line 2."));
+TEST( MessageTest, StreamsBasicIoManip )
+{
+  EXPECT_STREQ( "Line 1.\nA NUL char \\0 in line 2.",
+                ToCString( Message() << "Line 1." << std::endl
+                                     << "A NUL char " << std::ends << std::flush
+                                     << " in line 2." ) );
 }
 
 // Tests Message::GetString()
-TEST(MessageTest, GetString) {
+TEST( MessageTest, GetString )
+{
   Message msg;
   msg << 1 << " lamb";
-  EXPECT_STREQ("1 lamb", msg.GetString().c_str());
+  EXPECT_STREQ( "1 lamb", msg.GetString().c_str() );
 }
 
 // Tests streaming a Message object to an ostream.
-TEST(MessageTest, StreamsToOStream) {
-  Message msg("Hello");
+TEST( MessageTest, StreamsToOStream )
+{
+  Message msg( "Hello" );
   StrStream ss;
   ss << msg;
-  EXPECT_STREQ("Hello", testing::internal::StrStreamToString(&ss).c_str());
+  EXPECT_STREQ( "Hello", testing::internal::StrStreamToString( &ss ).c_str() );
 }
 
 // Tests that a Message object doesn't take up too much stack space.
-TEST(MessageTest, DoesNotTakeUpMuchStackSpace) {
-  EXPECT_LE(sizeof(Message), 16U);
+TEST( MessageTest, DoesNotTakeUpMuchStackSpace )
+{
+  EXPECT_LE( sizeof( Message ), 16U );
 }
 
 }  // namespace

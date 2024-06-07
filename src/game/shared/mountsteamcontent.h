@@ -1,6 +1,6 @@
 //========== Copyleft © 2011, Team Sandbox, Some rights reserved. ===========//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //===========================================================================//
@@ -18,4 +18,4 @@ bool Steam_MountSteamContent( int nExtraAppId = -1 );
 
 void MountUserContent();
 
-#endif // MOUNTSTEAMCONTENT_H
+#endif  // MOUNTSTEAMCONTENT_H

@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,16 +22,16 @@
 
 typedef enum EPersonalQuestion
 {
-	// Never ever change these after initial release.
-	k_EPSMsgNameOfSchool = 0,			// Question: What is the name of your school?
-	k_EPSMsgFavoriteTeam = 1,			// Question: What is your favorite team?
-	k_EPSMsgMothersName = 2,			// Question: What is your mother's maiden name?
-	k_EPSMsgNameOfPet = 3,				// Question: What is the name of your pet?
-	k_EPSMsgChildhoodHero = 4,			// Question: Who was your childhood hero?
-	k_EPSMsgCityBornIn = 5,				// Question: What city were you born in?
+  // Never ever change these after initial release.
+  k_EPSMsgNameOfSchool = 0,   // Question: What is the name of your school?
+  k_EPSMsgFavoriteTeam = 1,   // Question: What is your favorite team?
+  k_EPSMsgMothersName = 2,    // Question: What is your mother's maiden name?
+  k_EPSMsgNameOfPet = 3,      // Question: What is the name of your pet?
+  k_EPSMsgChildhoodHero = 4,  // Question: Who was your childhood hero?
+  k_EPSMsgCityBornIn = 5,     // Question: What city were you born in?
 
-	k_EPSMaxPersonalQuestion,
+  k_EPSMaxPersonalQuestion,
 
 } EPersonalQuestion;
 
-#endif // EPERSONALQUESTION_H
+#endif  // EPERSONALQUESTION_H

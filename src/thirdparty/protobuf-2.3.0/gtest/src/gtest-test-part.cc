@@ -42,77 +42,88 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-namespace testing {
+namespace testing
+{
 
 using internal::GetUnitTestImpl;
 
 // Gets the summary of the failure message by omitting the stack trace
 // in it.
-internal::String TestPartResult::ExtractSummary(const char* message) {
-  const char* const stack_trace = strstr(message, internal::kStackTraceMarker);
-  return stack_trace == NULL ? internal::String(message) :
-      internal::String(message, stack_trace - message);
+internal::String TestPartResult::ExtractSummary( const char* message )
+{
+  const char* const stack_trace = strstr( message, internal::kStackTraceMarker );
+  return stack_trace == NULL ? internal::String( message ) : internal::String( message, stack_trace - message );
 }
 
 // Prints a TestPartResult object.
-std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
+std::ostream& operator<<( std::ostream& os, const TestPartResult& result )
+{
   return os
-      << result.file_name() << ":" << result.line_number() << ": "
-      << (result.type() == TestPartResult::kSuccess ? "Success" :
-          result.type() == TestPartResult::kFatalFailure ? "Fatal failure" :
-          "Non-fatal failure") << ":\n"
-      << result.message() << std::endl;
+         << result.file_name() << ":" << result.line_number() << ": "
+         << ( result.type() == TestPartResult::kSuccess ? "Success" : result.type() == TestPartResult::kFatalFailure ? "Fatal failure"
+                                                                                                                     : "Non-fatal failure" )
+         << ":\n"
+         << result.message() << std::endl;
 }
 
 // Constructs an empty TestPartResultArray.
 TestPartResultArray::TestPartResultArray()
-    : array_(new internal::Vector<TestPartResult>) {
+    : array_( new internal::Vector< TestPartResult > )
+{
 }
 
 // Destructs a TestPartResultArray.
-TestPartResultArray::~TestPartResultArray() {
+TestPartResultArray::~TestPartResultArray()
+{
   delete array_;
 }
 
 // Appends a TestPartResult to the array.
-void TestPartResultArray::Append(const TestPartResult& result) {
-  array_->PushBack(result);
+void TestPartResultArray::Append( const TestPartResult& result )
+{
+  array_->PushBack( result );
 }
 
 // Returns the TestPartResult at the given index (0-based).
-const TestPartResult& TestPartResultArray::GetTestPartResult(int index) const {
-  if (index < 0 || index >= size()) {
-    printf("\nInvalid index (%d) into TestPartResultArray.\n", index);
+const TestPartResult& TestPartResultArray::GetTestPartResult( int index ) const
+{
+  if ( index < 0 || index >= size() )
+  {
+    printf( "\nInvalid index (%d) into TestPartResultArray.\n", index );
     internal::posix::Abort();
   }
 
-  return array_->GetElement(index);
+  return array_->GetElement( index );
 }
 
 // Returns the number of TestPartResult objects in the array.
-int TestPartResultArray::size() const {
+int TestPartResultArray::size() const
+{
   return array_->size();
 }
 
-namespace internal {
+namespace internal
+{
 
 HasNewFatalFailureHelper::HasNewFatalFailureHelper()
-    : has_new_fatal_failure_(false),
-      original_reporter_(GetUnitTestImpl()->
-                         GetTestPartResultReporterForCurrentThread()) {
-  GetUnitTestImpl()->SetTestPartResultReporterForCurrentThread(this);
+    : has_new_fatal_failure_( false ),
+      original_reporter_( GetUnitTestImpl()->GetTestPartResultReporterForCurrentThread() )
+{
+  GetUnitTestImpl()->SetTestPartResultReporterForCurrentThread( this );
 }
 
-HasNewFatalFailureHelper::~HasNewFatalFailureHelper() {
+HasNewFatalFailureHelper::~HasNewFatalFailureHelper()
+{
   GetUnitTestImpl()->SetTestPartResultReporterForCurrentThread(
-      original_reporter_);
+      original_reporter_ );
 }
 
 void HasNewFatalFailureHelper::ReportTestPartResult(
-    const TestPartResult& result) {
-  if (result.fatally_failed())
+    const TestPartResult& result )
+{
+  if ( result.fatally_failed() )
     has_new_fatal_failure_ = true;
-  original_reporter_->ReportTestPartResult(result);
+  original_reporter_->ReportTestPartResult( result );
 }
 
 }  // namespace internal

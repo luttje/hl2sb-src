@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -28,12 +28,11 @@
 //-----------------------------------------------------------------------------
 abstract_class ISteamApps001
 {
-public:
-	// returns 0 if the key does not exist
-	// this may be true on first call, since the app data may not be cached locally yet
-	// If you expect it to exists wait for the AppDataChanged_t after the first failure and ask again
-	virtual int GetAppData( AppId_t nAppID, const char *pchKey, char *pchValue, int cchValueMax ) = 0;
+ public:
+  // returns 0 if the key does not exist
+  // this may be true on first call, since the app data may not be cached locally yet
+  // If you expect it to exists wait for the AppDataChanged_t after the first failure and ask again
+  virtual int GetAppData( AppId_t nAppID, const char *pchKey, char *pchValue, int cchValueMax ) = 0;
 };
 
-
-#endif // ISTEAMAPPS001_H
+#endif  // ISTEAMAPPS001_H

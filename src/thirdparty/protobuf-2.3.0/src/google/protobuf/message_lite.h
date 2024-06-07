@@ -42,8 +42,10 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/io/coded_stream.h>
 
-namespace google {
-namespace protobuf {
+namespace google
+{
+namespace protobuf
+{
 
 // Interface to light weight protocol messages.
 //
@@ -68,7 +70,8 @@ namespace protobuf {
 // is best when you only have a small number of message types linked
 // into your binary, in which case the size of the protocol buffers
 // runtime itself is the biggest problem.
-class LIBPROTOBUF_EXPORT MessageLite {
+class LIBPROTOBUF_EXPORT MessageLite
+{
  public:
   inline MessageLite() {}
   virtual ~MessageLite();
@@ -99,7 +102,7 @@ class LIBPROTOBUF_EXPORT MessageLite {
 
   // If |other| is the exact same class as this, calls MergeFrom().  Otherwise,
   // results are undefined (probably crash).
-  virtual void CheckTypeAndMergeFrom(const MessageLite& other) = 0;
+  virtual void CheckTypeAndMergeFrom( const MessageLite& other ) = 0;
 
   // Parsing ---------------------------------------------------------
   // Methods for parsing in protocol buffer format.  Most of these are
@@ -108,35 +111,34 @@ class LIBPROTOBUF_EXPORT MessageLite {
   // Fill the message with a protocol buffer parsed from the given input
   // stream.  Returns false on a read error or if the input is in the
   // wrong format.
-  bool ParseFromCodedStream(io::CodedInputStream* input);
+  bool ParseFromCodedStream( io::CodedInputStream* input );
   // Like ParseFromCodedStream(), but accepts messages that are missing
   // required fields.
-  bool ParsePartialFromCodedStream(io::CodedInputStream* input);
+  bool ParsePartialFromCodedStream( io::CodedInputStream* input );
   // Read a protocol buffer from the given zero-copy input stream.  If
   // successful, the entire input will be consumed.
-  bool ParseFromZeroCopyStream(io::ZeroCopyInputStream* input);
+  bool ParseFromZeroCopyStream( io::ZeroCopyInputStream* input );
   // Like ParseFromZeroCopyStream(), but accepts messages that are missing
   // required fields.
-  bool ParsePartialFromZeroCopyStream(io::ZeroCopyInputStream* input);
+  bool ParsePartialFromZeroCopyStream( io::ZeroCopyInputStream* input );
   // Read a protocol buffer from the given zero-copy input stream, expecting
   // the message to be exactly "size" bytes long.  If successful, exactly
   // this many bytes will have been consumed from the input.
-  bool ParseFromBoundedZeroCopyStream(io::ZeroCopyInputStream* input, int size);
+  bool ParseFromBoundedZeroCopyStream( io::ZeroCopyInputStream* input, int size );
   // Like ParseFromBoundedZeroCopyStream(), but accepts messages that are
   // missing required fields.
-  bool ParsePartialFromBoundedZeroCopyStream(io::ZeroCopyInputStream* input,
-                                             int size);
+  bool ParsePartialFromBoundedZeroCopyStream( io::ZeroCopyInputStream* input,
+                                              int size );
   // Parse a protocol buffer contained in a string.
-  bool ParseFromString(const string& data);
+  bool ParseFromString( const string& data );
   // Like ParseFromString(), but accepts messages that are missing
   // required fields.
-  bool ParsePartialFromString(const string& data);
+  bool ParsePartialFromString( const string& data );
   // Parse a protocol buffer contained in an array of bytes.
-  bool ParseFromArray(const void* data, int size);
+  bool ParseFromArray( const void* data, int size );
   // Like ParseFromArray(), but accepts messages that are missing
   // required fields.
-  bool ParsePartialFromArray(const void* data, int size);
-
+  bool ParsePartialFromArray( const void* data, int size );
 
   // Reads a protocol buffer from the stream and merges it into this
   // Message.  Singular fields read from the input overwrite what is
@@ -149,14 +151,14 @@ class LIBPROTOBUF_EXPORT MessageLite {
   //
   // ParsefromCodedStream() is implemented as Clear() followed by
   // MergeFromCodedStream().
-  bool MergeFromCodedStream(io::CodedInputStream* input);
+  bool MergeFromCodedStream( io::CodedInputStream* input );
 
   // Like MergeFromCodedStream(), but succeeds even if required fields are
   // missing in the input.
   //
   // MergeFromCodedStream() is just implemented as MergePartialFromCodedStream()
   // followed by IsInitialized().
-  virtual bool MergePartialFromCodedStream(io::CodedInputStream* input) = 0;
+  virtual bool MergePartialFromCodedStream( io::CodedInputStream* input ) = 0;
 
   // Serialization ---------------------------------------------------
   // Methods for serializing in protocol buffer format.  Most of these
@@ -165,24 +167,24 @@ class LIBPROTOBUF_EXPORT MessageLite {
   // Write a protocol buffer of this message to the given output.  Returns
   // false on a write error.  If the message is missing required fields,
   // this may GOOGLE_CHECK-fail.
-  bool SerializeToCodedStream(io::CodedOutputStream* output) const;
+  bool SerializeToCodedStream( io::CodedOutputStream* output ) const;
   // Like SerializeToCodedStream(), but allows missing required fields.
-  bool SerializePartialToCodedStream(io::CodedOutputStream* output) const;
+  bool SerializePartialToCodedStream( io::CodedOutputStream* output ) const;
   // Write the message to the given zero-copy output stream.  All required
   // fields must be set.
-  bool SerializeToZeroCopyStream(io::ZeroCopyOutputStream* output) const;
+  bool SerializeToZeroCopyStream( io::ZeroCopyOutputStream* output ) const;
   // Like SerializeToZeroCopyStream(), but allows missing required fields.
-  bool SerializePartialToZeroCopyStream(io::ZeroCopyOutputStream* output) const;
+  bool SerializePartialToZeroCopyStream( io::ZeroCopyOutputStream* output ) const;
   // Serialize the message and store it in the given string.  All required
   // fields must be set.
-  bool SerializeToString(string* output) const;
+  bool SerializeToString( string* output ) const;
   // Like SerializeToString(), but allows missing required fields.
-  bool SerializePartialToString(string* output) const;
+  bool SerializePartialToString( string* output ) const;
   // Serialize the message and store it in the given byte array.  All required
   // fields must be set.
-  bool SerializeToArray(void* data, int size) const;
+  bool SerializeToArray( void* data, int size ) const;
   // Like SerializeToArray(), but allows missing required fields.
-  bool SerializePartialToArray(void* data, int size) const;
+  bool SerializePartialToArray( void* data, int size ) const;
 
   // Make a string encoding the message. Is equivalent to calling
   // SerializeToString() on a string and using that.  Returns the empty
@@ -196,9 +198,9 @@ class LIBPROTOBUF_EXPORT MessageLite {
 
   // Like SerializeToString(), but appends to the data to the string's existing
   // contents.  All required fields must be set.
-  bool AppendToString(string* output) const;
+  bool AppendToString( string* output ) const;
   // Like AppendToString(), but allows missing required fields.
-  bool AppendPartialToString(string* output) const;
+  bool AppendPartialToString( string* output ) const;
 
   // Computes the serialized size of the message.  This recursively calls
   // ByteSize() on all embedded messages.  If a subclass does not override
@@ -209,12 +211,12 @@ class LIBPROTOBUF_EXPORT MessageLite {
   // not have changed since the last call to ByteSize(); if it has, the results
   // are undefined.
   virtual void SerializeWithCachedSizes(
-      io::CodedOutputStream* output) const = 0;
+      io::CodedOutputStream* output ) const = 0;
 
   // Like SerializeWithCachedSizes, but writes directly to *target, returning
   // a pointer to the byte immediately after the last byte written.  "target"
   // must point at a byte array of at least ByteSize() bytes.
-  virtual uint8* SerializeWithCachedSizesToArray(uint8* target) const;
+  virtual uint8* SerializeWithCachedSizesToArray( uint8* target ) const;
 
   // Returns the result of the last call to ByteSize().  An embedded message's
   // size is needed both to serialize it (because embedded messages are
@@ -230,7 +232,7 @@ class LIBPROTOBUF_EXPORT MessageLite {
   virtual int GetCachedSize() const = 0;
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(MessageLite);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS( MessageLite );
 };
 
 }  // namespace protobuf

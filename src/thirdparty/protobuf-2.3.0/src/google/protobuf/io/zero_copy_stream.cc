@@ -34,14 +34,15 @@
 
 #include <google/protobuf/io/zero_copy_stream.h>
 
-
-namespace google {
-namespace protobuf {
-namespace io {
+namespace google
+{
+namespace protobuf
+{
+namespace io
+{
 
 ZeroCopyInputStream::~ZeroCopyInputStream() {}
 ZeroCopyOutputStream::~ZeroCopyOutputStream() {}
-
 
 }  // namespace io
 }  // namespace protobuf

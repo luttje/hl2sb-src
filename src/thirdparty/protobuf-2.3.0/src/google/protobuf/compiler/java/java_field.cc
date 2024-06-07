@@ -39,57 +39,70 @@
 #include <google/protobuf/compiler/java/java_message_field.h>
 #include <google/protobuf/stubs/common.h>
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace java {
+namespace google
+{
+namespace protobuf
+{
+namespace compiler
+{
+namespace java
+{
 
 FieldGenerator::~FieldGenerator() {}
 
-void FieldGenerator::GenerateParsingCodeFromPacked(io::Printer* printer) const {
+void FieldGenerator::GenerateParsingCodeFromPacked( io::Printer* printer ) const
+{
   // Reaching here indicates a bug. Cases are:
   //   - This FieldGenerator should support packing, but this method should be
   //     overridden.
   //   - This FieldGenerator doesn't support packing, and this method should
   //     never have been called.
-  GOOGLE_LOG(FATAL) << "GenerateParsingCodeFromPacked() "
-             << "called on field generator that does not support packing.";
+  GOOGLE_LOG( FATAL ) << "GenerateParsingCodeFromPacked() "
+                      << "called on field generator that does not support packing.";
 }
 
-FieldGeneratorMap::FieldGeneratorMap(const Descriptor* descriptor)
-  : descriptor_(descriptor),
-    field_generators_(
-      new scoped_ptr<FieldGenerator>[descriptor->field_count()]),
-    extension_generators_(
-      new scoped_ptr<FieldGenerator>[descriptor->extension_count()]) {
-
+FieldGeneratorMap::FieldGeneratorMap( const Descriptor* descriptor )
+    : descriptor_( descriptor ),
+      field_generators_(
+          new scoped_ptr< FieldGenerator >[descriptor->field_count()] ),
+      extension_generators_(
+          new scoped_ptr< FieldGenerator >[descriptor->extension_count()] )
+{
   // Construct all the FieldGenerators.
-  for (int i = 0; i < descriptor->field_count(); i++) {
-    field_generators_[i].reset(MakeGenerator(descriptor->field(i)));
+  for ( int i = 0; i < descriptor->field_count(); i++ )
+  {
+    field_generators_[i].reset( MakeGenerator( descriptor->field( i ) ) );
   }
-  for (int i = 0; i < descriptor->extension_count(); i++) {
-    extension_generators_[i].reset(MakeGenerator(descriptor->extension(i)));
+  for ( int i = 0; i < descriptor->extension_count(); i++ )
+  {
+    extension_generators_[i].reset( MakeGenerator( descriptor->extension( i ) ) );
   }
 }
 
-FieldGenerator* FieldGeneratorMap::MakeGenerator(const FieldDescriptor* field) {
-  if (field->is_repeated()) {
-    switch (GetJavaType(field)) {
+FieldGenerator* FieldGeneratorMap::MakeGenerator( const FieldDescriptor* field )
+{
+  if ( field->is_repeated() )
+  {
+    switch ( GetJavaType( field ) )
+    {
       case JAVATYPE_MESSAGE:
-        return new RepeatedMessageFieldGenerator(field);
+        return new RepeatedMessageFieldGenerator( field );
       case JAVATYPE_ENUM:
-        return new RepeatedEnumFieldGenerator(field);
+        return new RepeatedEnumFieldGenerator( field );
       default:
-        return new RepeatedPrimitiveFieldGenerator(field);
+        return new RepeatedPrimitiveFieldGenerator( field );
     }
-  } else {
-    switch (GetJavaType(field)) {
+  }
+  else
+  {
+    switch ( GetJavaType( field ) )
+    {
       case JAVATYPE_MESSAGE:
-        return new MessageFieldGenerator(field);
+        return new MessageFieldGenerator( field );
       case JAVATYPE_ENUM:
-        return new EnumFieldGenerator(field);
+        return new EnumFieldGenerator( field );
       default:
-        return new PrimitiveFieldGenerator(field);
+        return new PrimitiveFieldGenerator( field );
     }
   }
 }
@@ -97,12 +110,14 @@ FieldGenerator* FieldGeneratorMap::MakeGenerator(const FieldDescriptor* field) {
 FieldGeneratorMap::~FieldGeneratorMap() {}
 
 const FieldGenerator& FieldGeneratorMap::get(
-    const FieldDescriptor* field) const {
-  GOOGLE_CHECK_EQ(field->containing_type(), descriptor_);
+    const FieldDescriptor* field ) const
+{
+  GOOGLE_CHECK_EQ( field->containing_type(), descriptor_ );
   return *field_generators_[field->index()];
 }
 
-const FieldGenerator& FieldGeneratorMap::get_extension(int index) const {
+const FieldGenerator& FieldGeneratorMap::get_extension( int index ) const
+{
   return *extension_generators_[index];
 }
 

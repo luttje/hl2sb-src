@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -25,21 +25,21 @@
 
 abstract_class ISteamRemoteStorage001
 {
-public:
-	virtual bool FileWrite( const char *filename, void  const *data, int ) = 0;
+ public:
+  virtual bool FileWrite( const char *filename, void const *data, int ) = 0;
 
-	virtual uint32 GetFileSize( const char *filename ) = 0;
+  virtual uint32 GetFileSize( const char *filename ) = 0;
 
-	virtual bool FileRead( const char *filename, void *buffer, int size ) = 0;
+  virtual bool FileRead( const char *filename, void *buffer, int size ) = 0;
 
-	virtual bool FileExists( const char *filename ) = 0;
-	virtual OBSOLETE_FUNCTION bool FileDelete( const char *filename ) = 0;
+  virtual bool FileExists( const char *filename ) = 0;
+  virtual OBSOLETE_FUNCTION bool FileDelete( const char *filename ) = 0;
 
-	virtual uint32 GetFileCount() = 0;
+  virtual uint32 GetFileCount() = 0;
 
-	virtual const char *GetFileNameAndSize( int index, int *size ) = 0;
+  virtual const char *GetFileNameAndSize( int index, int *size ) = 0;
 
-	virtual bool GetQuota( int *current, int *maximum ) = 0;
+  virtual bool GetQuota( int *current, int *maximum ) = 0;
 };
 
-#endif // ISTEAMREMOTESTORAGE001_H
+#endif  // ISTEAMREMOTESTORAGE001_H

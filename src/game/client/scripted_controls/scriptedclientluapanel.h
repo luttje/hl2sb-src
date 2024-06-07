@@ -1,6 +1,6 @@
 //========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -15,21 +15,18 @@ using namespace vgui;
 //==============================================================================
 class CScriptedClientLuaPanel : public vgui::EditablePanel
 {
-	DECLARE_CLASS_SIMPLE( CScriptedClientLuaPanel, vgui::EditablePanel );
+  DECLARE_CLASS_SIMPLE( CScriptedClientLuaPanel, vgui::EditablePanel );
 
-public: 
-	CScriptedClientLuaPanel();
+ public:
+  CScriptedClientLuaPanel();
 
-	virtual void CreateDefaultPanels( void );
+  virtual void CreateDefaultPanels( void );
 
-	virtual void Start( IGameUIFuncs *pGameUIFuncs, IGameEventManager2 *pGameEventManager );
-	virtual void SetParent(vgui::VPANEL parent);
+  virtual void Start( IGameUIFuncs *pGameUIFuncs, IGameEventManager2 *pGameEventManager );
+  virtual void SetParent( vgui::VPANEL parent );
 
-protected:
-
-	virtual void Paint();
-
+ protected:
+  virtual void Paint();
 };
-
 
 #endif

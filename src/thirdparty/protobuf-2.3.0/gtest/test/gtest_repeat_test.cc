@@ -44,35 +44,38 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-namespace testing {
+namespace testing
+{
 
-GTEST_DECLARE_string_(death_test_style);
-GTEST_DECLARE_string_(filter);
-GTEST_DECLARE_int32_(repeat);
+GTEST_DECLARE_string_( death_test_style );
+GTEST_DECLARE_string_( filter );
+GTEST_DECLARE_int32_( repeat );
 
 }  // namespace testing
 
-using testing::GTEST_FLAG(death_test_style);
-using testing::GTEST_FLAG(filter);
-using testing::GTEST_FLAG(repeat);
+using testing::GTEST_FLAG( death_test_style );
+using testing::GTEST_FLAG( filter );
+using testing::GTEST_FLAG( repeat );
 
-namespace {
+namespace
+{
 
 // We need this when we are testing Google Test itself and therefore
 // cannot use Google Test assertions.
-#define GTEST_CHECK_INT_EQ_(expected, actual) \
-  do {\
-    const int expected_val = (expected);\
-    const int actual_val = (actual);\
-    if (::testing::internal::IsTrue(expected_val != actual_val)) {\
-      ::std::cout << "Value of: " #actual "\n"\
-                  << "  Actual: " << actual_val << "\n"\
-                  << "Expected: " #expected "\n"\
-                  << "Which is: " << expected_val << "\n";\
-      abort();\
-    }\
-  } while(::testing::internal::AlwaysFalse())
-
+#define GTEST_CHECK_INT_EQ_( expected, actual )                      \
+  do                                                                 \
+  {                                                                  \
+    const int expected_val = ( expected );                           \
+    const int actual_val = ( actual );                               \
+    if ( ::testing::internal::IsTrue( expected_val != actual_val ) ) \
+    {                                                                \
+      ::std::cout << "Value of: " #actual "\n"                       \
+                  << "  Actual: " << actual_val << "\n"              \
+                  << "Expected: " #expected "\n"                     \
+                  << "Which is: " << expected_val << "\n";           \
+      abort();                                                       \
+    }                                                                \
+  } while ( ::testing::internal::AlwaysFalse() )
 
 // Used for verifying that global environment set-up and tear-down are
 // inside the gtest_repeat loop.
@@ -80,27 +83,36 @@ namespace {
 int g_environment_set_up_count = 0;
 int g_environment_tear_down_count = 0;
 
-class MyEnvironment : public testing::Environment {
+class MyEnvironment : public testing::Environment
+{
  public:
   MyEnvironment() {}
-  virtual void SetUp() { g_environment_set_up_count++; }
-  virtual void TearDown() { g_environment_tear_down_count++; }
+  virtual void SetUp()
+  {
+    g_environment_set_up_count++;
+  }
+  virtual void TearDown()
+  {
+    g_environment_tear_down_count++;
+  }
 };
 
 // A test that should fail.
 
 int g_should_fail_count = 0;
 
-TEST(FooTest, ShouldFail) {
+TEST( FooTest, ShouldFail )
+{
   g_should_fail_count++;
-  EXPECT_EQ(0, 1) << "Expected failure.";
+  EXPECT_EQ( 0, 1 ) << "Expected failure.";
 }
 
 // A test that should pass.
 
 int g_should_pass_count = 0;
 
-TEST(FooTest, ShouldPass) {
+TEST( FooTest, ShouldPass )
+{
   g_should_pass_count++;
 }
 
@@ -109,14 +121,15 @@ TEST(FooTest, ShouldPass) {
 
 int g_death_test_count = 0;
 
-TEST(BarDeathTest, ThreadSafeAndFast) {
+TEST( BarDeathTest, ThreadSafeAndFast )
+{
   g_death_test_count++;
 
-  GTEST_FLAG(death_test_style) = "threadsafe";
-  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
+  GTEST_FLAG( death_test_style ) = "threadsafe";
+  EXPECT_DEATH_IF_SUPPORTED( abort(), "" );
 
-  GTEST_FLAG(death_test_style) = "fast";
-  EXPECT_DEATH_IF_SUPPORTED(abort(), "");
+  GTEST_FLAG( death_test_style ) = "fast";
+  EXPECT_DEATH_IF_SUPPORTED( abort(), "" );
 }
 
 #if GTEST_HAS_PARAM_TEST
@@ -124,21 +137,25 @@ int g_param_test_count = 0;
 
 const int kNumberOfParamTests = 10;
 
-class MyParamTest : public testing::TestWithParam<int> {};
+class MyParamTest : public testing::TestWithParam< int >
+{
+};
 
-TEST_P(MyParamTest, ShouldPass) {
+TEST_P( MyParamTest, ShouldPass )
+{
   // TODO(vladl@google.com): Make parameter value checking robust
   //                         WRT order of tests.
-  GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
+  GTEST_CHECK_INT_EQ_( g_param_test_count % kNumberOfParamTests, GetParam() );
   g_param_test_count++;
 }
-INSTANTIATE_TEST_CASE_P(MyParamSequence,
-                        MyParamTest,
-                        testing::Range(0, kNumberOfParamTests));
+INSTANTIATE_TEST_CASE_P( MyParamSequence,
+                         MyParamTest,
+                         testing::Range( 0, kNumberOfParamTests ) );
 #endif  // GTEST_HAS_PARAM_TEST
 
 // Resets the count for each test.
-void ResetCounts() {
+void ResetCounts()
+{
   g_environment_set_up_count = 0;
   g_environment_tear_down_count = 0;
   g_should_fail_count = 0;
@@ -150,97 +167,104 @@ void ResetCounts() {
 }
 
 // Checks that the count for each test is expected.
-void CheckCounts(int expected) {
-  GTEST_CHECK_INT_EQ_(expected, g_environment_set_up_count);
-  GTEST_CHECK_INT_EQ_(expected, g_environment_tear_down_count);
-  GTEST_CHECK_INT_EQ_(expected, g_should_fail_count);
-  GTEST_CHECK_INT_EQ_(expected, g_should_pass_count);
-  GTEST_CHECK_INT_EQ_(expected, g_death_test_count);
+void CheckCounts( int expected )
+{
+  GTEST_CHECK_INT_EQ_( expected, g_environment_set_up_count );
+  GTEST_CHECK_INT_EQ_( expected, g_environment_tear_down_count );
+  GTEST_CHECK_INT_EQ_( expected, g_should_fail_count );
+  GTEST_CHECK_INT_EQ_( expected, g_should_pass_count );
+  GTEST_CHECK_INT_EQ_( expected, g_death_test_count );
 #if GTEST_HAS_PARAM_TEST
-  GTEST_CHECK_INT_EQ_(expected * kNumberOfParamTests, g_param_test_count);
+  GTEST_CHECK_INT_EQ_( expected * kNumberOfParamTests, g_param_test_count );
 #endif  // GTEST_HAS_PARAM_TEST
 }
 
 // Tests the behavior of Google Test when --gtest_repeat is not specified.
-void TestRepeatUnspecified() {
+void TestRepeatUnspecified()
+{
   ResetCounts();
-  GTEST_CHECK_INT_EQ_(1, RUN_ALL_TESTS());
-  CheckCounts(1);
+  GTEST_CHECK_INT_EQ_( 1, RUN_ALL_TESTS() );
+  CheckCounts( 1 );
 }
 
 // Tests the behavior of Google Test when --gtest_repeat has the given value.
-void TestRepeat(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
+void TestRepeat( int repeat )
+{
+  GTEST_FLAG( repeat ) = repeat;
 
   ResetCounts();
-  GTEST_CHECK_INT_EQ_(repeat > 0 ? 1 : 0, RUN_ALL_TESTS());
-  CheckCounts(repeat);
+  GTEST_CHECK_INT_EQ_( repeat > 0 ? 1 : 0, RUN_ALL_TESTS() );
+  CheckCounts( repeat );
 }
 
 // Tests using --gtest_repeat when --gtest_filter specifies an empty
 // set of tests.
-void TestRepeatWithEmptyFilter(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "None";
+void TestRepeatWithEmptyFilter( int repeat )
+{
+  GTEST_FLAG( repeat ) = repeat;
+  GTEST_FLAG( filter ) = "None";
 
   ResetCounts();
-  GTEST_CHECK_INT_EQ_(0, RUN_ALL_TESTS());
-  CheckCounts(0);
+  GTEST_CHECK_INT_EQ_( 0, RUN_ALL_TESTS() );
+  CheckCounts( 0 );
 }
 
 // Tests using --gtest_repeat when --gtest_filter specifies a set of
 // successful tests.
-void TestRepeatWithFilterForSuccessfulTests(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "*-*ShouldFail";
+void TestRepeatWithFilterForSuccessfulTests( int repeat )
+{
+  GTEST_FLAG( repeat ) = repeat;
+  GTEST_FLAG( filter ) = "*-*ShouldFail";
 
   ResetCounts();
-  GTEST_CHECK_INT_EQ_(0, RUN_ALL_TESTS());
-  GTEST_CHECK_INT_EQ_(repeat, g_environment_set_up_count);
-  GTEST_CHECK_INT_EQ_(repeat, g_environment_tear_down_count);
-  GTEST_CHECK_INT_EQ_(0, g_should_fail_count);
-  GTEST_CHECK_INT_EQ_(repeat, g_should_pass_count);
-  GTEST_CHECK_INT_EQ_(repeat, g_death_test_count);
+  GTEST_CHECK_INT_EQ_( 0, RUN_ALL_TESTS() );
+  GTEST_CHECK_INT_EQ_( repeat, g_environment_set_up_count );
+  GTEST_CHECK_INT_EQ_( repeat, g_environment_tear_down_count );
+  GTEST_CHECK_INT_EQ_( 0, g_should_fail_count );
+  GTEST_CHECK_INT_EQ_( repeat, g_should_pass_count );
+  GTEST_CHECK_INT_EQ_( repeat, g_death_test_count );
 #if GTEST_HAS_PARAM_TEST
-  GTEST_CHECK_INT_EQ_(repeat * kNumberOfParamTests, g_param_test_count);
+  GTEST_CHECK_INT_EQ_( repeat * kNumberOfParamTests, g_param_test_count );
 #endif  // GTEST_HAS_PARAM_TEST
 }
 
 // Tests using --gtest_repeat when --gtest_filter specifies a set of
 // failed tests.
-void TestRepeatWithFilterForFailedTests(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "*ShouldFail";
+void TestRepeatWithFilterForFailedTests( int repeat )
+{
+  GTEST_FLAG( repeat ) = repeat;
+  GTEST_FLAG( filter ) = "*ShouldFail";
 
   ResetCounts();
-  GTEST_CHECK_INT_EQ_(1, RUN_ALL_TESTS());
-  GTEST_CHECK_INT_EQ_(repeat, g_environment_set_up_count);
-  GTEST_CHECK_INT_EQ_(repeat, g_environment_tear_down_count);
-  GTEST_CHECK_INT_EQ_(repeat, g_should_fail_count);
-  GTEST_CHECK_INT_EQ_(0, g_should_pass_count);
-  GTEST_CHECK_INT_EQ_(0, g_death_test_count);
+  GTEST_CHECK_INT_EQ_( 1, RUN_ALL_TESTS() );
+  GTEST_CHECK_INT_EQ_( repeat, g_environment_set_up_count );
+  GTEST_CHECK_INT_EQ_( repeat, g_environment_tear_down_count );
+  GTEST_CHECK_INT_EQ_( repeat, g_should_fail_count );
+  GTEST_CHECK_INT_EQ_( 0, g_should_pass_count );
+  GTEST_CHECK_INT_EQ_( 0, g_death_test_count );
 #if GTEST_HAS_PARAM_TEST
-  GTEST_CHECK_INT_EQ_(0, g_param_test_count);
+  GTEST_CHECK_INT_EQ_( 0, g_param_test_count );
 #endif  // GTEST_HAS_PARAM_TEST
 }
 
 }  // namespace
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  testing::AddGlobalTestEnvironment(new MyEnvironment);
+int main( int argc, char **argv )
+{
+  testing::InitGoogleTest( &argc, argv );
+  testing::AddGlobalTestEnvironment( new MyEnvironment );
 
   TestRepeatUnspecified();
-  TestRepeat(0);
-  TestRepeat(1);
-  TestRepeat(5);
+  TestRepeat( 0 );
+  TestRepeat( 1 );
+  TestRepeat( 5 );
 
-  TestRepeatWithEmptyFilter(2);
-  TestRepeatWithEmptyFilter(3);
+  TestRepeatWithEmptyFilter( 2 );
+  TestRepeatWithEmptyFilter( 3 );
 
-  TestRepeatWithFilterForSuccessfulTests(3);
+  TestRepeatWithFilterForSuccessfulTests( 3 );
 
-  TestRepeatWithFilterForFailedTests(4);
+  TestRepeatWithFilterForFailedTests( 4 );
 
   // It would be nice to verify that the tests indeed loop forever
   // when GTEST_FLAG(repeat) is negative, but this test will be quite
@@ -248,6 +272,6 @@ int main(int argc, char **argv) {
   // debugging only and doesn't affect the normal test result, such a
   // test would be an overkill.
 
-  printf("PASS\n");
+  printf( "PASS\n" );
   return 0;
 }

@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //===========================================================================//
@@ -12,6 +12,6 @@
 #pragma once
 #endif
 
-int luaopen_filesystem(lua_State *L);
+int luaopen_filesystem( lua_State *L );
 
-#endif // LFILESYSTEM_H
+#endif  // LFILESYSTEM_H

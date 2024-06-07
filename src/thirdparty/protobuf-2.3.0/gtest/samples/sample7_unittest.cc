@@ -53,13 +53,15 @@ using ::testing::Values;
 // delete them in TearDown() method.
 typedef PrimeTable* CreatePrimeTableFunc();
 
-PrimeTable* CreateOnTheFlyPrimeTable() {
+PrimeTable* CreateOnTheFlyPrimeTable()
+{
   return new OnTheFlyPrimeTable();
 }
 
-template <size_t max_precalculated>
-PrimeTable* CreatePreCalculatedPrimeTable() {
-  return new PreCalculatedPrimeTable(max_precalculated);
+template < size_t max_precalculated >
+PrimeTable* CreatePreCalculatedPrimeTable()
+{
+  return new PreCalculatedPrimeTable( max_precalculated );
 }
 
 // Inside the test body, fixture constructor, SetUp(), and TearDown()
@@ -67,11 +69,19 @@ PrimeTable* CreatePreCalculatedPrimeTable() {
 // In this case, the test parameter is a PrimeTableFactory interface pointer
 // which we use in fixture's SetUp() to create and store an instance of
 // PrimeTable.
-class PrimeTableTest : public TestWithParam<CreatePrimeTableFunc*> {
+class PrimeTableTest : public TestWithParam< CreatePrimeTableFunc* >
+{
  public:
-  virtual ~PrimeTableTest() { delete table_; }
-  virtual void SetUp() { table_ = (*GetParam())(); }
-  virtual void TearDown() {
+  virtual ~PrimeTableTest()
+  {
+    delete table_;
+  }
+  virtual void SetUp()
+  {
+    table_ = ( *GetParam() )();
+  }
+  virtual void TearDown()
+  {
     delete table_;
     table_ = NULL;
   }
@@ -80,31 +90,34 @@ class PrimeTableTest : public TestWithParam<CreatePrimeTableFunc*> {
   PrimeTable* table_;
 };
 
-TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
-  EXPECT_FALSE(table_->IsPrime(-5));
-  EXPECT_FALSE(table_->IsPrime(0));
-  EXPECT_FALSE(table_->IsPrime(1));
-  EXPECT_FALSE(table_->IsPrime(4));
-  EXPECT_FALSE(table_->IsPrime(6));
-  EXPECT_FALSE(table_->IsPrime(100));
+TEST_P( PrimeTableTest, ReturnsFalseForNonPrimes )
+{
+  EXPECT_FALSE( table_->IsPrime( -5 ) );
+  EXPECT_FALSE( table_->IsPrime( 0 ) );
+  EXPECT_FALSE( table_->IsPrime( 1 ) );
+  EXPECT_FALSE( table_->IsPrime( 4 ) );
+  EXPECT_FALSE( table_->IsPrime( 6 ) );
+  EXPECT_FALSE( table_->IsPrime( 100 ) );
 }
 
-TEST_P(PrimeTableTest, ReturnsTrueForPrimes) {
-  EXPECT_TRUE(table_->IsPrime(2));
-  EXPECT_TRUE(table_->IsPrime(3));
-  EXPECT_TRUE(table_->IsPrime(5));
-  EXPECT_TRUE(table_->IsPrime(7));
-  EXPECT_TRUE(table_->IsPrime(11));
-  EXPECT_TRUE(table_->IsPrime(131));
+TEST_P( PrimeTableTest, ReturnsTrueForPrimes )
+{
+  EXPECT_TRUE( table_->IsPrime( 2 ) );
+  EXPECT_TRUE( table_->IsPrime( 3 ) );
+  EXPECT_TRUE( table_->IsPrime( 5 ) );
+  EXPECT_TRUE( table_->IsPrime( 7 ) );
+  EXPECT_TRUE( table_->IsPrime( 11 ) );
+  EXPECT_TRUE( table_->IsPrime( 131 ) );
 }
 
-TEST_P(PrimeTableTest, CanGetNextPrime) {
-  EXPECT_EQ(2, table_->GetNextPrime(0));
-  EXPECT_EQ(3, table_->GetNextPrime(2));
-  EXPECT_EQ(5, table_->GetNextPrime(3));
-  EXPECT_EQ(7, table_->GetNextPrime(5));
-  EXPECT_EQ(11, table_->GetNextPrime(7));
-  EXPECT_EQ(131, table_->GetNextPrime(128));
+TEST_P( PrimeTableTest, CanGetNextPrime )
+{
+  EXPECT_EQ( 2, table_->GetNextPrime( 0 ) );
+  EXPECT_EQ( 3, table_->GetNextPrime( 2 ) );
+  EXPECT_EQ( 5, table_->GetNextPrime( 3 ) );
+  EXPECT_EQ( 7, table_->GetNextPrime( 5 ) );
+  EXPECT_EQ( 11, table_->GetNextPrime( 7 ) );
+  EXPECT_EQ( 131, table_->GetNextPrime( 128 ) );
 }
 
 // In order to run value-parameterized tests, you need to instantiate them,
@@ -117,7 +130,7 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 INSTANTIATE_TEST_CASE_P(
     OnTheFlyAndPreCalculated,
     PrimeTableTest,
-    Values(&CreateOnTheFlyPrimeTable, &CreatePreCalculatedPrimeTable<1000>));
+    Values( &CreateOnTheFlyPrimeTable, &CreatePreCalculatedPrimeTable< 1000 > ) );
 
 #else
 
@@ -127,6 +140,6 @@ INSTANTIATE_TEST_CASE_P(
 // will not link that library at all and consequently complain about
 // missing entry point defined in that library (fatal error LNK1561:
 // entry point must be defined). This dummy test keeps gtest_main linked in.
-TEST(DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform) {}
+TEST( DummyTest, ValueParameterizedTestsAreNotSupportedOnThisPlatform ) {}
 
 #endif  // GTEST_HAS_PARAM_TEST

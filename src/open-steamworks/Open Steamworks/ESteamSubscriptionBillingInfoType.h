@@ -2,7 +2,7 @@
 //
 // This file is part of the Open Steamworks project. All individuals associated
 // with this project do not claim ownership of the contents
-// 
+//
 // The code, comments, and all related files, projects, resources,
 // redistributables included with this project are Copyright Valve Corporation.
 // Additionally, Valve, the Valve logo, Half-Life, the Half-Life logo, the
@@ -22,13 +22,13 @@
 
 typedef enum ESteamSubscriptionBillingInfoType
 {
-	ePaymentCardInfo		= 1,
-	ePrepurchasedInfo		= 2,
-	eAccountBillingInfo		= 3,
-	eExternalBillingInfo	= 4,		// indirect billing via ISP etc (not supported yet)
-	ePaymentCardReceipt		= 5,
-	ePrepurchaseReceipt		= 6,
-	eEmptyReceipt			= 7,
+  ePaymentCardInfo = 1,
+  ePrepurchasedInfo = 2,
+  eAccountBillingInfo = 3,
+  eExternalBillingInfo = 4,  // indirect billing via ISP etc (not supported yet)
+  ePaymentCardReceipt = 5,
+  ePrepurchaseReceipt = 6,
+  eEmptyReceipt = 7,
 } ESteamSubscriptionBillingInfoType;
 
-#endif // ESTEAMSUBSCRIPTIONBILLINGINFOTYPE_H
+#endif  // ESTEAMSUBSCRIPTIONBILLINGINFOTYPE_H
